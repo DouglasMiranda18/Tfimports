@@ -40,9 +40,10 @@
     .pill { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.18) }
   </style>
 
-  <!-- Firebase SDKs (Auth Google) -->
+  <!-- Firebase SDKs (Auth + Functions) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-functions-compat.js"></script>
 </head>
 <body class="font-[InterVar] selection:bg-emerald-300 selection:text-black">
   <!-- Header -->
@@ -94,7 +95,7 @@
   <!-- Alertinha de ambiente -->
   <div class="max-w-7xl mx-auto px-4 sm:px-6 mt-4">
     <div class="glass rounded-xl p-3 text-sm hint">
-      Este site tenta usar Netlify Functions em tempo real. Se não estiverem configuradas, ele entra em modo Demo automaticamente.
+      Este site tenta usar Firebase Functions (preferencial) ou Netlify Functions. Se não estiverem configuradas, entra em modo Demo automaticamente.
     </div>
   </div>
 
@@ -393,8 +394,8 @@
         <button id="closeTutorial" class="btn pill px-3 py-1 rounded-lg">✕</button>
       </div>
       <div class="mt-3 space-y-2 text-slate-300">
-        <p>Este site chama Netlify Functions para catálogo, frete, pagamento e admin. Se a função não existir, o site continua em modo demonstração.</p>
-        <p>No Netlify, crie funções com estes nomes: catalog, cart-price, shipping-calculate, shipping-create, payment-create, admin-products.</p>
+        <p>Este site chama Funções do Firebase (httpsCallable) ou Netlify Functions automaticamente. Se a função não existir, o site continua em modo demonstração.</p>
+        <p>Nomes esperados (Firebase callable ou Netlify): catalog, cart-price, shipping-calculate, shipping-create, payment-create, admin-products, payment-webhook (HTTP).</p>
       </div>
       <div class="mt-4 text-sm hint">Use “Imprimir/Salvar em PDF” para exportar.</div>
     </div>
@@ -479,6 +480,10 @@
       firebase.initializeApp(firebaseConfig);
       auth = firebase.auth();
       provider = new firebase.auth.GoogleAuthProvider();
+      // Define a região das Cloud Functions (ajuste se for diferente)
+      if (firebase.functions) {
+        firebase.functions().useEmulator && location.hostname.includes('localhost') && firebase.functions().useEmulator('localhost', 5001);
+      }
     } catch(e){ console.warn('Firebase indisponível', e); }
 
     function updateAuthUI(){
@@ -505,9 +510,27 @@
     if (auth) auth.onAuthStateChanged(u=>{ state.user=u||null; updateAuthUI(); });
 
     // Helper para chamar Netlify Functions
+    // Detecta ambiente: Netlify Functions (/.netlify/functions) ou Firebase Functions (httpsCallable)
+    let useFirebaseFunctions = false;
+    let fns = null;
+    try { fns = firebase.functions(); useFirebaseFunctions = !!fns; } catch(e) { useFirebaseFunctions = false; }
+
     async function apiFetch(name, payload, method='POST'){
       const headers = { 'Content-Type':'application/json' };
       const tok = await getIdToken(); if (tok) headers['Authorization'] = 'Bearer ' + tok;
+
+      // Se Firebase Functions estiver disponível, usa httpsCallable("name")
+      if (useFirebaseFunctions) {
+        try {
+          const callable = fns.httpsCallable(name);
+          const result = await callable(payload||{});
+          return result.data;
+        } catch (err) {
+          // Fallback para fetch caso a callable não exista
+        }
+      }
+
+      // Fallback: Netlify Functions
       const res = await fetch(`/.netlify/functions/${name}`, { method, headers, body: method==='GET'?undefined:JSON.stringify(payload||{}) });
       if (!res.ok) throw new Error(await res.text().catch(()=>res.statusText));
       return await res.json();
@@ -896,5 +919,5 @@
     }
     init();
   </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'972271afa3fcf199',t:'MTc1NTY5ODcxMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97227aca64fff199',t:'MTc1NTY5OTA4NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
