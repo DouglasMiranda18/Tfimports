@@ -6,71 +6,33 @@
   <title>TFI IMPORTS — Moda Masculina Premium</title>
   <meta name="description" content="TFI IMPORTS — Moda masculina premium inspirada no lifestyle Playboy. Exclusividade, atitude e sofisticação. Compre online: camisetas, calças, bermudas, cuecas premium e mais." />
   <meta name="theme-color" content="#0b1220" />
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 64 64%27%3E%3Crect width=%2764%27 height=%2764%27 rx=%2712%27 fill=%27%230b1220%27/%3E%3Cpath d=%27M13 46c8-2 14-9 19-18 2-4 5-7 9-9 4-2 9-2 10 2s-2 10-7 13c-3 2-6 2-9 3-6 2-9 6-10 10-1 3-7 3-12-1z%27 fill=%27%2346d39a%27/%3E%3Ctext x=%2732%27 y=%2738%27 font-size=%2722%27 text-anchor=%27middle%27 fill=%27%23e5edf8%27 font-family=%27Georgia, serif%27%3ETF%3C/text%3E%3C/svg%3E" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 64 64%27%3E%3Crect width=%2764%27 height=%2764%27 rx=%2712%27 fill=%27%230b1220%27/%3E%3Cpath d=%27M13 46c8-2 14-9 19-18 2-4 5-7 9-9 4-2 9-2 10 2s-2 10-7 13c-3 2-6 2-9 3-6 2-9 6-10 10-1 3-7 3-12-1z%27 fill=%271dd1a1%27/%3E%3Ctext x=%2732%27 y=%2738%27 font-size=%2722%27 text-anchor=%27middle%27 fill=%27%23e5edf8%27 font-family=%27Georgia, serif%27%3ETF%3C/text%3E%3C/svg%3E" />
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    @font-face {
-      font-family: "InterVar";
-      src: local("Inter");
-    }
+    @font-face { font-family: "InterVar"; src: local("Inter"); }
     :root{
-      --ink:#0b1220; /* azul escuro profundo */
-      --night:#070b12; /* quase preto */
-      --accent:#1dd1a1; /* verde sofisticado */
+      --night:#070b12;
+      --accent:#1dd1a1;
       --accent-2:#18b68c;
-      --ink-2:#101b33;
       --paper:#e5edf8;
     }
     html,body { background: radial-gradient(1200px 600px at 70% -10%, #0f1a33 0%, var(--night) 45%) fixed, var(--night); color: #e8f0ff; }
-    .glass {
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
-      border: 1px solid rgba(255,255,255,.12);
-      backdrop-filter: blur(10px);
-    }
-    .btn {
-      transition: transform .15s ease, box-shadow .15s ease, background .2s ease;
-      box-shadow: 0 6px 20px rgba(0,0,0,.25);
-    }
+    .glass { background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02)); border: 1px solid rgba(255,255,255,.12); backdrop-filter: blur(10px); }
+    .btn { transition: transform .15s ease, box-shadow .15s ease, background .2s ease; box-shadow: 0 6px 20px rgba(0,0,0,.25); }
     .btn:hover { transform: translateY(-1px); box-shadow: 0 10px 28px rgba(0,0,0,.32); }
-    .pulse {
-      animation: pulse 2.5s ease-in-out infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-4px); }
-    }
-    .tag {
-      background: linear-gradient(90deg, var(--accent), var(--accent-2));
-      color: #041313;
-      font-weight: 700;
-      letter-spacing: .02em;
-    }
-    .card-img {
-      background: linear-gradient(140deg, #0f1a2e, #0a0f1f);
-    }
+    .tag { background: linear-gradient(90deg, var(--accent), var(--accent-2)); color: #041313; font-weight: 700; letter-spacing: .02em; }
+    .card-img { background: linear-gradient(140deg, #0f1a2e, #0a0f1f); }
     .star { color: #ffd166; }
     .badge { background: rgba(29, 209, 161, .12); color: var(--accent); border: 1px solid rgba(29,209,161,.35); }
     .nav-active { color: var(--accent); }
-    .gradient-title {
-      background: linear-gradient(90deg, #bcd5ff, #7fb7ff);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-    .cta-gradient {
-      background: linear-gradient(90deg, var(--accent), var(--accent-2));
-      color: #041313;
-    }
+    .gradient-title { background: linear-gradient(90deg, #bcd5ff, #7fb7ff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .cta-gradient { background: linear-gradient(90deg, var(--accent), var(--accent-2)); color: #041313; }
     .shadow-soft { box-shadow: 0 20px 50px rgba(0,0,0,.35); }
     .ring-accent { box-shadow: inset 0 0 0 1px rgba(29,209,161,.4); }
     .grid-auto-fit { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
     .hidden-scroll::-webkit-scrollbar { display: none; }
     .hidden-scroll { -ms-overflow-style: none; scrollbar-width: none; }
-    .qr {
-      background: conic-gradient(from 90deg at 1px 1px, #000 90deg, #fff 0) 0 0/8px 8px;
-      image-rendering: pixelated;
-      border: 8px solid #fff;
-    }
+    .qr { background: conic-gradient(from 90deg at 1px 1px, #000 90deg, #fff 0) 0 0/8px 8px; image-rendering: pixelated; border: 8px solid #fff; }
     .panel { display: none; }
     .panel.active { display: block; }
     .modal-mask { background: rgba(3,6,12,.6); backdrop-filter: blur(4px); }
@@ -78,7 +40,7 @@
     .pill { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.18) }
   </style>
 
-  <!-- Firebase SDKs (Auth only, sem campos de senha locais) -->
+  <!-- Firebase SDKs (Auth Google) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 </head>
@@ -111,7 +73,7 @@
       <div class="flex items-center gap-3">
         <button id="btnLogin" class="btn px-3 py-2 rounded-lg pill text-slate-200 hover:text-white">Entrar</button>
         <a href="#carrinho" data-route id="miniCart" class="relative btn px-3 py-2 rounded-lg pill hover:text-white">
-          <span>🛒</span>
+          🛒
           <span id="cartCount" class="absolute -top-2 -right-2 bg-emerald-400 text-black text-xs font-bold w-6 h-6 rounded-full grid place-items-center">0</span>
         </a>
         <button id="btnMenu" class="md:hidden btn px-3 py-2 rounded-lg pill">☰</button>
@@ -129,18 +91,21 @@
     </div>
   </header>
 
+  <!-- Alertinha de ambiente -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 mt-4">
+    <div class="glass rounded-xl p-3 text-sm hint">
+      Este site tenta usar Netlify Functions em tempo real. Se não estiverem configuradas, ele entra em modo Demo automaticamente.
+    </div>
+  </div>
+
   <!-- Hero -->
   <section id="home" class="panel active">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-12">
       <div class="grid md:grid-cols-2 gap-8 items-center">
         <div>
           <div class="inline-flex items-center gap-2 tag px-3 py-1 rounded-full mb-4">LIFESTYLE PLAYBOY</div>
-          <h1 class="text-4xl md:text-5xl font-extrabold leading-tight">
-            Moda masculina premium com presença, confiança e impacto.
-          </h1>
-          <p class="mt-4 text-slate-300">
-            Peças que destacam atitude e sofisticação. Se vista como quem lidera.
-          </p>
+          <h1 class="text-4xl md:text-5xl font-extrabold leading-tight">Moda masculina premium com presença, confiança e impacto.</h1>
+          <p class="mt-4 text-slate-300">Peças que destacam atitude e sofisticação. Se vista como quem lidera.</p>
           <div class="mt-6 flex flex-wrap gap-4">
             <a href="#loja" data-route class="btn cta-gradient px-5 py-3 rounded-xl font-bold">Comprar agora</a>
             <a href="#novidades" data-route class="btn px-5 py-3 rounded-xl pill text-slate-200 hover:text-white">Ver lançamentos</a>
@@ -154,7 +119,6 @@
         <div class="relative">
           <div class="glass shadow-soft rounded-3xl p-6 ring-accent">
             <div class="grid grid-cols-3 gap-3">
-              <!-- Vitrines SVG (substitua por fotos reais depois) -->
               <div class="card-img rounded-2xl h-36 flex items-center justify-center">
                 <svg viewBox="0 0 120 120" class="w-24 h-24">
                   <rect x="10" y="10" width="100" height="100" rx="16" fill="#0b1a34"/>
@@ -182,15 +146,13 @@
               </div>
             </div>
           </div>
-          <div class="absolute -top-4 -right-4 tag px-3 py-1 rounded-full pulse">Novo</div>
+          <div class="absolute -top-4 -right-4 tag px-3 py-1 rounded-full">Novo</div>
         </div>
       </div>
 
       <!-- Faixa de categorias -->
       <div class="mt-12 hidden-scroll overflow-x-auto">
-        <div id="categoryChips" class="flex gap-3 min-w-max">
-          <!-- chips dinamicos -->
-        </div>
+        <div id="categoryChips" class="flex gap-3 min-w-max"></div>
       </div>
 
       <!-- Destaques -->
@@ -205,7 +167,6 @@
   <section id="loja" class="panel">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-10">
       <div class="flex flex-col md:flex-row gap-6">
-        <!-- Filtros -->
         <aside class="md:w-64 glass rounded-2xl p-5 h-max">
           <h3 class="font-bold text-lg mb-3">Filtrar</h3>
           <div class="space-y-4">
@@ -226,7 +187,6 @@
             <button id="btnLimparFiltros" class="btn w-full mt-2 px-4 py-2 rounded-lg pill">Limpar filtros</button>
           </div>
         </aside>
-        <!-- Lista -->
         <div class="flex-1">
           <div class="flex items-center justify-between gap-4 mb-4">
             <h2 class="text-2xl font-bold">Produtos</h2>
@@ -260,15 +220,13 @@
       <h2 class="text-2xl font-bold mb-4">Feedbacks de Clientes</h2>
       <div id="feedbackList" class="space-y-4"></div>
       <div class="glass rounded-2xl p-5 mt-6">
-        <h3 class="font-bold mb-2">Deixe seu feedback (Demo)</h3>
-        <div class="flex items-center gap-2 mb-3" id="ratingStars">
-          <!-- estrelas -->
-        </div>
+        <h3 class="font-bold mb-2">Deixe seu feedback</h3>
+        <div class="flex items-center gap-2 mb-3" id="ratingStars"></div>
         <textarea id="feedbackText" class="w-full bg-transparent pill p-3 rounded-lg" rows="3" placeholder="Escreva um comentário..."></textarea>
         <div class="mt-3 flex justify-end">
           <button id="btnEnviarFeedback" class="btn cta-gradient px-4 py-2 rounded-lg font-bold">Enviar</button>
         </div>
-        <p class="hint mt-2">Este é um formulário de exemplo – o envio é armazenado apenas no seu navegador.</p>
+        <p class="hint mt-2">Os comentários ficam visíveis aqui. Para moderação, ative no servidor.</p>
       </div>
     </div>
   </section>
@@ -285,19 +243,18 @@
             <input id="chatInput" class="flex-1 bg-transparent pill px-3 py-2 rounded-lg" placeholder="Escreva sua mensagem..." />
             <button id="btnChat" class="btn cta-gradient px-4 py-2 rounded-lg font-bold">Enviar</button>
           </div>
-          <p class="hint mt-2">Atendimento simples dentro do site (Demo). Respostas automáticas.</p>
+          <p class="hint mt-2">Atendimento simples dentro do site.</p>
         </div>
         <div class="glass rounded-2xl p-5">
           <h3 class="font-bold mb-2">Instagram Oficial</h3>
-          <p class="text-slate-300">Siga para ver lançamentos, making-of e ofertas exclusivas.</p>
+          <p class="text-slate-300">Siga para ver lançamentos e ofertas exclusivas.</p>
           <a href="https://instagram.com" target="_blank" rel="noopener" class="btn mt-3 px-4 py-2 rounded-lg pill inline-flex items-center gap-2 hover:text-white">📸 Abrir Instagram</a>
           <div class="mt-4 grid grid-cols-3 gap-3">
-            <!-- Placeholders de posts -->
             <div class="card-img rounded-xl h-24"></div>
             <div class="card-img rounded-xl h-24"></div>
             <div class="card-img rounded-xl h-24"></div>
           </div>
-          <p class="hint mt-2">Pré-visualização ilustrativa. A incorporação direta do feed não é suportada aqui.</p>
+          <p class="hint mt-2">Pré-visualização ilustrativa.</p>
         </div>
       </div>
     </div>
@@ -307,9 +264,7 @@
   <section id="produto" class="panel">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 py-10">
       <button class="btn pill px-3 py-2 rounded-lg mb-4" onclick="navigate('#loja')">← Voltar</button>
-      <div id="produtoWrap" class="grid md:grid-cols-2 gap-6">
-        <!-- conteudo dinamico -->
-      </div>
+      <div id="produtoWrap" class="grid md:grid-cols-2 gap-6"></div>
     </div>
   </section>
 
@@ -332,13 +287,13 @@
     </div>
   </section>
 
-  <!-- Checkout (Demo) -->
+  <!-- Checkout -->
   <section id="checkout" class="panel">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 py-10">
       <h2 class="text-2xl font-bold mb-4">Finalizar Compra</h2>
       <div class="grid lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2 glass rounded-2xl p-5">
-          <h3 class="font-bold mb-3">Endereço e Frete (Demo)</h3>
+          <h3 class="font-bold mb-3">Endereço e Frete</h3>
           <div class="grid md:grid-cols-2 gap-3">
             <input id="cep" class="bg-transparent pill px-3 py-2 rounded-lg" placeholder="CEP" />
             <input id="cidade" class="bg-transparent pill px-3 py-2 rounded-lg" placeholder="Cidade" />
@@ -347,19 +302,20 @@
           </div>
           <div id="freteOpcoes" class="mt-4 grid sm:grid-cols-2 gap-3"></div>
 
-          <h3 class="font-bold mt-6 mb-3">Pagamento (Demo)</h3>
+          <h3 class="font-bold mt-6 mb-3">Pagamento</h3>
           <div class="grid sm:grid-cols-2 gap-4">
             <div class="glass rounded-xl p-4">
               <div class="flex items-center gap-2 mb-2"><span class="badge px-2 py-1 rounded-full">Pix</span><span class="text-slate-300">Aprovação rápida</span></div>
               <div class="bg-white rounded-xl p-3 grid place-items-center">
-                <div class="qr w-48 h-48"></div>
+                <div id="qrBox" class="qr w-48 h-48"></div>
               </div>
-              <button id="btnSimularPix" class="btn cta-gradient w-full mt-3 px-4 py-2 rounded-lg font-bold">Simular Pagamento Pix</button>
+              <div id="pixCodeWrap" class="hidden mt-2 text-xs text-black bg-white rounded-lg p-2 break-words"></div>
+              <button id="btnSimularPix" class="btn cta-gradient w-full mt-3 px-4 py-2 rounded-lg font-bold">Gerar Pix</button>
             </div>
             <div class="glass rounded-xl p-4">
               <div class="flex items-center gap-2 mb-2"><span class="badge px-2 py-1 rounded-full">Cartão</span><span class="text-slate-300">Crédito/Débito</span></div>
-              <p class="hint">Pagamento transparente real com cartão não é suportado aqui. Use o botão Pix Demo ou publique com integrações no servidor.</p>
-              <button id="btnSimularCartao" class="btn px-4 py-2 rounded-lg pill w-full mt-3">Simular Cartão (Demo)</button>
+              <p class="hint">O site chama o servidor para processar. Se não houver resposta, permanece em modo demonstração.</p>
+              <button id="btnSimularCartao" class="btn px-4 py-2 rounded-lg pill w-full mt-3">Pagar com Cartão</button>
             </div>
           </div>
         </div>
@@ -374,18 +330,18 @@
               <span>Total</span><span id="resTotal">R$ 0,00</span>
             </div>
           </div>
-          <button id="btnFinalizar" class="btn cta-gradient w-full mt-4 px-5 py-3 rounded-xl font-bold">Finalizar (Demo)</button>
-          <p class="hint mt-2">Este checkout é demonstrativo. Integrações reais de pagamento e frete devem ser feitas no servidor seguro.</p>
+          <button id="btnFinalizar" class="btn cta-gradient w-full mt-4 px-5 py-3 rounded-xl font-bold">Finalizar Pedido</button>
+          <p class="hint mt-2">Tudo é conferido no servidor quando as funções estão ativas.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Admin (Demo) -->
+  <!-- Admin -->
   <section id="admin" class="panel">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-10">
       <div class="flex items-center justify-between">
-        <h2 class="text-2xl font-bold">Painel Admin (Demo)</h2>
+        <h2 class="text-2xl font-bold">Painel Admin</h2>
         <div class="flex items-center gap-2">
           <span id="authState" class="text-sm hint">Não autenticado</span>
           <button id="btnGoogle" class="btn px-4 py-2 rounded-lg pill">Entrar com Google</button>
@@ -394,7 +350,7 @@
       </div>
       <div class="grid lg:grid-cols-2 gap-6 mt-6">
         <div class="glass rounded-2xl p-5">
-          <h3 class="font-bold mb-3">Cadastrar Produto (Local Demo)</h3>
+          <h3 class="font-bold mb-3">Cadastrar Produto</h3>
           <div class="grid grid-cols-2 gap-3">
             <input id="admNome" class="bg-transparent pill px-3 py-2 rounded-lg col-span-2" placeholder="Nome do produto" />
             <select id="admCategoria" class="bg-transparent pill px-3 py-2 rounded-lg col-span-2"></select>
@@ -403,12 +359,12 @@
             <input id="admCores" class="bg-transparent pill px-3 py-2 rounded-lg col-span-2" placeholder="Cores (ex.: preto,branco,azul)" />
             <input id="admTamanhos" class="bg-transparent pill px-3 py-2 rounded-lg col-span-2" placeholder="Tamanhos (ex.: P,M,G,GG)" />
             <textarea id="admDesc" class="bg-transparent pill px-3 py-2 rounded-lg col-span-2" rows="3" placeholder="Descrição curta"></textarea>
-            <button id="btnSalvarProduto" class="btn cta-gradient px-4 py-2 rounded-lg font-bold col-span-2">Salvar (Local)</button>
+            <button id="btnSalvarProduto" class="btn cta-gradient px-4 py-2 rounded-lg font-bold col-span-2">Salvar</button>
           </div>
-          <p class="hint mt-2">Os dados ficam no seu navegador neste Demo. Para produção, use Firestore com regras seguras.</p>
+          <p class="hint mt-2">Para salvar no servidor, entre com Google (admin). Se o servidor não responder, salva localmente.</p>
         </div>
         <div class="glass rounded-2xl p-5">
-          <h3 class="font-bold mb-3">Produtos (Local)</h3>
+          <h3 class="font-bold mb-3">Produtos</h3>
           <div id="adminLista" class="space-y-3 max-h-96 overflow-y-auto hidden-scroll"></div>
         </div>
       </div>
@@ -416,10 +372,10 @@
       <div class="glass rounded-2xl p-5 mt-6">
         <h3 class="font-bold mb-3">Tutorial do Painel</h3>
         <ol class="list-decimal ml-5 space-y-2 text-slate-300">
-          <li>Acesse “Entrar com Google”.</li>
-          <li>Preencha os campos do produto e clique em “Salvar”.</li>
-          <li>O produto aparece na Loja e destaques automaticamente.</li>
-          <li>Para publicar oficialmente, configure Firestore e as integrações no servidor.</li>
+          <li>Publique o site no Netlify.</li>
+          <li>Configure as Netlify Functions (catálogo, frete, pagamento, admin).</li>
+          <li>Entre com Google e cadastre produtos.</li>
+          <li>Verifique que a Loja atualiza automaticamente.</li>
         </ol>
         <div class="mt-3 flex gap-3">
           <button id="btnAbrirTutorial" class="btn px-4 py-2 rounded-lg pill">Ver Tutorial</button>
@@ -433,14 +389,14 @@
   <div id="tutorialModal" class="fixed inset-0 hidden items-center justify-center modal-mask z-50">
     <div class="glass rounded-2xl p-6 max-w-2xl mx-4">
       <div class="flex items-center justify-between">
-        <h3 class="text-xl font-bold">Tutorial do Painel (Resumo)</h3>
+        <h3 class="text-xl font-bold">Tutorial (Resumo)</h3>
         <button id="closeTutorial" class="btn pill px-3 py-1 rounded-lg">✕</button>
       </div>
       <div class="mt-3 space-y-2 text-slate-300">
-        <p>1) Entre com Google. 2) Cadastre produtos. 3) Revise na Loja. 4) Publique com integrações reais (pagamento, frete, Firestore) em ambiente seguro.</p>
-        <p>Para integrar Mercado Pago e Melhor Envio, faça as chamadas no servidor (Cloud Functions/Hosting com SSR) para manter seus tokens protegidos.</p>
+        <p>Este site chama Netlify Functions para catálogo, frete, pagamento e admin. Se a função não existir, o site continua em modo demonstração.</p>
+        <p>No Netlify, crie funções com estes nomes: catalog, cart-price, shipping-calculate, shipping-create, payment-create, admin-products.</p>
       </div>
-      <div class="mt-4 text-sm hint">Use o botão “Imprimir/Salvar em PDF” para exportar.</div>
+      <div class="mt-4 text-sm hint">Use “Imprimir/Salvar em PDF” para exportar.</div>
     </div>
   </div>
 
@@ -469,7 +425,7 @@
   </footer>
 
   <script>
-    // Estado global (local)
+    // Estado global
     const state = {
       user: null,
       categorias: [
@@ -477,338 +433,209 @@
         "Camiseta dry fit","Camisa peruana","Camisa polo","Regata USA","Meias","Bermuda high"
       ],
       produtos: [
-        {
-          id: "p1",
-          nome: "Camiseta Black Premium",
-          categoria: "Camisetas",
-          preco: 199.9,
-          promo: 159.9,
-          cores: ["preto","branco"],
-          tamanhos: ["P","M","G","GG"],
-          novas: true,
-          destaque: true,
-          descricao: "Camiseta premium em algodão egípcio. Toque macio e caimento perfeito.",
-          composicao: "100% algodão egípcio",
-          estilo: "Casual sofisticado",
-          imagens: ["svg"]
-        },
-        {
-          id: "p2",
-          nome: "Bermuda de Linho Azul",
-          categoria: "Bermudas de linho",
-          preco: 249.9,
-          promo: null,
-          cores: ["azul","areia"],
-          tamanhos: ["P","M","G"],
-          novas: true,
-          destaque: true,
-          descricao: "Leve, refrescante e elegante. Ideal para clima quente.",
-          composicao: "55% linho, 45% algodão",
-          estilo: "Summer classy",
-          imagens: ["svg"]
-        },
-        {
-          id: "p3",
-          nome: "Cueca Premium Comfort",
-          categoria: "Cueca premium",
-          preco: 69.9,
-          promo: 59.9,
-          cores: ["preto","cinza"],
-          tamanhos: ["M","G","GG"],
-          novas: false,
-          destaque: true,
-          descricao: "Suporte e maciez com respirabilidade para o dia todo.",
-          composicao: "Modal com elastano",
-          estilo: "Conforto ativo",
-          imagens: ["svg"]
-        },
-        {
-          id: "p4",
-          nome: "Camisa Polo TFI",
-          categoria: "Camisa polo",
-          preco: 229.9,
-          promo: 199.9,
-          cores: ["preto","azul-marinho","branco"],
-          tamanhos: ["P","M","G","GG"],
-          novas: false,
-          destaque: false,
-          descricao: "Textura premium e acabamento impecável.",
-          composicao: "Algodão Pima",
-          estilo: "Smart casual",
-          imagens: ["svg"]
-        },
-        {
-          id: "p5",
-          nome: "Regata USA Cut",
-          categoria: "Regata USA",
-          preco: 119.9,
-          promo: 99.9,
-          cores: ["preto","verde"],
-          tamanhos: ["P","M","G"],
-          novas: true,
-          destaque: false,
-          descricao: "Corte atlético com visual urbano.",
-          composicao: "Poliéster com elastano",
-          estilo: "Athleisure",
-          imagens: ["svg"]
-        }
+        { id: "p1", nome: "Camiseta Black Premium", categoria: "Camisetas", preco: 199.9, promo: 159.9, cores: ["preto","branco"], tamanhos: ["P","M","G","GG"], novas: true, destaque: true, descricao: "Camiseta premium em algodão egípcio. Toque macio e caimento perfeito.", composicao: "100% algodão egípcio", estilo: "Casual sofisticado", imagens: ["svg"] },
+        { id: "p2", nome: "Bermuda de Linho Azul", categoria: "Bermudas de linho", preco: 249.9, promo: null, cores: ["azul","areia"], tamanhos: ["P","M","G"], novas: true, destaque: true, descricao: "Leve, refrescante e elegante. Ideal para clima quente.", composicao: "55% linho, 45% algodão", estilo: "Summer classy", imagens: ["svg"] },
+        { id: "p3", nome: "Cueca Premium Comfort", categoria: "Cueca premium", preco: 69.9, promo: 59.9, cores: ["preto","cinza"], tamanhos: ["M","G","GG"], novas: false, destaque: true, descricao: "Suporte e maciez com respirabilidade para o dia todo.", composicao: "Modal com elastano", estilo: "Conforto ativo", imagens: ["svg"] },
+        { id: "p4", nome: "Camisa Polo TFI", categoria: "Camisa polo", preco: 229.9, promo: 199.9, cores: ["preto","azul-marinho","branco"], tamanhos: ["P","M","G","GG"], novas: false, destaque: false, descricao: "Textura premium e acabamento impecável.", composicao: "Algodão Pima", estilo: "Smart casual", imagens: ["svg"] },
+        { id: "p5", nome: "Regata USA Cut", categoria: "Regata USA", preco: 119.9, promo: 99.9, cores: ["preto","verde"], tamanhos: ["P","M","G"], novas: true, destaque: false, descricao: "Corte atlético com visual urbano.", composicao: "Poliéster com elastano", estilo: "Athleisure", imagens: ["svg"] }
       ],
       carrinho: [],
-      freteSelecionado: null
+      freteSelecionado: null,
+      server: { enabled: true }
     };
 
     // Utilidades
     const fmt = v => v.toLocaleString('pt-BR',{style:'currency', currency:'BRL'});
     const qs = s => document.querySelector(s);
     const qsa = s => Array.from(document.querySelectorAll(s));
+    function toast(msg) { const t=document.createElement('div'); t.className='fixed bottom-6 left-1/2 -translate-x-1/2 glass rounded-xl px-4 py-3'; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),1600); }
 
     // Navegação SPA
-    function navigate(hash) {
-      window.location.hash = hash;
-    }
-    function applyRoute() {
+    function navigate(hash){ window.location.hash = hash; }
+    function applyRoute(){
       const hash = window.location.hash || "#home";
       qsa('[data-route]').forEach(a => a.classList.toggle('nav-active', a.getAttribute('href') === hash));
       qsa('.panel').forEach(p => p.classList.remove('active'));
-      const id = hash.replace('#','');
-      const panel = qs('#'+id);
-      if (panel) panel.classList.add('active');
+      const id = hash.replace('#',''); const panel = qs('#'+id); if (panel) panel.classList.add('active');
       if (id === 'produto') renderProdutoDetalhe();
       if (id === 'carrinho') renderCarrinho();
-      if (id === 'checkout') renderCheckoutResumo();
+      if (id === 'checkout') { renderCheckoutResumo(); }
     }
     window.addEventListener('hashchange', applyRoute);
+    qs('#btnMenu').addEventListener('click', ()=> qs('#mobileNav').classList.toggle('hidden'));
 
-    // Header behaviors
-    qs('#btnMenu').addEventListener('click', () => {
-      qs('#mobileNav').classList.toggle('hidden');
-    });
+    // Firebase Auth (Google)
+    const firebaseConfig = {
+      apiKey: "AIzaSyD__XrPqFeh4_K0ih4l1reNvWxjW7VItPw",
+      authDomain: "tfimports-27898.firebaseapp.com",
+      projectId: "tfimports-27898",
+      storageBucket: "tfimports-27898.firebasestorage.app",
+      messagingSenderId: "379291286011",
+      appId: "1:379291286011:web:1feb4711b5235b04c4b35e",
+      measurementId: "G-B742BVBRES"
+    };
+    let auth, provider;
+    try {
+      firebase.initializeApp(firebaseConfig);
+      auth = firebase.auth();
+      provider = new firebase.auth.GoogleAuthProvider();
+    } catch(e){ console.warn('Firebase indisponível', e); }
 
-    // Render categorias chips/footer
-    function renderChips() {
-      const chips = qs('#categoryChips');
-      chips.innerHTML = '';
-      state.categorias.forEach(cat => {
-        const a = document.createElement('a');
-        a.href = '#loja';
-        a.setAttribute('data-route','');
-        a.className = 'pill px-4 py-2 rounded-full hover:text-emerald-300';
-        a.textContent = cat;
-        a.addEventListener('click', () => {
-          qs('#filterCategoria').value = cat;
-          filterAndRenderCatalog();
-        });
-        chips.appendChild(a);
-      });
-      const footerCats = qs('#footerCats');
-      footerCats.innerHTML = '';
-      state.categorias.slice(0,6).forEach(cat => {
-        const span = document.createElement('span');
-        span.className = 'pill px-3 py-1 rounded-full text-sm';
-        span.textContent = cat;
-        footerCats.appendChild(span);
-      });
+    function updateAuthUI(){
+      qs('#authState').textContent = state.user ? `Olá, ${state.user.displayName||'admin'}` : 'Não autenticado';
+      qs('#btnLogout').classList.toggle('hidden', !state.user);
+      qs('#btnGoogle').classList.toggle('hidden', !!state.user);
+      qs('#btnLogin').textContent = state.user ? 'Conta' : 'Entrar';
+    }
+    async function getIdToken(){
+      if (!auth || !auth.currentUser) return null;
+      try { return await auth.currentUser.getIdToken(); } catch { return null; }
+    }
+    function signInGoogle(){
+      if (!auth) { toast('Login indisponível aqui.'); return; }
+      auth.signInWithPopup(provider).then(res => { state.user = res.user; updateAuthUI(); toast('Login realizado!'); }).catch(()=> toast('Login cancelado.'));
+    }
+    function signOut(){
+      if (!auth) { state.user=null; updateAuthUI(); return; }
+      auth.signOut().then(()=> { state.user=null; updateAuthUI(); toast('Você saiu.'); });
+    }
+    qs('#btnGoogle').addEventListener('click', signInGoogle);
+    qs('#btnLogout').addEventListener('click', signOut);
+    qs('#btnLogin').addEventListener('click', ()=> navigate('#admin'));
+    if (auth) auth.onAuthStateChanged(u=>{ state.user=u||null; updateAuthUI(); });
+
+    // Helper para chamar Netlify Functions
+    async function apiFetch(name, payload, method='POST'){
+      const headers = { 'Content-Type':'application/json' };
+      const tok = await getIdToken(); if (tok) headers['Authorization'] = 'Bearer ' + tok;
+      const res = await fetch(`/.netlify/functions/${name}`, { method, headers, body: method==='GET'?undefined:JSON.stringify(payload||{}) });
+      if (!res.ok) throw new Error(await res.text().catch(()=>res.statusText));
+      return await res.json();
     }
 
-    // Produto card SVG placeholder
-    function svgThumb() {
-      return `
-        <div class="card-img rounded-2xl aspect-[4/3] grid place-items-center">
-          <svg viewBox="0 0 140 100" class="w-24 h-24">
-            <rect x="10" y="10" width="120" height="80" rx="12" fill="#0b1a34"/>
-            <path d="M20 75 L55 35 L85 55 L120 25" stroke="#1dd1a1" stroke-width="5" fill="none"/>
-          </svg>
-        </div>`;
+    // UI de categorias
+    function renderChips(){
+      const chips = qs('#categoryChips'); chips.innerHTML='';
+      state.categorias.forEach(cat=>{
+        const a=document.createElement('a'); a.href='#loja'; a.setAttribute('data-route',''); a.className='pill px-4 py-2 rounded-full hover:text-emerald-300'; a.textContent=cat;
+        a.addEventListener('click', ()=>{ qs('#filterCategoria').value = cat; filterAndRenderCatalog(); });
+        chips.appendChild(a);
+      });
+      const footerCats = qs('#footerCats'); footerCats.innerHTML=''; state.categorias.slice(0,6).forEach(cat=>{
+        const span=document.createElement('span'); span.className='pill px-3 py-1 rounded-full text-sm'; span.textContent=cat; footerCats.appendChild(span);
+      });
+    }
+    function svgThumb(){
+      return `<div class="card-img rounded-2xl aspect-[4/3] grid place-items-center">
+        <svg viewBox="0 0 140 100" class="w-24 h-24">
+          <rect x="10" y="10" width="120" height="80" rx="12" fill="#0b1a34"/>
+          <path d="M20 75 L55 35 L85 55 L120 25" stroke="#1dd1a1" stroke-width="5" fill="none"/>
+        </svg>
+      </div>`;
     }
 
     // Destaques
-    function renderDestaques() {
-      const grid = qs('#featuredGrid');
-      grid.innerHTML = '';
-      state.produtos.filter(p => p.destaque).slice(0,6).forEach(p => {
-        const el = document.createElement('div');
-        el.className = 'glass rounded-2xl overflow-hidden hover:ring-2 hover:ring-emerald-400/40';
-        el.innerHTML = `
-          ${svgThumb()}
-          <div class="p-4">
-            <div class="flex items-center justify-between">
-              <h3 class="font-bold">${p.nome}</h3>
-              ${p.novas ? '<span class="badge px-2 py-1 rounded-full text-xs">Novo</span>' : ''}
-            </div>
-            <div class="mt-1 text-sm hint">${p.categoria}</div>
-            <div class="mt-2 flex items-center gap-2">
-              <div class="font-extrabold">${fmt(p.promo ?? p.preco)}</div>
-              ${p.promo ? '<div class="line-through text-slate-400">'+fmt(p.preco)+'</div>' : ''}
-            </div>
-            <div class="mt-3 flex gap-2">
-              <button class="btn cta-gradient px-3 py-2 rounded-lg font-bold" data-id="${p.id}" data-action="ver">Ver</button>
-              <button class="btn px-3 py-2 rounded-lg pill" data-id="${p.id}" data-action="add">Adicionar</button>
-            </div>
+    function renderDestaques(){
+      const grid = qs('#featuredGrid'); grid.innerHTML='';
+      state.produtos.filter(p=>p.destaque).slice(0,6).forEach(p=>{
+        const el=document.createElement('div'); el.className='glass rounded-2xl overflow-hidden hover:ring-2 hover:ring-emerald-400/40';
+        el.innerHTML = `${svgThumb()}<div class="p-4">
+          <div class="flex items-center justify-between"><h3 class="font-bold">${p.nome}</h3>${p.novas?'<span class="badge px-2 py-1 rounded-full text-xs">Novo</span>':''}</div>
+          <div class="mt-1 text-sm hint">${p.categoria}</div>
+          <div class="mt-2 flex items-center gap-2"><div class="font-extrabold">${fmt(p.promo ?? p.preco)}</div>${p.promo?'<div class="line-through text-slate-400">'+fmt(p.preco)+'</div>':''}</div>
+          <div class="mt-3 flex gap-2">
+            <button class="btn cta-gradient px-3 py-2 rounded-lg font-bold" data-id="${p.id}" data-action="ver">Ver</button>
+            <button class="btn px-3 py-2 rounded-lg pill" data-id="${p.id}" data-action="add">Adicionar</button>
           </div>
-        `;
+        </div>`;
         grid.appendChild(el);
       });
-      grid.addEventListener('click', e => {
-        const b = e.target.closest('button'); if (!b) return;
-        const id = b.getAttribute('data-id'); const act = b.getAttribute('data-action');
-        if (act === 'ver') { openProduto(id); }
-        if (act === 'add') { addToCart(id); }
-      }, { once: true });
+      grid.addEventListener('click', e=>{
+        const b=e.target.closest('button'); if(!b) return;
+        const id=b.getAttribute('data-id'); const act=b.getAttribute('data-action');
+        if (act==='ver') openProduto(id); if (act==='add') addToCart(id);
+      }, { once:true });
     }
 
-    // Loja: filtros
-    function initFilters() {
-      const sel = qs('#filterCategoria');
-      state.categorias.forEach(c => {
-        const opt = document.createElement('option');
-        opt.value = c; opt.textContent = c;
-        sel.appendChild(opt);
-      });
-      const sizes = ["PP","P","M","G","GG","XG"];
-      const wrapT = qs('#filterTamanho');
-      sizes.forEach(t => {
-        const b = document.createElement('button');
-        b.className = 'btn px-3 py-1 rounded-full pill text-sm';
-        b.textContent = t;
-        b.addEventListener('click', () => {
-          b.classList.toggle('badge');
-          filterAndRenderCatalog();
-        });
-        wrapT.appendChild(b);
-      });
-      const cores = ["preto","branco","azul","verde","cinza","areia"];
-      const wrapC = qs('#filterCor');
-      cores.forEach(c => {
-        const b = document.createElement('button');
-        b.className = 'btn px-3 py-1 rounded-full pill text-sm capitalize';
-        b.textContent = c;
-        b.addEventListener('click', () => {
-          b.classList.toggle('badge');
-          filterAndRenderCatalog();
-        });
-        wrapC.appendChild(b);
-      });
-      qs('#btnLimparFiltros').addEventListener('click', () => {
-        sel.value = '';
-        qsa('#filterTamanho button, #filterCor button').forEach(b => b.classList.remove('badge'));
-        filterAndRenderCatalog();
-      });
+    // Filtros
+    function initFilters(){
+      const sel = qs('#filterCategoria'); state.categorias.forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c; sel.appendChild(o); });
+      const sizes=["PP","P","M","G","GG","XG"]; const wrapT=qs('#filterTamanho'); sizes.forEach(t=>{ const b=document.createElement('button'); b.className='btn px-3 py-1 rounded-full pill text-sm'; b.textContent=t; b.addEventListener('click',()=>{ b.classList.toggle('badge'); filterAndRenderCatalog(); }); wrapT.appendChild(b); });
+      const cores=["preto","branco","azul","verde","cinza","areia"]; const wrapC=qs('#filterCor'); cores.forEach(c=>{ const b=document.createElement('button'); b.className='btn px-3 py-1 rounded-full pill text-sm capitalize'; b.textContent=c; b.addEventListener('click',()=>{ b.classList.toggle('badge'); filterAndRenderCatalog(); }); wrapC.appendChild(b); });
+      qs('#btnLimparFiltros').addEventListener('click', ()=>{ sel.value=''; qsa('#filterTamanho button, #filterCor button').forEach(b=>b.classList.remove('badge')); filterAndRenderCatalog(); });
       qs('#ordenacao').addEventListener('change', filterAndRenderCatalog);
     }
-    function filterAndRenderCatalog() {
-      const grid = qs('#catalogoGrid');
-      const cat = qs('#filterCategoria').value;
-      const sizesSel = qsa('#filterTamanho button.badge').map(b => b.textContent.trim());
-      const coresSel = qsa('#filterCor button.badge').map(b => b.textContent.trim());
-      let arr = [...state.produtos];
-      if (cat) arr = arr.filter(p => p.categoria === cat);
-      if (sizesSel.length) arr = arr.filter(p => p.tamanhos.some(t => sizesSel.includes(t)));
-      if (coresSel.length) arr = arr.filter(p => p.cores.some(c => coresSel.includes(c)));
-      const ord = qs('#ordenacao').value;
-      if (ord === 'menor-preco') arr.sort((a,b)=>(a.promo ?? a.preco) - (b.promo ?? b.preco));
-      if (ord === 'maior-preco') arr.sort((a,b)=>(b.promo ?? b.preco) - (a.promo ?? a.preco));
-      if (ord === 'novidades') arr.sort((a,b)=> (b.novas?-1:1));
-      grid.innerHTML = '';
-      arr.forEach(p => {
-        const el = document.createElement('div');
-        el.className = 'glass rounded-2xl overflow-hidden hover:ring-2 hover:ring-emerald-400/40';
-        el.innerHTML = `
-          ${svgThumb()}
-          <div class="p-4">
-            <h3 class="font-bold">${p.nome}</h3>
-            <div class="mt-1 text-sm hint">${p.categoria}</div>
-            <div class="mt-2 flex items-center gap-2">
-              <div class="font-extrabold">${fmt(p.promo ?? p.preco)}</div>
-              ${p.promo ? '<div class="line-through text-slate-400">'+fmt(p.preco)+'</div>' : ''}
-            </div>
-            <div class="mt-3 flex gap-2">
-              <button class="btn cta-gradient px-3 py-2 rounded-lg font-bold" data-id="${p.id}" data-action="ver">Ver</button>
-              <button class="btn px-3 py-2 rounded-lg pill" data-id="${p.id}" data-action="add">Adicionar</button>
-            </div>
+    function filterAndRenderCatalog(){
+      const grid=qs('#catalogoGrid');
+      const cat=qs('#filterCategoria').value;
+      const sizesSel=qsa('#filterTamanho button.badge').map(b=>b.textContent.trim());
+      const coresSel=qsa('#filterCor button.badge').map(b=>b.textContent.trim());
+      let arr=[...state.produtos];
+      if (cat) arr=arr.filter(p=>p.categoria===cat);
+      if (sizesSel.length) arr=arr.filter(p=>p.tamanhos.some(t=>sizesSel.includes(t)));
+      if (coresSel.length) arr=arr.filter(p=>p.cores.some(c=>coresSel.includes(c)));
+      const ord=qs('#ordenacao').value;
+      if (ord==='menor-preco') arr.sort((a,b)=>(a.promo??a.preco)-(b.promo??b.preco));
+      if (ord==='maior-preco') arr.sort((a,b)=>(b.promo??b.preco)-(a.promo??a.preco));
+      if (ord==='novidades') arr.sort((a,b)=>(b.novas?-1:1));
+      grid.innerHTML='';
+      arr.forEach(p=>{
+        const el=document.createElement('div'); el.className='glass rounded-2xl overflow-hidden hover:ring-2 hover:ring-emerald-400/40';
+        el.innerHTML = `${svgThumb()}<div class="p-4">
+          <h3 class="font-bold">${p.nome}</h3>
+          <div class="mt-1 text-sm hint">${p.categoria}</div>
+          <div class="mt-2 flex items-center gap-2"><div class="font-extrabold">${fmt(p.promo ?? p.preco)}</div>${p.promo?'<div class="line-through text-slate-400">'+fmt(p.preco)+'</div>':''}</div>
+          <div class="mt-3 flex gap-2">
+            <button class="btn cta-gradient px-3 py-2 rounded-lg font-bold" data-id="${p.id}" data-action="ver">Ver</button>
+            <button class="btn px-3 py-2 rounded-lg pill" data-id="${p.id}" data-action="add">Adicionar</button>
           </div>
-        `;
+        </div>`;
         grid.appendChild(el);
       });
-      grid.onclick = (e) => {
-        const b = e.target.closest('button'); if (!b) return;
-        const id = b.getAttribute('data-id'); const act = b.getAttribute('data-action');
-        if (act === 'ver') openProduto(id);
-        if (act === 'add') addToCart(id);
-      };
+      grid.onclick = (e)=>{ const b=e.target.closest('button'); if(!b) return; const id=b.getAttribute('data-id'); const act=b.getAttribute('data-action'); if (act==='ver') openProduto(id); if (act==='add') addToCart(id); };
     }
 
     // Novidades
-    function renderNovidades() {
-      const grid = qs('#novidadesGrid');
-      grid.innerHTML = '';
-      state.produtos.filter(p=>p.novas || p.promo).slice(0,8).forEach(p => {
-        const el = document.createElement('div');
-        el.className = 'glass rounded-2xl overflow-hidden';
-        el.innerHTML = `
-          ${svgThumb()}
-          <div class="p-4">
-            <div class="flex items-center justify-between">
-              <h3 class="font-bold">${p.nome}</h3>
-              ${p.promo ? '<span class="badge px-2 py-1 rounded-full text-xs">Promo</span>' : '<span class="badge px-2 py-1 rounded-full text-xs">Lançamento</span>'}
-            </div>
-            <div class="mt-2 flex items-center gap-2">
-              <div class="font-extrabold">${fmt(p.promo ?? p.preco)}</div>
-              ${p.promo ? '<div class="line-through text-slate-400">'+fmt(p.preco)+'</div>' : ''}
-            </div>
-            <div class="mt-3 flex gap-2">
-              <button class="btn cta-gradient px-3 py-2 rounded-lg font-bold" data-id="${p.id}" data-action="ver">Ver</button>
-              <button class="btn px-3 py-2 rounded-lg pill" data-id="${p.id}" data-action="add">Adicionar</button>
-            </div>
+    function renderNovidades(){
+      const grid=qs('#novidadesGrid'); grid.innerHTML='';
+      state.produtos.filter(p=>p.novas || p.promo).slice(0,8).forEach(p=>{
+        const el=document.createElement('div'); el.className='glass rounded-2xl overflow-hidden';
+        el.innerHTML = `${svgThumb()}<div class="p-4">
+          <div class="flex items-center justify-between"><h3 class="font-bold">${p.nome}</h3>${p.promo?'<span class="badge px-2 py-1 rounded-full text-xs">Promo</span>':'<span class="badge px-2 py-1 rounded-full text-xs">Lançamento</span>'}</div>
+          <div class="mt-2 flex items-center gap-2"><div class="font-extrabold">${fmt(p.promo ?? p.preco)}</div>${p.promo?'<div class="line-through text-slate-400">'+fmt(p.preco)+'</div>':''}</div>
+          <div class="mt-3 flex gap-2">
+            <button class="btn cta-gradient px-3 py-2 rounded-lg font-bold" data-id="${p.id}" data-action="ver">Ver</button>
+            <button class="btn px-3 py-2 rounded-lg pill" data-id="${p.id}" data-action="add">Adicionar</button>
           </div>
-        `;
+        </div>`;
         grid.appendChild(el);
       });
-      grid.onclick = (e) => {
-        const b = e.target.closest('button'); if (!b) return;
-        const id = b.getAttribute('data-id'); const act = b.getAttribute('data-action');
-        if (act === 'ver') openProduto(id);
-        if (act === 'add') addToCart(id);
-      };
+      grid.onclick = (e)=>{ const b=e.target.closest('button'); if(!b) return; const id=b.getAttribute('data-id'); const act=b.getAttribute('data-action'); if (act==='ver') openProduto(id); if (act==='add') addToCart(id); };
     }
 
-    // Produto detalhe
-    let currentProdutoId = null;
-    function openProduto(id) {
-      currentProdutoId = id;
-      navigate('#produto');
-    }
-    function renderProdutoDetalhe() {
-      const p = state.produtos.find(x=>x.id===currentProdutoId) || state.produtos[0];
-      const wrap = qs('#produtoWrap');
+    // Produto
+    let currentProdutoId=null;
+    function openProduto(id){ currentProdutoId=id; navigate('#produto'); }
+    function renderProdutoDetalhe(){
+      const p=state.produtos.find(x=>x.id===currentProdutoId) || state.produtos[0];
+      const wrap=qs('#produtoWrap');
       wrap.innerHTML = `
         <div class="glass rounded-2xl p-5">
           <div class="rounded-xl card-img aspect-square grid place-items-center">
-            <svg viewBox="0 0 160 160" class="w-40 h-40">
-              <rect x="15" y="15" width="130" height="130" rx="16" fill="#0b1a34"/>
-              <path d="M30 120 L70 60 L110 80 L135 45" stroke="#1dd1a1" stroke-width="6" fill="none"/>
-            </svg>
+            <svg viewBox="0 0 160 160" class="w-40 h-40"><rect x="15" y="15" width="130" height="130" rx="16" fill="#0b1a34"/><path d="M30 120 L70 60 L110 80 L135 45" stroke="#1dd1a1" stroke-width="6" fill="none"/></svg>
           </div>
         </div>
         <div>
           <div class="flex items-center justify-between">
             <h1 class="text-2xl font-extrabold">${p.nome}</h1>
-            ${p.novas ? '<span class="badge px-3 py-1 rounded-full">Novo</span>' : ''}
+            ${p.novas?'<span class="badge px-3 py-1 rounded-full">Novo</span>':''}
           </div>
           <div class="text-sm hint mt-1">${p.categoria}</div>
-          <div class="mt-3 flex items-center gap-3">
-            <div class="text-3xl font-extrabold">${fmt(p.promo ?? p.preco)}</div>
-            ${p.promo ? '<div class="line-through text-slate-400">'+fmt(p.preco)+'</div>' : ''}
-          </div>
+          <div class="mt-3 flex items-center gap-3"><div class="text-3xl font-extrabold">${fmt(p.promo ?? p.preco)}</div>${p.promo?'<div class="line-through text-slate-400">'+fmt(p.preco)+'</div>':''}</div>
           <p class="mt-4 text-slate-300">${p.descricao}</p>
           <div class="mt-4 grid grid-cols-2 gap-3">
-            <div>
-              <div class="text-sm text-slate-300 mb-2">Cor</div>
-              <div id="selCores" class="flex flex-wrap gap-2"></div>
-            </div>
-            <div>
-              <div class="text-sm text-slate-300 mb-2">Tamanho</div>
-              <div id="selTamanhos" class="flex flex-wrap gap-2"></div>
-            </div>
+            <div><div class="text-sm text-slate-300 mb-2">Cor</div><div id="selCores" class="flex flex-wrap gap-2"></div></div>
+            <div><div class="text-sm text-slate-300 mb-2">Tamanho</div><div id="selTamanhos" class="flex flex-wrap gap-2"></div></div>
           </div>
           <div class="mt-5 flex gap-3">
             <button id="btnAddDetail" class="btn cta-gradient px-5 py-3 rounded-xl font-bold">Adicionar ao carrinho</button>
@@ -821,260 +648,198 @@
           </div>
         </div>
       `;
-      const cores = qs('#selCores'); const tams = qs('#selTamanhos');
-      p.cores.forEach(c => {
-        const b = document.createElement('button');
-        b.className = 'btn px-3 py-1 rounded-full pill capitalize';
-        b.textContent = c;
-        b.addEventListener('click', () => {
-          qsa('#selCores button').forEach(x => x.classList.remove('badge')); b.classList.add('badge');
-        });
-        cores.appendChild(b);
-      });
-      p.tamanhos.forEach(t => {
-        const b = document.createElement('button');
-        b.className = 'btn px-3 py-1 rounded-full pill';
-        b.textContent = t;
-        b.addEventListener('click', () => {
-          qsa('#selTamanhos button').forEach(x => x.classList.remove('badge')); b.classList.add('badge');
-        });
-        tams.appendChild(b);
-      });
-      qs('#btnAddDetail').onclick = () => {
-        const cor = (qsa('#selCores button.badge')[0]||{}).textContent || p.cores[0];
-        const tam = (qsa('#selTamanhos button.badge')[0]||{}).textContent || p.tamanhos[0];
-        addToCart(p.id, cor, tam, 1);
-      };
+      const cores=qs('#selCores'); const tams=qs('#selTamanhos');
+      p.cores.forEach(c=>{ const b=document.createElement('button'); b.className='btn px-3 py-1 rounded-full pill capitalize'; b.textContent=c; b.addEventListener('click',()=>{ qsa('#selCores button').forEach(x=>x.classList.remove('badge')); b.classList.add('badge'); }); cores.appendChild(b); });
+      p.tamanhos.forEach(t=>{ const b=document.createElement('button'); b.className='btn px-3 py-1 rounded-full pill'; b.textContent=t; b.addEventListener('click',()=>{ qsa('#selTamanhos button').forEach(x=>x.classList.remove('badge')); b.classList.add('badge'); }); tams.appendChild(b); });
+      qs('#btnAddDetail').onclick = ()=>{ const cor=(qsa('#selCores button.badge')[0]||{}).textContent || p.cores[0]; const tam=(qsa('#selTamanhos button.badge')[0]||{}).textContent || p.tamanhos[0]; addToCart(p.id, cor, tam, 1); };
     }
 
     // Carrinho
-    function loadCart() {
-      try { state.carrinho = JSON.parse(localStorage.getItem('tfi_cart')||'[]'); } catch { state.carrinho = []; }
-      updateCartCount();
-    }
-    function saveCart() {
-      localStorage.setItem('tfi_cart', JSON.stringify(state.carrinho));
-      updateCartCount();
-    }
-    function updateCartCount() {
-      qs('#cartCount').textContent = state.carrinho.reduce((s,i)=>s+i.qtd,0);
-    }
-    function addToCart(id, cor=null, tam=null, qtd=1) {
-      const p = state.produtos.find(x=>x.id===id); if (!p) return;
+    function loadCart(){ try { state.carrinho = JSON.parse(localStorage.getItem('tfi_cart')||'[]'); } catch { state.carrinho=[]; } updateCartCount(); }
+    function saveCart(){ localStorage.setItem('tfi_cart', JSON.stringify(state.carrinho)); updateCartCount(); }
+    function updateCartCount(){ qs('#cartCount').textContent = state.carrinho.reduce((s,i)=>s+i.qtd,0); }
+    function addToCart(id, cor=null, tam=null, qtd=1){
+      const p=state.produtos.find(x=>x.id===id); if(!p) return;
       const key = id + '|' + (cor||p.cores[0]) + '|' + (tam||p.tamanhos[0]);
       const found = state.carrinho.find(x=>x.key===key);
       if (found) found.qtd += qtd;
-      else state.carrinho.push({ key, id, nome: p.nome, preco: p.promo ?? p.preco, cor: cor||p.cores[0], tam: tam||p.tamanhos[0], qtd });
+      else state.carrinho.push({ key, id, nome:p.nome, preco:p.promo ?? p.preco, cor:cor||p.cores[0], tam:tam||p.tamanhos[0], qtd });
       saveCart();
-      // toast simples
-      const t = document.createElement('div');
-      t.className='fixed bottom-6 right-6 glass rounded-xl p-3'; t.textContent='Adicionado ao carrinho';
-      document.body.appendChild(t); setTimeout(()=>t.remove(),1200);
+      const t=document.createElement('div'); t.className='fixed bottom-6 right-6 glass rounded-xl p-3'; t.textContent='Adicionado ao carrinho'; document.body.appendChild(t); setTimeout(()=>t.remove(),1200);
     }
-    function renderCarrinho() {
-      const list = qs('#cartList'); list.innerHTML='';
-      if (!state.carrinho.length){
-        list.innerHTML = '<div class="glass rounded-xl p-5 text-slate-300">Seu carrinho está vazio.</div>';
-      } else {
-        state.carrinho.forEach((i, idx) => {
-          const row = document.createElement('div');
-          row.className = 'glass rounded-2xl p-4 flex items-center justify-between gap-3';
-          row.innerHTML = `
-            <div class="flex items-center gap-3">
-              <div class="card-img rounded-xl w-20 h-16"></div>
-              <div>
-                <div class="font-bold">${i.nome}</div>
-                <div class="hint text-sm">Cor: ${i.cor} • Tam: ${i.tam}</div>
-              </div>
+    function renderCarrinho(){
+      const list=qs('#cartList'); list.innerHTML='';
+      if (!state.carrinho.length){ list.innerHTML='<div class="glass rounded-xl p-5 text-slate-300">Seu carrinho está vazio.</div>'; }
+      else {
+        state.carrinho.forEach((i, idx)=>{
+          const row=document.createElement('div'); row.className='glass rounded-2xl p-4 flex items-center justify-between gap-3';
+          row.innerHTML = `<div class="flex items-center gap-3"><div class="card-img rounded-xl w-20 h-16"></div><div><div class="font-bold">${i.nome}</div><div class="hint text-sm">Cor: ${i.cor} • Tam: ${i.tam}</div></div></div>
+          <div class="flex items-center gap-3">
+            <div class="pill px-2 py-1 rounded-lg">${fmt(i.preco)}</div>
+            <div class="flex items-center gap-2">
+              <button class="btn pill px-2 py-1 rounded-lg" data-idx="${idx}" data-act="menos">−</button>
+              <div class="w-8 text-center">${i.qtd}</div>
+              <button class="btn pill px-2 py-1 rounded-lg" data-idx="${idx}" data-act="mais">+</button>
             </div>
-            <div class="flex items-center gap-3">
-              <div class="pill px-2 py-1 rounded-lg">${fmt(i.preco)}</div>
-              <div class="flex items-center gap-2">
-                <button class="btn pill px-2 py-1 rounded-lg" data-idx="${idx}" data-act="menos">−</button>
-                <div class="w-8 text-center">${i.qtd}</div>
-                <button class="btn pill px-2 py-1 rounded-lg" data-idx="${idx}" data-act="mais">+</button>
-              </div>
-              <button class="btn px-3 py-2 rounded-lg pill" data-idx="${idx}" data-act="rm">Remover</button>
-            </div>
-          `;
+            <button class="btn px-3 py-2 rounded-lg pill" data-idx="${idx}" data-act="rm">Remover</button>
+          </div>`;
           list.appendChild(row);
         });
-        list.onclick = (e) => {
-          const b = e.target.closest('button'); if(!b) return;
-          const idx = +b.getAttribute('data-idx'); const act = b.getAttribute('data-act');
-          if (act==='mais') state.carrinho[idx].qtd++;
-          if (act==='menos') state.carrinho[idx].qtd = Math.max(1, state.carrinho[idx].qtd-1);
-          if (act==='rm') state.carrinho.splice(idx,1);
-          saveCart(); renderCarrinho();
-        };
+        list.onclick = (e)=>{ const b=e.target.closest('button'); if(!b) return; const idx=+b.getAttribute('data-idx'); const act=b.getAttribute('data-act'); if (act==='mais') state.carrinho[idx].qtd++; if (act==='menos') state.carrinho[idx].qtd=Math.max(1,state.carrinho[idx].qtd-1); if (act==='rm') state.carrinho.splice(idx,1); saveCart(); renderCarrinho(); };
       }
-      const subtotal = state.carrinho.reduce((s,i)=>s+i.preco*i.qtd,0);
-      qs('#cartSubtotal').textContent = fmt(subtotal);
+      const subtotal = state.carrinho.reduce((s,i)=>s+i.preco*i.qtd,0); qs('#cartSubtotal').textContent = fmt(subtotal);
     }
 
-    // Checkout demo
-    function renderCheckoutResumo() {
-      const box = qs('#resumoCheckout'); box.innerHTML='';
-      if (!state.carrinho.length) {
-        box.innerHTML = '<div class="hint">Seu carrinho está vazio.</div>';
-      } else {
-        state.carrinho.forEach(i => {
-          const line = document.createElement('div');
-          line.className = 'flex items-center justify-between';
-          line.innerHTML = `<span class="text-slate-300">${i.nome} (${i.qtd})</span><span>${fmt(i.preco*i.qtd)}</span>`;
-          box.appendChild(line);
-        });
-      }
+    // Checkout
+    function renderCheckoutResumo(){
+      const box=qs('#resumoCheckout'); box.innerHTML='';
+      if (!state.carrinho.length){ box.innerHTML='<div class="hint">Seu carrinho está vazio.</div>'; updateTotals(); return; }
+      state.carrinho.forEach(i=>{ const line=document.createElement('div'); line.className='flex items-center justify-between'; line.innerHTML=`<span class="text-slate-300">${i.nome} (${i.qtd})</span><span>${fmt(i.preco*i.qtd)}</span>`; box.appendChild(line); });
       updateTotals();
+      refreshServerTotals(); // tenta validar pelo servidor
     }
-    function updateTotals() {
+    function updateTotals(){
       const subtotal = state.carrinho.reduce((s,i)=>s+i.preco*i.qtd,0);
       const frete = state.freteSelecionado?.preco || 0;
       qs('#resFrete').textContent = fmt(frete);
       qs('#resTotal').textContent = fmt(subtotal + frete);
     }
-    qs('#btnCalcFrete').addEventListener('click', () => {
-      const cep = (qs('#cep').value||'').replace(/\D/g,'');
-      const op = qs('#freteOpcoes'); op.innerHTML='';
-      if (cep.length < 8) {
-        op.innerHTML = '<div class="hint">Informe um CEP válido.</div>'; return;
+    async function refreshServerTotals(){
+      try {
+        const items = state.carrinho.map(i=>({ id:i.id, qty:i.qtd }));
+        const shipping = state.freteSelecionado ? { id: state.freteSelecionado.id } : null;
+        const data = await apiFetch('cart-price', { items, shipping });
+        if (data && typeof data.total === 'number'){
+          if (data.shipping && typeof data.shipping.price === 'number'){
+            state.freteSelecionado = { id: data.shipping.id, nome: data.shipping.name||'Frete', prazo: data.shipping.eta||'', preco: data.shipping.price };
+          }
+          qs('#resFrete').textContent = fmt(state.freteSelecionado?.preco || 0);
+          qs('#resTotal').textContent = fmt(data.total);
+        }
+      } catch(e){ /* mantém valores locais */ }
+    }
+    qs('#btnCalcFrete').addEventListener('click', async ()=>{
+      const cep=(qs('#cep').value||'').replace(/\D/g,''); const op=qs('#freteOpcoes'); op.innerHTML='';
+      if (cep.length<8){ op.innerHTML='<div class="hint">Informe um CEP válido.</div>'; return; }
+      op.innerHTML = '<div class="hint">Calculando frete...</div>';
+      let opcoes=[];
+      try {
+        const items = state.carrinho.map(i=>({ id:i.id, qty:i.qtd }));
+        const data = await apiFetch('shipping-calculate', { cep, items });
+        opcoes = (data.options||[]).map(o=>({ id:o.id, nome:o.name, prazo:o.eta, preco:o.price }));
+      } catch(e){
+        const subtotal = state.carrinho.reduce((s,i)=>s+i.preco*i.qtd,0);
+        const base = subtotal > 400 ? 0 : 24.9;
+        opcoes = [
+          { id:'exp', nome:'Expresso', prazo:'2-4 dias', preco: base + 19.9 },
+          { id:'std', nome:'Padrão', prazo:'4-8 dias', preco: base + 9.9 },
+        ];
       }
-      // Cálculo fictício (Demo), substitua por Melhor Envio no backend
-      const subtotal = state.carrinho.reduce((s,i)=>s+i.preco*i.qtd,0);
-      const base = subtotal > 400 ? 0 : 24.9;
-      const opcoes = [
-        { id:'exp', nome:'Expresso', prazo:'2-4 dias', preco: base + 19.9 },
-        { id:'std', nome:'Padrão', prazo:'4-8 dias', preco: base + 9.9 },
-      ];
+      op.innerHTML='';
       opcoes.forEach(o=>{
-        const d = document.createElement('label');
-        d.className = 'glass rounded-xl p-3 flex items-center justify-between cursor-pointer';
+        const d=document.createElement('label'); d.className='glass rounded-xl p-3 flex items-center justify-between cursor-pointer';
         d.innerHTML = `<div><div class="font-bold">${o.nome}</div><div class="hint text-sm">${o.prazo}</div></div>
           <div class="flex items-center gap-3"><div class="font-extrabold">${fmt(o.preco)}</div><input type="radio" name="frete" value="${o.id}"></div>`;
         op.appendChild(d);
       });
-      op.onclick = (e) => {
-        const r = e.target.closest('input[type=radio]'); if (!r) return;
-        const o = (r.value==='exp') ? opcoes[0] : opcoes[1];
-        state.freteSelecionado = o; updateTotals();
-      };
+      op.onclick = (e)=>{ const r=e.target.closest('input[type=radio]'); if(!r) return; const sel=opcoes.find(x=>x.id===r.value)||opcoes[0]; state.freteSelecionado=sel; updateTotals(); refreshServerTotals(); };
     });
 
-    // Simulação de pagamento
-    qs('#btnSimularPix').addEventListener('click', () => {
-      toast('Pagamento Pix confirmado (Demo).');
+    // Pagamentos (chama servidor; se falhar, mostra aviso)
+    qs('#btnSimularPix').addEventListener('click', async ()=>{
+      if (!state.carrinho.length){ toast('Adicione produtos ao carrinho.'); return; }
+      try {
+        const items = state.carrinho.map(i=>({ id:i.id, qty:i.qtd }));
+        const amount = state.carrinho.reduce((s,i)=>s+i.preco*i.qtd,0) + (state.freteSelecionado?.preco||0);
+        const shipping = state.freteSelecionado ? { id: state.freteSelecionado.id } : null;
+        const data = await apiFetch('payment-create', { method:'pix', items, amount, shipping });
+        const code = data.pixCopiaCola || data.qrCode || '';
+        if (code){
+          const box=qs('#pixCodeWrap'); box.classList.remove('hidden'); box.textContent = code;
+          toast('Pix gerado! Copie e pague no seu banco.');
+        } else {
+          toast('Pix enviado. Verifique o app do banco.');
+        }
+      } catch(e){
+        toast('Servidor indisponível. Modo demonstração ativo.');
+      }
     });
-    qs('#btnSimularCartao').addEventListener('click', () => {
-      toast('Pagamento por cartão simulado (Demo).');
+    qs('#btnSimularCartao').addEventListener('click', async ()=>{
+      if (!state.carrinho.length){ toast('Adicione produtos ao carrinho.'); return; }
+      try {
+        const items = state.carrinho.map(i=>({ id:i.id, qty:i.qtd }));
+        const amount = state.carrinho.reduce((s,i)=>s+i.preco*i.qtd,0) + (state.freteSelecionado?.preco||0);
+        const shipping = state.freteSelecionado ? { id: state.freteSelecionado.id } : null;
+        await apiFetch('payment-create', { method:'card', items, amount, shipping });
+        toast('Pagamento iniciado. Conclua os dados no fluxo seguro.');
+      } catch(e){
+        toast('Servidor indisponível. Modo demonstração ativo.');
+      }
     });
-    qs('#btnFinalizar').addEventListener('click', () => {
-      if (!state.carrinho.length) { toast('Adicione produtos antes de finalizar.'); return; }
-      toast('Pedido finalizado (Demo). Você receberá confirmação por e-mail (exemplo).');
-      state.carrinho = []; saveCart(); renderCheckoutResumo(); updateCartCount();
+    qs('#btnFinalizar').addEventListener('click', async ()=>{
+      if (!state.carrinho.length){ toast('Adicione produtos antes de finalizar.'); return; }
+      try {
+        const address={ cep:qs('#cep').value, cidade:qs('#cidade').value, uf:qs('#uf').value };
+        const items = state.carrinho.map(i=>({ id:i.id, qty:i.qtd }));
+        const shipping = state.freteSelecionado ? { id: state.freteSelecionado.id } : null;
+        const total = state.carrinho.reduce((s,i)=>s+i.preco*i.qtd,0) + (state.freteSelecionado?.preco||0);
+        const data = await apiFetch('shipping-create', { items, shipping, address, total });
+        toast('Pedido criado! Você receberá o rastreio em breve.');
+        state.carrinho=[]; saveCart(); renderCheckoutResumo(); updateCartCount();
+      } catch(e){
+        toast('Servidor indisponível. Finalização local realizada (demonstração).');
+        state.carrinho=[]; saveCart(); renderCheckoutResumo(); updateCartCount();
+      }
     });
-
-    function toast(msg) {
-      const t = document.createElement('div');
-      t.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 glass rounded-xl px-4 py-3';
-      t.textContent = msg; document.body.appendChild(t);
-      setTimeout(()=>t.remove(),1600);
-    }
 
     // Feedbacks
-    const feedbacks = [
+    const feedbacks=[
       { nome:'Rafael', nota:5, texto:'Qualidade absurda. Caimento perfeito.', data:'há 2 dias' },
       { nome:'Lucas', nota:5, texto:'Entrega rápida e peças com presença.', data:'há 1 semana' },
       { nome:'Henrique', nota:4, texto:'Camiseta premium real, recomendo.', data:'há 3 semanas' }
     ];
-    function renderFeedbacks() {
-      const list = qs('#feedbackList'); list.innerHTML='';
-      feedbacks.forEach(f => {
-        const el = document.createElement('div');
-        el.className = 'glass rounded-2xl p-4';
-        el.innerHTML = `
-          <div class="flex items-center justify-between">
-            <div class="font-bold">${f.nome}</div>
-            <div class="text-sm hint">${f.data}</div>
-          </div>
+    function renderFeedbacks(){
+      const list=qs('#feedbackList'); list.innerHTML='';
+      feedbacks.forEach(f=>{
+        const el=document.createElement('div'); el.className='glass rounded-2xl p-4';
+        el.innerHTML = `<div class="flex items-center justify-between"><div class="font-bold">${f.nome}</div><div class="text-sm hint">${f.data}</div></div>
           <div class="mt-1 star">${'★'.repeat(f.nota)}<span class="text-slate-600">${'★'.repeat(5-f.nota)}</span></div>
-          <p class="mt-2 text-slate-300">${f.texto}</p>
-        `;
+          <p class="mt-2 text-slate-300">${f.texto}</p>`;
         list.appendChild(el);
       });
     }
-    // estrelas input
-    let currentRating = 5;
-    function initRating() {
-      const box = qs('#ratingStars'); box.innerHTML='';
-      for (let i=1;i<=5;i++){
-        const b = document.createElement('button');
-        b.className = 'text-2xl'; b.textContent = '★';
-        b.style.color = (i<=currentRating)?'#ffd166':'#334155';
-        b.addEventListener('click', ()=>{
-          currentRating = i;
-          qsa('#ratingStars button').forEach((x,idx)=> x.style.color = (idx < i)?'#ffd166':'#334155');
-        });
-        box.appendChild(b);
-      }
-      qs('#btnEnviarFeedback').onclick = () => {
-        const txt = qs('#feedbackText').value.trim();
-        if (!txt) { toast('Escreva um comentário.'); return; }
-        feedbacks.unshift({ nome: state.user?.displayName || 'Cliente', nota: currentRating, texto: txt, data: 'agora' });
-        qs('#feedbackText').value='';
-        renderFeedbacks();
-        toast('Obrigado pelo feedback!');
-      };
+    let currentRating=5;
+    function initRating(){
+      const box=qs('#ratingStars'); box.innerHTML='';
+      for(let i=1;i<=5;i++){ const b=document.createElement('button'); b.className='text-2xl'; b.textContent='★'; b.style.color=(i<=currentRating)?'#ffd166':'#334155'; b.addEventListener('click',()=>{ currentRating=i; qsa('#ratingStars button').forEach((x,idx)=> x.style.color=(idx<i)?'#ffd166':'#334155'); }); box.appendChild(b); }
+      qs('#btnEnviarFeedback').onclick = ()=>{ const txt=qs('#feedbackText').value.trim(); if(!txt){ toast('Escreva um comentário.'); return; } feedbacks.unshift({ nome: state.user?.displayName || 'Cliente', nota: currentRating, texto: txt, data: 'agora' }); qs('#feedbackText').value=''; renderFeedbacks(); toast('Obrigado pelo feedback!'); };
     }
 
     // Chat simples
-    const chatMsgs = [];
-    function renderChat() {
-      const box = qs('#chatBox');
-      box.innerHTML = chatMsgs.map(m => `
-        <div class="flex ${m.me?'justify-end':'justify-start'}">
-          <div class="max-w-[80%] ${m.me?'cta-gradient':'glass'} rounded-xl px-3 py-2 my-1">${m.txt}</div>
-        </div>
-      `).join('');
-      box.scrollTop = box.scrollHeight;
-    }
-    qs('#btnChat').addEventListener('click', () => {
-      const input = qs('#chatInput'); const txt = input.value.trim();
-      if (!txt) return;
-      chatMsgs.push({ me:true, txt }); input.value='';
-      renderChat();
-      setTimeout(()=>{ chatMsgs.push({ me:false, txt:'Recebido! Nossa equipe retornará em breve (Demo).' }); renderChat(); }, 700);
-    });
+    const chatMsgs=[]; function renderChat(){ const box=qs('#chatBox'); box.innerHTML=chatMsgs.map(m=>`<div class="flex ${m.me?'justify-end':'justify-start'}"><div class="max-w-[80%] ${m.me?'cta-gradient':'glass'} rounded-xl px-3 py-2 my-1">${m.txt}</div></div>`).join(''); box.scrollTop=box.scrollHeight; }
+    qs('#btnChat').addEventListener('click', ()=>{ const input=qs('#chatInput'); const txt=input.value.trim(); if(!txt) return; chatMsgs.push({ me:true, txt }); input.value=''; renderChat(); setTimeout(()=>{ chatMsgs.push({ me:false, txt:'Recebido! Nossa equipe retornará em breve.' }); renderChat(); }, 700); });
 
-    // Admin: inserir produto local
-    function adminFillCategorias() {
-      const sel = qs('#admCategoria'); sel.innerHTML='';
-      state.categorias.forEach(c=>{
-        const o=document.createElement('option'); o.value=c; o.textContent=c; sel.appendChild(o);
-      });
-    }
-    qs('#btnSalvarProduto').addEventListener('click', () => {
-      if (!state.user) { toast('Faça login com Google para salvar (Demo).'); return; }
-      const nome = qs('#admNome').value.trim();
-      const cat = qs('#admCategoria').value;
-      const preco = parseFloat(qs('#admPreco').value.replace(',','.'))||0;
-      const promo = qs('#admPromo').value ? parseFloat(qs('#admPromo').value.replace(',','.')) : null;
-      const cores = qs('#admCores').value.split(',').map(s=>s.trim()).filter(Boolean);
-      const tams = qs('#admTamanhos').value.split(',').map(s=>s.trim()).filter(Boolean);
-      const desc = qs('#admDesc').value.trim();
-      if (!nome || !preco || !cores.length || !tams.length) { toast('Preencha os campos obrigatórios.'); return; }
-      const id = 'p'+(Date.now());
-      const novo = { id, nome, categoria: cat, preco, promo, cores, tamanhos:tams, novas:true, destaque:false, descricao:desc||'Sem descrição', composicao:'A definir', estilo:'TFI Signature', imagens:['svg'] };
-      state.produtos.unshift(novo);
-      persistLocalProducts();
-      filterAndRenderCatalog(); renderDestaques(); renderNovidades(); renderAdminList();
-      toast('Produto salvo localmente!');
+    // Admin
+    function adminFillCategorias(){ const sel=qs('#admCategoria'); sel.innerHTML=''; state.categorias.forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c; sel.appendChild(o); }); }
+    qs('#btnSalvarProduto').addEventListener('click', async ()=>{
+      const nome=qs('#admNome').value.trim(); const cat=qs('#admCategoria').value;
+      const preco=parseFloat(qs('#admPreco').value.replace(',','.'))||0; const promo=qs('#admPromo').value?parseFloat(qs('#admPromo').value.replace(',','.')):null;
+      const cores=qs('#admCores').value.split(',').map(s=>s.trim()).filter(Boolean); const tams=qs('#admTamanhos').value.split(',').map(s=>s.trim()).filter(Boolean);
+      const desc=qs('#admDesc').value.trim() || 'Sem descrição';
+      if (!nome || !preco || !cores.length || !tams.length){ toast('Preencha os campos obrigatórios.'); return; }
+      const novo={ id:'p'+Date.now(), nome, categoria:cat, preco, promo, cores, tamanhos:tams, novas:true, destaque:false, descricao:desc, composicao:'A definir', estilo:'TFI Signature', imagens:['svg'] };
+      try {
+        const saved = await apiFetch('admin-products', { product: novo });
+        if (saved && saved.id){ const idx=state.produtos.findIndex(x=>x.id===saved.id); if (idx>=0) state.produtos[idx]=saved; else state.produtos.unshift(saved); toast('Produto salvo no servidor!'); }
+        else { state.produtos.unshift(novo); toast('Produto salvo localmente.'); }
+      } catch(e){ state.produtos.unshift(novo); toast('Servidor indisponível. Salvo localmente.'); }
+      persistLocalProducts(); filterAndRenderCatalog(); renderDestaques(); renderNovidades(); renderAdminList();
       ['#admNome','#admPreco','#admPromo','#admCores','#admTamanhos','#admDesc'].forEach(s=>qs(s).value='');
     });
-    function renderAdminList() {
-      const box = qs('#adminLista'); box.innerHTML='';
+    function renderAdminList(){
+      const box=qs('#adminLista'); box.innerHTML='';
       state.produtos.slice(0,20).forEach(p=>{
-        const row = document.createElement('div');
-        row.className='glass rounded-xl p-3 flex items-center justify-between';
+        const row=document.createElement('div'); row.className='glass rounded-xl p-3 flex items-center justify-between';
         row.innerHTML = `<div><div class="font-bold">${p.nome}</div><div class="hint text-sm">${p.categoria}</div></div>
         <div class="flex items-center gap-2">
           <button class="btn pill px-3 py-1 rounded-lg" data-id="${p.id}" data-act="dest">${p.destaque?'Remover destaque':'Destacar'}</button>
@@ -1082,76 +847,39 @@
         </div>`;
         box.appendChild(row);
       });
-      box.onclick = (e)=>{
-        const b = e.target.closest('button'); if(!b) return;
-        const id=b.getAttribute('data-id'); const act=b.getAttribute('data-act');
-        const idx = state.produtos.findIndex(p=>p.id===id); if (idx<0) return;
-        if (act==='dest') state.produtos[idx].destaque = !state.produtos[idx].destaque;
-        if (act==='del') state.produtos.splice(idx,1);
-        persistLocalProducts(); renderAdminList(); renderDestaques(); filterAndRenderCatalog(); renderNovidades();
-      }
+      box.onclick = (e)=>{ const b=e.target.closest('button'); if(!b) return; const id=b.getAttribute('data-id'); const act=b.getAttribute('data-act'); const idx=state.produtos.findIndex(p=>p.id===id); if (idx<0) return; if (act==='dest') state.produtos[idx].destaque=!state.produtos[idx].destaque; if (act==='del') state.produtos.splice(idx,1); persistLocalProducts(); renderAdminList(); renderDestaques(); filterAndRenderCatalog(); renderNovidades(); };
     }
-    function persistLocalProducts() {
-      localStorage.setItem('tfi_products', JSON.stringify(state.produtos));
-    }
-    function loadLocalProducts() {
-      try {
-        const arr = JSON.parse(localStorage.getItem('tfi_products')||'[]');
-        if (Array.isArray(arr) && arr.length) state.produtos = arr;
-      } catch {}
-    }
+    function persistLocalProducts(){ localStorage.setItem('tfi_products', JSON.stringify(state.produtos)); }
+    function loadLocalProducts(){ try{ const arr=JSON.parse(localStorage.getItem('tfi_products')||'[]'); if (Array.isArray(arr)&&arr.length) state.produtos=arr; } catch {}
 
-    // Tutorial modal + PDF (print)
+    // Tutorial modal + PDF
     qs('#btnAbrirTutorial').addEventListener('click', ()=> qs('#tutorialModal').classList.remove('hidden'));
     qs('#closeTutorial').addEventListener('click', ()=> qs('#tutorialModal').classList.add('hidden'));
     qs('#btnSalvarPDF').addEventListener('click', ()=> window.print());
 
-    // Firebase Auth (Google only)
-    const firebaseConfig = {
-      apiKey: "AIzaSyD__XrPqFeh4_K0ih4l1reNvWxjW7VItPw",
-      authDomain: "tfimports-27898.firebaseapp.com",
-      projectId: "tfimports-27898",
-      storageBucket: "tfimports-27898.firebasestorage.app",
-      messagingSenderId: "379291286011",
-      appId: "1:379291286011:web:1feb4711b5235b04c4b35e",
-      measurementId: "G-B742BVBRES"
-    };
-    let firebaseApp, auth, provider;
-    try {
-      firebaseApp = firebase.initializeApp(firebaseConfig);
-      auth = firebase.auth();
-      provider = new firebase.auth.GoogleAuthProvider();
-    } catch (e) {
-      console.warn('Firebase não inicializado neste ambiente.', e);
-    }
-    function updateAuthUI() {
-      qs('#authState').textContent = state.user ? `Olá, ${state.user.displayName||'admin'}` : 'Não autenticado';
-      qs('#btnLogout').classList.toggle('hidden', !state.user);
-      qs('#btnGoogle').classList.toggle('hidden', !!state.user);
-      qs('#btnLogin').textContent = state.user ? 'Conta' : 'Entrar';
-    }
-    function signInGoogle() {
-      if (!auth) { toast('Login indisponível neste ambiente.'); return; }
-      auth.signInWithPopup(provider).then(res => {
-        state.user = res.user; updateAuthUI(); toast('Login realizado!');
-      }).catch(()=> toast('Login cancelado.'));
-    }
-    function signOut() {
-      if (!auth) { state.user=null; updateAuthUI(); return; }
-      auth.signOut().then(()=> { state.user=null; updateAuthUI(); toast('Você saiu.'); });
-    }
-    qs('#btnGoogle').addEventListener('click', signInGoogle);
-    qs('#btnLogout').addEventListener('click', signOut);
-    qs('#btnLogin').addEventListener('click', ()=> navigate('#admin'));
-    if (auth) {
-      auth.onAuthStateChanged(u => { state.user = u || null; updateAuthUI(); });
+    // Catálogo do servidor (Netlify) com fallback local
+    async function loadServerCatalog(){
+      try {
+        const data = await apiFetch('catalog', {}, 'POST'); // pode ser GET no seu backend
+        if (Array.isArray(data) && data.length){
+          state.produtos = data.map(x=>({
+            id: x.id, nome: x.nome || x.name, categoria: x.categoria || x.category,
+            preco: x.preco ?? x.price ?? 0, promo: x.promo ?? x.salePrice ?? null,
+            cores: x.cores || x.colors || ["preto"], tamanhos: x.tamanhos || x.sizes || ["M"],
+            novas: !!x.novas, destaque: !!x.destaque,
+            descricao: x.descricao || x.description || '', composicao: x.composicao || '—', estilo: x.estilo || 'TFI'
+          }));
+          persistLocalProducts();
+        }
+      } catch(e){ /* mantém catálogo local */ }
     }
 
     // Mini util: year
     qs('#year').textContent = new Date().getFullYear();
 
     // Inicialização
-    function init() {
+    function renderFeedbackSafe(){ renderFeedbacks(); initRating(); }
+    function init(){
       loadLocalProducts();
       loadCart();
       renderChips();
@@ -1159,14 +887,14 @@
       initFilters();
       filterAndRenderCatalog();
       renderNovidades();
-      renderFeedbacks();
-      initRating();
+      renderFeedbackSafe();
       renderChat();
       adminFillCategorias();
       renderAdminList();
       applyRoute();
+      loadServerCatalog().then(()=>{ filterAndRenderCatalog(); renderDestaques(); renderNovidades(); renderAdminList(); });
     }
     init();
   </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9721b30b149bf202',t:'MTc1NTY5MDkwMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'972271afa3fcf199',t:'MTc1NTY5ODcxMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
