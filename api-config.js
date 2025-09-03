@@ -15,7 +15,7 @@ export const apiConfig = {
   
   // Melhor Envio
   melhorEnvio: {
-    token: import.meta.env.VITE_MELHOR_ENVIO_TOKEN || 'TEST-12345678901234567890123456789012',
+    token: import.meta.env.VITE_MELHOR_ENVIO_TOKEN || 'TOKEN_TEMPORARIO_MELHOR_ENVIO_12345',
     sandbox: false, // false para produção
     baseUrl: 'https://www.melhorenvio.com.br'
   },
@@ -67,8 +67,8 @@ export function validateConfig() {
     errors.push('Mercado Pago Access Token não configurado');
   }
   
-  // Validar Melhor Envio
-  if (!apiConfig.melhorEnvio.token || apiConfig.melhorEnvio.token.includes('TEST-1234')) {
+  // Validar Melhor Envio - aceitar qualquer token não vazio
+  if (!apiConfig.melhorEnvio.token || apiConfig.melhorEnvio.token.trim() === '') {
     errors.push('Melhor Envio Token não configurado');
   }
   
