@@ -21,7 +21,7 @@ export const apiConfig = {
   
   // Configurações da loja
   loja: {
-    cepOrigem: '01310-100', // CEP de origem (exemplo: São Paulo)
+    cepOrigem: '59140-000', // CEP de origem (Parnamirim/RN)
     pesoPadrao: 0.3, // Peso padrão em kg por produto
     dimensoes: {
       altura: 5, // cm

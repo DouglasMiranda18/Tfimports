@@ -163,27 +163,36 @@ export class MelhorEnvioService {
       };
     }
 
-    // Calcular preço baseado no peso e distância
-    calculatePriceByWeight(peso, distancia, tipo) {
-      let basePrice = 0;
-      
-      switch (tipo) {
-        case 'sedex':
-          basePrice = 15 + (peso * 2) + (distancia * 0.00001);
-          break;
-        case 'pac':
-          basePrice = 8 + (peso * 1.5) + (distancia * 0.000008);
-          break;
-        case 'express':
-          basePrice = 12 + (peso * 1.8) + (distancia * 0.000009);
-          break;
-        default:
-          basePrice = 10 + (peso * 1.5) + (distancia * 0.000008);
-      }
-      
-      // Arredondar para 2 casas decimais
-      return Math.round(basePrice * 100) / 100;
-    }
+         // Calcular preço baseado no peso e distância (valores realistas)
+     calculatePriceByWeight(peso, distancia, tipo) {
+       let basePrice = 0;
+       
+       // Calcular distância em km (aproximada)
+       const distanciaKm = Math.abs(distancia) / 1000000;
+       
+       switch (tipo) {
+         case 'sedex':
+           // SEDEX: R$ 25-45 dependendo da distância
+           basePrice = 25 + (distanciaKm * 0.8) + (peso * 3);
+           break;
+         case 'pac':
+           // PAC: R$ 15-35 dependendo da distância
+           basePrice = 15 + (distanciaKm * 0.6) + (peso * 2);
+           break;
+         case 'express':
+           // Expresso: R$ 20-40 dependendo da distância
+           basePrice = 20 + (distanciaKm * 0.7) + (peso * 2.5);
+           break;
+         default:
+           basePrice = 18 + (distanciaKm * 0.6) + (peso * 2);
+       }
+       
+       // Limitar valores entre R$ 15 e R$ 50
+       basePrice = Math.max(15, Math.min(50, basePrice));
+       
+       // Arredondar para 2 casas decimais
+       return Math.round(basePrice * 100) / 100;
+     }
 
   // Obter empresas de transporte
   async getShippingCompanies() {
