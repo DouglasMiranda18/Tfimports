@@ -7,16 +7,18 @@ export class MercadoPagoService {
     this.baseUrl = this.config.baseUrl;
   }
 
-  // Criar preferência de pagamento
+  // Criar preferência de pagamento para Checkout Pro
   async createPreference(paymentData) {
     try {
+      console.log('🛒 Criando preferência Mercado Pago:', paymentData);
+      
       const preference = {
         items: paymentData.items.map(item => ({
           id: item.id,
           title: item.nome,
           description: item.descricao || '',
           quantity: item.quantidade,
-          unit_price: item.preco,
+          unit_price: parseFloat(item.preco),
           currency_id: 'BRL'
         })),
         payer: {
@@ -28,17 +30,26 @@ export class MercadoPagoService {
           } : undefined
         },
         back_urls: {
-          success: `${window.location.origin}/#checkout?status=success`,
-          failure: `${window.location.origin}/#checkout?status=failure`,
-          pending: `${window.location.origin}/#checkout?status=pending`
+          success: `${window.location.origin}/#checkout?status=success&payment_id={PAYMENT_ID}`,
+          failure: `${window.location.origin}/#checkout?status=failure&payment_id={PAYMENT_ID}`,
+          pending: `${window.location.origin}/#checkout?status=pending&payment_id={PAYMENT_ID}`
         },
         auto_return: 'approved',
         external_reference: paymentData.external_reference,
         notification_url: `${window.location.origin}/api/notifications/mercado-pago`,
         metadata: {
           order_id: paymentData.external_reference,
-          user_id: paymentData.user_id
-        }
+          user_id: paymentData.user_id,
+          store: 'TFI IMPORTS'
+        },
+        // Configurações específicas do Checkout Pro
+        payment_methods: {
+          excluded_payment_methods: [],
+          excluded_payment_types: [],
+          installments: 12 // Até 12x
+        },
+        expires: true,
+        expiration_date_to: new Date(Date.now() + 30 * 60 * 1000).toISOString() // 30 minutos
       };
 
       const response = await fetch(`${this.baseUrl}${endpoints.mercadoPago.preferences}`, {
@@ -52,6 +63,8 @@ export class MercadoPagoService {
       }
 
       const data = await response.json();
+      console.log('✅ Preferência criada:', data);
+      
       return {
         success: true,
         preference_id: data.id,
@@ -65,6 +78,28 @@ export class MercadoPagoService {
         success: false,
         error: error.message
       };
+    }
+  }
+
+  // Redirecionar para checkout do Mercado Pago
+  redirectToCheckout(preferenceId) {
+    try {
+      const checkoutUrl = this.config.sandbox 
+        ? `https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=${preferenceId}`
+        : `https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=${preferenceId}`;
+      
+      console.log('🚀 Redirecionando para checkout:', checkoutUrl);
+      
+      // Abrir em nova aba ou redirecionar
+      if (window.confirm('Redirecionar para o Mercado Pago para finalizar o pagamento?')) {
+        window.open(checkoutUrl, '_blank');
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('Erro ao redirecionar para checkout:', error);
+      return false;
     }
   }
 

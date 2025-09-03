@@ -4,10 +4,12 @@
 export const apiConfig = {
   // Mercado Pago
   mercadoPago: {
-    publicKey: import.meta.env.VITE_MERCADO_PAGO_PUBLIC_KEY || 'TEST-12345678-1234-1234-1234-123456789012',
-    accessToken: import.meta.env.VITE_MERCADO_PAGO_ACCESS_TOKEN || 'TEST-12345678901234567890123456789012-123456-12345678901234567890123456789012-123456789',
-    sandbox: import.meta.env.VITE_MERCADO_PAGO_SANDBOX === 'true' || true, // true para teste, false para produção
-    baseUrl: 'https://api.mercadopago.com'
+    publicKey: import.meta.env.VITE_MERCADO_PAGO_PUBLIC_KEY || 'APP_USR_5032663457298044-123456-12345678901234567890123456789012-123456789',
+    accessToken: import.meta.env.VITE_MERCADO_PAGO_ACCESS_TOKEN || 'APP_USR_5032663457298044-123456-12345678901234567890123456789012-123456789',
+    sandbox: import.meta.env.VITE_MERCADO_PAGO_SANDBOX === 'true' || false, // false para produção
+    baseUrl: 'https://api.mercadopago.com',
+    userId: '2018162925',
+    appId: '5032663457298044'
   },
   
   // Melhor Envio
@@ -34,9 +36,10 @@ export const apiConfig = {
 // URLs dos endpoints
 export const endpoints = {
   mercadoPago: {
-    preferences: '/checkout/preferences',
+    preferences: '/v1/checkout/preferences',
     payments: '/v1/payments',
-    orders: '/merchant_orders'
+    orders: '/merchant_orders',
+    webhooks: '/v1/webhooks'
   },
   melhorEnvio: {
     calculate: '/api/v2/me/shipment/calculate',
