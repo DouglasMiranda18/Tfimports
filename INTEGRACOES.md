@@ -104,6 +104,14 @@ window.open(result.payment_url, '_blank');
 - ✅ **Múltiplas transportadoras**
 - ✅ **Criação de etiquetas**
 - ✅ **Rastreamento de envios**
+- ✅ **Carrinho de fretes**
+- ✅ **Finalização de compra**
+- ✅ **Geração de etiquetas PDF**
+- ✅ **Impressão de etiquetas**
+- ✅ **Cancelamento de envios**
+- ✅ **Informações do usuário**
+- ✅ **Consulta de saldo**
+- ✅ **Webhooks automáticos**
 
 ### **Transportadoras Suportadas:**
 - ✅ **Correios** - PAC, SEDEX
@@ -124,7 +132,24 @@ const result = await melhorEnvioService.calculateShipping({
 result.options.forEach(option => {
   console.log(`${option.name}: ${option.price} - ${option.delivery_time} dias`);
 });
+
+// Adicionar ao carrinho
+const cartResult = await melhorEnvioService.addToCart(cartData);
+
+// Finalizar compra
+const checkoutResult = await melhorEnvioService.checkoutCart(cartId);
+
+// Gerar etiqueta PDF
+const labelResult = await melhorEnvioService.generateLabelPDF(orderId);
 ```
+
+### **Webhooks Suportados:**
+- ✅ **shipment.created** - Envio criado
+- ✅ **shipment.paid** - Envio pago
+- ✅ **shipment.generated** - Etiqueta gerada
+- ✅ **shipment.dispatched** - Envio despachado
+- ✅ **shipment.delivered** - Envio entregue
+- ✅ **shipment.cancelled** - Envio cancelado
 
 ## 🛒 **Sistema de Pedidos**
 

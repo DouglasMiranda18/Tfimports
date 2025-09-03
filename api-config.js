@@ -41,7 +41,14 @@ export const endpoints = {
   melhorEnvio: {
     calculate: '/api/v2/me/shipment/calculate',
     companies: '/api/v2/me/shipment/companies',
-    tracking: '/api/v2/me/shipment/tracking'
+    tracking: '/api/v2/me/shipment/tracking',
+    cart: '/api/v2/me/cart',
+    checkout: '/api/v2/me/cart/{id}/checkout',
+    generate: '/api/v2/me/shipment/generate',
+    print: '/api/v2/me/shipment/print',
+    cancel: '/api/v2/me/shipment/cancel',
+    user: '/api/v2/me',
+    balance: '/api/v2/me/balance'
   }
 };
 

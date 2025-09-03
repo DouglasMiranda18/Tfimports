@@ -187,6 +187,224 @@ export class MelhorEnvioService {
     }
   }
 
+  // Adicionar ao carrinho do Melhor Envio
+  async addToCart(cartData) {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v2/me/cart`, {
+        method: 'POST',
+        headers: getHeaders('melhorEnvio'),
+        body: JSON.stringify(cartData)
+      });
+
+      if (!response.ok) {
+        throw new Error(`Erro ao adicionar ao carrinho: ${response.status}`);
+      }
+
+      const result = await response.json();
+      return {
+        success: true,
+        cart_id: result.id,
+        protocol: result.protocol
+      };
+
+    } catch (error) {
+      console.error('Erro ao adicionar ao carrinho:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  }
+
+  // Finalizar compra do frete
+  async checkoutCart(cartId) {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v2/me/cart/${cartId}/checkout`, {
+        method: 'POST',
+        headers: getHeaders('melhorEnvio')
+      });
+
+      if (!response.ok) {
+        throw new Error(`Erro ao finalizar compra: ${response.status}`);
+      }
+
+      const result = await response.json();
+      return {
+        success: true,
+        order_id: result.id,
+        protocol: result.protocol,
+        tracking_codes: result.tracking_codes
+      };
+
+    } catch (error) {
+      console.error('Erro ao finalizar compra:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  }
+
+  // Gerar etiqueta PDF
+  async generateLabelPDF(orderId) {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v2/me/shipment/generate`, {
+        method: 'POST',
+        headers: getHeaders('melhorEnvio'),
+        body: JSON.stringify({
+          orders: [orderId]
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Erro ao gerar etiqueta: ${response.status}`);
+      }
+
+      const result = await response.json();
+      return {
+        success: true,
+        url: result.url,
+        expires_at: result.expires_at
+      };
+
+    } catch (error) {
+      console.error('Erro ao gerar etiqueta PDF:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  }
+
+  // Imprimir etiqueta
+  async printLabel(orderId) {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v2/me/shipment/print`, {
+        method: 'POST',
+        headers: getHeaders('melhorEnvio'),
+        body: JSON.stringify({
+          orders: [orderId]
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Erro ao imprimir etiqueta: ${response.status}`);
+      }
+
+      const result = await response.json();
+      return {
+        success: true,
+        url: result.url
+      };
+
+    } catch (error) {
+      console.error('Erro ao imprimir etiqueta:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  }
+
+  // Cancelar envio
+  async cancelShipping(orderId) {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v2/me/shipment/cancel`, {
+        method: 'POST',
+        headers: getHeaders('melhorEnvio'),
+        body: JSON.stringify({
+          order: {
+            id: orderId
+          }
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Erro ao cancelar envio: ${response.status}`);
+      }
+
+      const result = await response.json();
+      return {
+        success: true,
+        message: result.message
+      };
+
+    } catch (error) {
+      console.error('Erro ao cancelar envio:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  }
+
+  // Obter informações do usuário
+  async getUserInfo() {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v2/me`, {
+        method: 'GET',
+        headers: getHeaders('melhorEnvio')
+      });
+
+      if (!response.ok) {
+        throw new Error(`Erro ao obter informações do usuário: ${response.status}`);
+      }
+
+      const userInfo = await response.json();
+      return {
+        success: true,
+        user: {
+          id: userInfo.id,
+          name: userInfo.name,
+          email: userInfo.email,
+          phone: userInfo.phone,
+          document: userInfo.document,
+          company_document: userInfo.company_document,
+          state_register: userInfo.state_register,
+          address: userInfo.address,
+          city: userInfo.city,
+          state: userInfo.state,
+          postal_code: userInfo.postal_code
+        }
+      };
+
+    } catch (error) {
+      console.error('Erro ao obter informações do usuário:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  }
+
+  // Obter saldo da conta
+  async getBalance() {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v2/me/balance`, {
+        method: 'GET',
+        headers: getHeaders('melhorEnvio')
+      });
+
+      if (!response.ok) {
+        throw new Error(`Erro ao obter saldo: ${response.status}`);
+      }
+
+      const balance = await response.json();
+      return {
+        success: true,
+        balance: balance.balance,
+        credit: balance.credit
+      };
+
+    } catch (error) {
+      console.error('Erro ao obter saldo:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  }
+
   // Rastrear envio
   async trackShipping(trackingCode) {
     try {
