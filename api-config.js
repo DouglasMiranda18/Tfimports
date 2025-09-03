@@ -4,12 +4,13 @@
 export const apiConfig = {
   // Mercado Pago
   mercadoPago: {
-    publicKey: import.meta.env.VITE_MERCADO_PAGO_PUBLIC_KEY || 'APP_USR_5032663457298044-123456-12345678901234567890123456789012-123456789',
-    accessToken: import.meta.env.VITE_MERCADO_PAGO_ACCESS_TOKEN || 'APP_USR_5032663457298044-123456-12345678901234567890123456789012-123456789',
+    publicKey: import.meta.env.VITE_MERCADO_PAGO_PUBLIC_KEY || 'APP_USR-9e9ec536-b2c8-40eb-bd4a-69d5be0b0539',
+    accessToken: import.meta.env.VITE_MERCADO_PAGO_ACCESS_TOKEN || 'APP_USR-5032663457298044-090316-620de3416b9f7f60d475223dd78c6b99-2018162925',
     sandbox: import.meta.env.VITE_MERCADO_PAGO_SANDBOX === 'true' || false, // false para produção
     baseUrl: 'https://api.mercadopago.com',
     userId: '2018162925',
-    appId: '5032663457298044'
+    appId: '5032663457298044',
+    clientSecret: import.meta.env.VITE_MERCADO_PAGO_CLIENT_SECRET || 'POvnfQOswweLVB5zUXtyRbtFF11d8OhD'
   },
   
   // Melhor Envio
@@ -59,11 +60,11 @@ export const endpoints = {
 export function validateConfig() {
   const errors = [];
   
-  if (!apiConfig.mercadoPago.publicKey || apiConfig.mercadoPago.publicKey.includes('TEST-1234')) {
+  if (!apiConfig.mercadoPago.publicKey || apiConfig.mercadoPago.publicKey.includes('TEST-1234') || apiConfig.mercadoPago.publicKey.includes('123456')) {
     errors.push('Mercado Pago Public Key não configurada');
   }
   
-  if (!apiConfig.mercadoPago.accessToken || apiConfig.mercadoPago.accessToken.includes('TEST-1234')) {
+  if (!apiConfig.mercadoPago.accessToken || apiConfig.mercadoPago.accessToken.includes('TEST-1234') || apiConfig.mercadoPago.accessToken.includes('123456')) {
     errors.push('Mercado Pago Access Token não configurado');
   }
   
