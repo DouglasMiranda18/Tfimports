@@ -1546,14 +1546,8 @@
             numero: qs('#numero').value,
             complemento: qs('#complemento').value
           },
-          payment_method: paymentMethod,
-          payment_data: paymentMethod === 'credit_card' ? {
-            card_number: qs('#cardNumber').value,
-            card_name: qs('#cardName').value,
-            card_expiry: qs('#cardExpiry').value,
-            card_cvv: qs('#cardCvv').value,
-            installments: parseInt(qs('#cardInstallments').value)
-          } : {}
+          payment_method: 'mercado_pago',
+          payment_data: {}
         };
         
         // Criar preferência no Mercado Pago
