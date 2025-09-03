@@ -1,0 +1,24 @@
+{
+  "name": "tfi-imports",
+  "version": "1.0.0",
+  "description": "TFI IMPORTS - Moda Masculina Premium",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --ext js,html --fix",
+    "security-check": "npm audit",
+    "netlify-build": "npm run build"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0",
+    "eslint": "^8.0.0"
+  },
+  "dependencies": {
+    "firebase": "^10.12.2"
+  },
+  "keywords": ["ecommerce", "moda", "masculina", "premium"],
+  "author": "TFI IMPORTS",
+  "license": "MIT"
+}
