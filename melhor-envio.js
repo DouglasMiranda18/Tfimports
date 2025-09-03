@@ -437,31 +437,56 @@ export class MelhorEnvioService {
     }
   }
 
-  // Validar CEP
+  // Validar e buscar CEP
   async validateCEP(cep) {
     try {
+      // Limpar CEP (remover caracteres não numéricos)
       const cleanCEP = cep.replace(/\D/g, '');
       
+      // Validar formato
       if (cleanCEP.length !== 8) {
         return {
           success: false,
-          error: 'CEP deve ter 8 dígitos'
+          error: 'CEP deve ter exatamente 8 dígitos'
         };
       }
 
-      // Simular validação (em produção, usar API do ViaCEP ou similar)
-      const response = await fetch(`https://viacep.com.br/ws/${cleanCEP}/json/`);
+      // Validar se contém apenas números
+      if (!/^\d{8}$/.test(cleanCEP)) {
+        return {
+          success: false,
+          error: 'CEP deve conter apenas números'
+        };
+      }
+
+      // Buscar CEP na API ViaCEP
+      const response = await fetch(`https://viacep.com.br/ws/${cleanCEP}/json/`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      });
       
       if (!response.ok) {
-        throw new Error('Erro ao validar CEP');
+        throw new Error(`Erro na API ViaCEP: ${response.status}`);
       }
 
       const data = await response.json();
       
+      // Verificar se CEP foi encontrado
       if (data.erro) {
         return {
           success: false,
-          error: 'CEP não encontrado'
+          error: 'CEP não encontrado. Verifique se o CEP está correto.'
+        };
+      }
+
+      // Verificar se os dados estão completos
+      if (!data.localidade || !data.uf || !data.logradouro || !data.bairro) {
+        return {
+          success: false,
+          error: 'Dados do CEP incompletos. Tente novamente.'
         };
       }
 
@@ -472,16 +497,71 @@ export class MelhorEnvioService {
         bairro: data.bairro,
         cidade: data.localidade,
         uf: data.uf,
-        ibge: data.ibge
+        ibge: data.ibge,
+        gia: data.gia,
+        ddd: data.ddd,
+        siafi: data.siafi
       };
 
     } catch (error) {
       console.error('Erro ao validar CEP:', error);
+      
+      // Retornar erro específico baseado no tipo
+      if (error.message.includes('fetch')) {
+        return {
+          success: false,
+          error: 'Erro de conexão. Verifique sua internet e tente novamente.'
+        };
+      }
+      
       return {
         success: false,
-        error: 'Erro ao validar CEP'
+        error: 'Erro ao validar CEP. Tente novamente em alguns instantes.'
       };
     }
+  }
+
+  // Formatar CEP
+  formatCEP(cep) {
+    const cleanCEP = cep.replace(/\D/g, '');
+    if (cleanCEP.length <= 5) {
+      return cleanCEP;
+    }
+    return cleanCEP.replace(/(\d{5})(\d{3})/, '$1-$2');
+  }
+
+  // Validar endereço completo
+  validateAddress(addressData) {
+    const errors = [];
+    
+    if (!addressData.cep || addressData.cep.replace(/\D/g, '').length !== 8) {
+      errors.push('CEP inválido');
+    }
+    
+    if (!addressData.logradouro || addressData.logradouro.trim().length < 3) {
+      errors.push('Logradouro inválido');
+    }
+    
+    if (!addressData.bairro || addressData.bairro.trim().length < 2) {
+      errors.push('Bairro inválido');
+    }
+    
+    if (!addressData.cidade || addressData.cidade.trim().length < 2) {
+      errors.push('Cidade inválida');
+    }
+    
+    if (!addressData.uf || addressData.uf.trim().length !== 2) {
+      errors.push('UF inválido');
+    }
+    
+    if (!addressData.numero || addressData.numero.trim().length < 1) {
+      errors.push('Número é obrigatório');
+    }
+    
+    return {
+      isValid: errors.length === 0,
+      errors
+    };
   }
 }
 

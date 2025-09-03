@@ -371,11 +371,51 @@
       <div class="grid lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2 glass rounded-2xl p-5">
           <h3 class="font-bold mb-3">Endereço e Frete</h3>
+          <div class="space-y-4">
+            <!-- CEP -->
+            <div>
+              <label class="block text-sm text-slate-300 mb-2">CEP *</label>
+              <div class="flex gap-2">
+                <input id="cep" class="bg-transparent pill px-3 py-2 rounded-lg flex-1" placeholder="00000-000" maxlength="9" />
+                <button id="btnBuscarCep" class="btn cta-gradient px-4 py-2 rounded-lg font-bold">Buscar</button>
+              </div>
+              <div id="cepStatus" class="text-xs mt-1"></div>
+            </div>
+            
+            <!-- Endereço -->
           <div class="grid md:grid-cols-2 gap-3">
-            <input id="cep" class="bg-transparent pill px-3 py-2 rounded-lg" placeholder="CEP" />
-            <input id="cidade" class="bg-transparent pill px-3 py-2 rounded-lg" placeholder="Cidade" />
-            <input id="uf" class="bg-transparent pill px-3 py-2 rounded-lg" placeholder="UF" />
-            <button id="btnCalcFrete" class="btn cta-gradient px-4 py-2 rounded-lg font-bold">Calcular Frete</button>
+              <div>
+                <label class="block text-sm text-slate-300 mb-2">Logradouro *</label>
+                <input id="logradouro" class="bg-transparent pill px-3 py-2 rounded-lg w-full" placeholder="Rua, Avenida, etc." readonly />
+              </div>
+              <div>
+                <label class="block text-sm text-slate-300 mb-2">Bairro *</label>
+                <input id="bairro" class="bg-transparent pill px-3 py-2 rounded-lg w-full" placeholder="Bairro" readonly />
+              </div>
+              <div>
+                <label class="block text-sm text-slate-300 mb-2">Cidade *</label>
+                <input id="cidade" class="bg-transparent pill px-3 py-2 rounded-lg w-full" placeholder="Cidade" readonly />
+              </div>
+              <div>
+                <label class="block text-sm text-slate-300 mb-2">UF *</label>
+                <input id="uf" class="bg-transparent pill px-3 py-2 rounded-lg w-full" placeholder="Estado" readonly />
+              </div>
+              <div>
+                <label class="block text-sm text-slate-300 mb-2">Número *</label>
+                <input id="numero" class="bg-transparent pill px-3 py-2 rounded-lg w-full" placeholder="123" />
+              </div>
+              <div>
+                <label class="block text-sm text-slate-300 mb-2">Complemento</label>
+                <input id="complemento" class="bg-transparent pill px-3 py-2 rounded-lg w-full" placeholder="Apto, casa, etc." />
+              </div>
+            </div>
+            
+            <!-- Botão Calcular Frete -->
+            <div class="pt-2">
+              <button id="btnCalcFrete" class="btn cta-gradient px-6 py-3 rounded-lg font-bold w-full" disabled>
+                Calcular Frete
+              </button>
+            </div>
           </div>
           <div id="freteOpcoes" class="mt-4 grid sm:grid-cols-2 gap-3"></div>
 
@@ -389,7 +429,7 @@
               </div>
               <div class="text-sm text-slate-300 mb-3">
                 Pague instantaneamente com PIX e receba confirmação imediata.
-              </div>
+            </div>
               <button id="btnPagarPix" class="btn cta-gradient w-full px-4 py-2 rounded-lg font-bold">
                 Pagar com PIX
               </button>
@@ -400,7 +440,7 @@
               <div class="flex items-center gap-2 mb-2">
                 <span class="badge px-2 py-1 rounded-full">Cartão</span>
                 <span class="text-slate-300">Crédito/Débito</span>
-              </div>
+            </div>
               <div class="text-sm text-slate-300 mb-3">
                 Pagamento seguro com cartão de crédito ou débito.
               </div>
@@ -631,7 +671,7 @@
       </div>
 
 
-    </div>
+        </div>
   </section>
 
   <!-- Login Modal -->
@@ -647,7 +687,7 @@
         <div>
           <label class="block text-sm text-slate-300 mb-2">Email</label>
           <input id="loginEmail" type="email" class="w-full bg-transparent pill px-3 py-2 rounded-lg" placeholder="seu@email.com" />
-        </div>
+    </div>
         <div>
           <label class="block text-sm text-slate-300 mb-2">Senha</label>
           <input id="loginPassword" type="password" class="w-full bg-transparent pill px-3 py-2 rounded-lg" placeholder="Sua senha" />
@@ -661,18 +701,18 @@
         <div>
           <label class="block text-sm text-slate-300 mb-2">Nome</label>
           <input id="registerName" type="text" class="w-full bg-transparent pill px-3 py-2 rounded-lg" placeholder="Seu nome completo" />
-        </div>
+      </div>
         <div>
           <label class="block text-sm text-slate-300 mb-2">Email</label>
           <input id="registerEmail" type="email" class="w-full bg-transparent pill px-3 py-2 rounded-lg" placeholder="seu@email.com" />
-        </div>
+      </div>
         <div>
           <label class="block text-sm text-slate-300 mb-2">Senha</label>
           <input id="registerPassword" type="password" class="w-full bg-transparent pill px-3 py-2 rounded-lg" placeholder="Mínimo 6 caracteres" />
-        </div>
+    </div>
         <button id="btnEmailRegister" class="btn cta-gradient w-full px-4 py-3 rounded-lg font-bold">Criar Conta</button>
         <button id="btnShowLogin" class="btn pill w-full px-4 py-2 rounded-lg">Já tenho conta</button>
-      </div>
+  </div>
       
       <!-- Divisor -->
       <div class="flex items-center my-4">
@@ -919,13 +959,13 @@
             </div>
           </div>`;
       } else {
-        return `
-          <div class="card-img rounded-2xl aspect-[4/3] grid place-items-center">
-            <svg viewBox="0 0 140 100" class="w-24 h-24">
-              <rect x="10" y="10" width="120" height="80" rx="12" fill="#0b1a34"/>
-              <path d="M20 75 L55 35 L85 55 L120 25" stroke="#1dd1a1" stroke-width="5" fill="none"/>
-            </svg>
-          </div>`;
+      return `
+        <div class="card-img rounded-2xl aspect-[4/3] grid place-items-center">
+          <svg viewBox="0 0 140 100" class="w-24 h-24">
+            <rect x="10" y="10" width="120" height="80" rx="12" fill="#0b1a34"/>
+            <path d="M20 75 L55 35 L85 55 L120 25" stroke="#1dd1a1" stroke-width="5" fill="none"/>
+          </svg>
+        </div>`;
       }
     }
 
@@ -1247,31 +1287,104 @@
       qs('#resFrete').textContent = fmt(frete);
       qs('#resTotal').textContent = fmt(subtotal + frete);
     }
+        // Formatação automática do CEP
+    qs('#cep').addEventListener('input', (e) => {
+      const cep = e.target.value.replace(/\D/g, '');
+      if (cep.length <= 8) {
+        e.target.value = melhorEnvioService.formatCEP(cep);
+      }
+      
+      // Limpar status quando usuário digita
+      qs('#cepStatus').textContent = '';
+      qs('#btnCalcFrete').disabled = true;
+    });
+
+    // Buscar CEP
+    qs('#btnBuscarCep').addEventListener('click', async () => {
+      const cepInput = qs('#cep');
+      const cep = cepInput.value.replace(/\D/g, '');
+      const statusDiv = qs('#cepStatus');
+      
+      if (cep.length !== 8) {
+        statusDiv.textContent = 'CEP deve ter 8 dígitos';
+        statusDiv.className = 'text-xs mt-1 text-red-400';
+        return;
+      }
+      
+      statusDiv.textContent = 'Buscando CEP...';
+      statusDiv.className = 'text-xs mt-1 text-blue-400';
+      qs('#btnBuscarCep').disabled = true;
+      
+      try {
+        const result = await melhorEnvioService.validateCEP(cep);
+        
+        if (result.success) {
+          // Preencher campos automaticamente
+          qs('#logradouro').value = result.logradouro;
+          qs('#bairro').value = result.bairro;
+          qs('#cidade').value = result.cidade;
+          qs('#uf').value = result.uf;
+          
+          // Formatar CEP
+          cepInput.value = result.cep;
+          
+          statusDiv.textContent = 'CEP encontrado! Preencha o número e complemento.';
+          statusDiv.className = 'text-xs mt-1 text-green-400';
+          
+          // Habilitar botão de calcular frete
+          qs('#btnCalcFrete').disabled = false;
+          
+          // Focar no campo número
+          qs('#numero').focus();
+          
+        } else {
+          statusDiv.textContent = result.error;
+          statusDiv.className = 'text-xs mt-1 text-red-400';
+        }
+        
+      } catch (error) {
+        console.error('Erro ao buscar CEP:', error);
+        statusDiv.textContent = 'Erro ao buscar CEP. Tente novamente.';
+        statusDiv.className = 'text-xs mt-1 text-red-400';
+      } finally {
+        qs('#btnBuscarCep').disabled = false;
+      }
+    });
+
+    // Buscar CEP ao pressionar Enter
+    qs('#cep').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        qs('#btnBuscarCep').click();
+      }
+    });
+
+    // Validar endereço completo antes de calcular frete
     qs('#btnCalcFrete').addEventListener('click', async () => {
-      const cep = (qs('#cep').value||'').replace(/\D/g,'');
       const op = qs('#freteOpcoes'); 
       op.innerHTML='<div class="hint text-center py-4">Calculando frete...</div>';
       
-      if (cep.length < 8) {
-        op.innerHTML = '<div class="hint text-center py-4">Informe um CEP válido.</div>'; 
+      // Coletar dados do endereço
+      const addressData = {
+        cep: qs('#cep').value.replace(/\D/g, ''),
+        logradouro: qs('#logradouro').value,
+        bairro: qs('#bairro').value,
+        cidade: qs('#cidade').value,
+        uf: qs('#uf').value,
+        numero: qs('#numero').value,
+        complemento: qs('#complemento').value
+      };
+      
+      // Validar endereço
+      const validation = melhorEnvioService.validateAddress(addressData);
+      if (!validation.isValid) {
+        op.innerHTML = `<div class="hint text-center py-4">Erro: ${validation.errors.join(', ')}</div>`;
         return;
       }
       
       try {
-        // Validar CEP primeiro
-        const cepValidation = await melhorEnvioService.validateCEP(cep);
-        if (!cepValidation.success) {
-          op.innerHTML = `<div class="hint text-center py-4">${cepValidation.error}</div>`;
-          return;
-        }
-        
-        // Preencher cidade e UF automaticamente
-        qs('#cidade').value = cepValidation.cidade;
-        qs('#uf').value = cepValidation.uf;
-        
         // Calcular frete com Melhor Envio
         const shippingData = {
-          cepDestino: cep,
+          cepDestino: addressData.cep,
           produtos: state.carrinho.map(item => ({
             id: item.id,
             nome: item.nome,
@@ -1317,12 +1430,15 @@
               company_id: selectedOption.company_id
             };
             
+            // Salvar endereço completo no estado
+            state.enderecoCompleto = addressData;
+            
             updateTotals();
             toast('Frete selecionado!');
           };
           
         } else {
-          op.innerHTML = '<div class="hint text-center py-4">Não foi possível calcular o frete para este CEP.</div>';
+          op.innerHTML = '<div class="hint text-center py-4">Não foi possível calcular o frete para este endereço.</div>';
         }
         
       } catch (error) {
@@ -1464,14 +1580,14 @@
             delivery_time: state.freteSelecionado.prazo
           },
           total: state.carrinho.reduce((s,i)=>s+i.preco*i.qtd,0) + state.freteSelecionado.preco,
-          shipping_address: {
-            cep: qs('#cep').value,
+          shipping_address: state.enderecoCompleto || {
+            cep: qs('#cep').value.replace(/\D/g, ''),
+            logradouro: qs('#logradouro').value,
+            bairro: qs('#bairro').value,
             cidade: qs('#cidade').value,
             uf: qs('#uf').value,
-            logradouro: 'Endereço completo',
-            numero: '123',
-            bairro: 'Centro',
-            complemento: ''
+            numero: qs('#numero').value,
+            complemento: qs('#complemento').value
           },
           payment_method: paymentMethod,
           payment_data: paymentMethod === 'credit_card' ? {
@@ -1521,10 +1637,14 @@
         userId: state.user.uid,
         email: state.user.email,
         nomeUsuario: state.user.displayName || 'Usuário',
-        endereco: {
-          cep: qs('#cep').value || '',
+        endereco: state.enderecoCompleto || {
+          cep: qs('#cep').value.replace(/\D/g, '') || '',
+          logradouro: qs('#logradouro').value || '',
+          bairro: qs('#bairro').value || '',
           cidade: qs('#cidade').value || '',
-          uf: qs('#uf').value || ''
+          uf: qs('#uf').value || '',
+          numero: qs('#numero').value || '',
+          complemento: qs('#complemento').value || ''
         },
         freteSelecionado: state.freteSelecionado ? {
           nome: state.freteSelecionado.nome,
@@ -1755,16 +1875,16 @@
           await db.collection('feedbacks').add(feedbackData);
           
           // Adicionar ao estado local
-          feedbacks.unshift({ 
-            nome: sanitizedName, 
-            nota: currentRating, 
-            texto: sanitizedText, 
-            data: 'agora' 
-          });
+        feedbacks.unshift({ 
+          nome: sanitizedName, 
+          nota: currentRating, 
+          texto: sanitizedText, 
+          data: 'agora' 
+        });
           
-          qs('#feedbackText').value='';
-          renderFeedbacks();
-          toast('Obrigado pelo feedback!');
+        qs('#feedbackText').value='';
+        renderFeedbacks();
+        toast('Obrigado pelo feedback!');
           
         } catch (error) {
           console.error('Erro ao salvar feedback:', error);
@@ -1802,7 +1922,7 @@
         
         chatMsgs.push({ me:true, txt }); 
         input.value='';
-        renderChat();
+      renderChat();
         
         setTimeout(()=>{ 
           chatMsgs.push({ me:false, txt:'Recebido! Nossa equipe retornará em breve.' }); 
@@ -1888,17 +2008,17 @@
         } else {
           // Criar novo produto
           const produtoData = {
-            nome,
-            categoria: cat,
-            preco,
-            promo,
-            cores,
-            tamanhos: tams,
-            novas: true,
-            destaque: false,
-            descricao: desc || 'Sem descrição',
-            composicao: 'A definir',
-            estilo: 'TFI Signature',
+        nome, 
+        categoria: cat, 
+        preco, 
+        promo, 
+        cores, 
+        tamanhos: tams, 
+        novas: true, 
+        destaque: false, 
+        descricao: desc || 'Sem descrição', 
+        composicao: 'A definir', 
+        estilo: 'TFI Signature', 
             imagem: imagem || null,
             imagens: imagem ? [imagem] : ['svg'],
             criadoPor: state.user.uid,
@@ -1912,17 +2032,17 @@
           const novo = { 
             id: docRef.id, 
             ...produtoData
-          };
-          
-          state.produtos.unshift(novo);
+      };
+      
+      state.produtos.unshift(novo);
           toast('Produto salvo com sucesso!');
         }
         
-        persistLocalProducts();
-        filterAndRenderCatalog(); 
-        renderDestaques(); 
-        renderNovidades(); 
-        renderAdminList();
+      persistLocalProducts();
+      filterAndRenderCatalog(); 
+      renderDestaques(); 
+      renderNovidades(); 
+      renderAdminList();
         
         // Limpar formulário e resetar botão
         ['#admNome','#admPreco','#admPromo','#admImagem','#admCores','#admTamanhos','#admDesc'].forEach(s=>qs(s).value='');
@@ -1953,7 +2073,7 @@
               <div class="hint text-sm">${p.categoria} • ${fmt(p.promo ?? p.preco)}</div>
             </div>
           </div>
-          <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2">
             <button class="btn pill px-3 py-1 rounded-lg text-xs" data-id="${p.id}" data-act="edit">Editar</button>
             <button class="btn pill px-3 py-1 rounded-lg text-xs" data-id="${p.id}" data-act="dest">${p.destaque?'Remover destaque':'Destacar'}</button>
             <button class="btn pill px-3 py-1 rounded-lg text-xs hover:bg-red-500/20 hover:text-red-300" data-id="${p.id}" data-act="del">Excluir</button>
