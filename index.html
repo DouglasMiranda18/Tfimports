@@ -420,61 +420,33 @@
           <div id="freteOpcoes" class="mt-4 grid sm:grid-cols-2 gap-3"></div>
 
           <h3 class="font-bold mt-6 mb-3">Pagamento</h3>
-          <div class="grid sm:grid-cols-2 gap-4">
-            <!-- PIX -->
-            <div class="glass rounded-xl p-4">
-              <div class="flex items-center gap-2 mb-2">
-                <span class="badge px-2 py-1 rounded-full">PIX</span>
-                <span class="text-slate-300">Aprovação instantânea</span>
-              </div>
-              <div class="text-sm text-slate-300 mb-3">
-                Pague instantaneamente com PIX e receba confirmação imediata.
-            </div>
-              <button id="btnPagarPix" class="btn cta-gradient w-full px-4 py-2 rounded-lg font-bold">
-                Pagar com PIX
-              </button>
+          <div class="glass rounded-xl p-6 text-center">
+            <div class="mb-4">
+              <div class="text-2xl mb-2">💳</div>
+              <h4 class="font-bold text-lg mb-2">Finalizar Pagamento</h4>
+              <p class="text-slate-300 text-sm">
+                Escolha sua forma de pagamento preferida no Mercado Pago
+              </p>
             </div>
             
-            <!-- Cartão de Crédito -->
-            <div class="glass rounded-xl p-4">
-              <div class="flex items-center gap-2 mb-2">
-                <span class="badge px-2 py-1 rounded-full">Cartão</span>
-                <span class="text-slate-300">Crédito/Débito</span>
-            </div>
-              <div class="text-sm text-slate-300 mb-3">
-                Pagamento seguro com cartão de crédito ou débito.
+            <div class="grid grid-cols-3 gap-2 mb-4 text-xs text-slate-400">
+              <div class="flex items-center gap-1">
+                <span>📱</span>
+                <span>PIX</span>
               </div>
-              <button id="btnPagarCartao" class="btn px-4 py-2 rounded-lg pill w-full">
-                Pagar com Cartão
-              </button>
+              <div class="flex items-center gap-1">
+                <span>💳</span>
+                <span>Cartão</span>
+              </div>
+              <div class="flex items-center gap-1">
+                <span>📄</span>
+                <span>Boleto</span>
+              </div>
             </div>
-          </div>
-          
-          <!-- Formulário de Cartão (oculto inicialmente) -->
-          <div id="cardForm" class="glass rounded-xl p-4 mt-4 hidden">
-            <h4 class="font-bold mb-3">Dados do Cartão</h4>
-            <div class="grid grid-cols-2 gap-3">
-              <input id="cardNumber" class="bg-transparent pill px-3 py-2 rounded-lg col-span-2" placeholder="Número do cartão" maxlength="19" />
-              <input id="cardName" class="bg-transparent pill px-3 py-2 rounded-lg col-span-2" placeholder="Nome no cartão" />
-              <input id="cardExpiry" class="bg-transparent pill px-3 py-2 rounded-lg" placeholder="MM/AA" maxlength="5" />
-              <input id="cardCvv" class="bg-transparent pill px-3 py-2 rounded-lg" placeholder="CVV" maxlength="4" />
-              <select id="cardInstallments" class="bg-transparent pill px-3 py-2 rounded-lg col-span-2">
-                <option value="1">1x sem juros</option>
-                <option value="2">2x sem juros</option>
-                <option value="3">3x sem juros</option>
-                <option value="4">4x sem juros</option>
-                <option value="5">5x sem juros</option>
-                <option value="6">6x sem juros</option>
-              </select>
-            </div>
-            <div class="flex gap-3 mt-4">
-              <button id="btnProcessarCartao" class="btn cta-gradient px-4 py-2 rounded-lg font-bold flex-1">
-                Processar Pagamento
-              </button>
-              <button id="btnCancelarCartao" class="btn px-4 py-2 rounded-lg pill">
-                Cancelar
-              </button>
-            </div>
+            
+            <button id="btnPagar" class="btn cta-gradient w-full px-6 py-3 rounded-lg font-bold text-lg">
+              🛒 Finalizar Compra
+            </button>
           </div>
         </div>
         <div class="glass rounded-2xl p-5 h-max">
@@ -1448,22 +1420,8 @@
     });
 
     // Pagamento
-    qs('#btnPagarPix').addEventListener('click', async () => {
-      await processPayment('pix');
-    });
-    
-    qs('#btnPagarCartao').addEventListener('click', () => {
-      qs('#cardForm').classList.remove('hidden');
-      qs('#btnPagarCartao').classList.add('hidden');
-    });
-    
-    qs('#btnCancelarCartao').addEventListener('click', () => {
-      qs('#cardForm').classList.add('hidden');
-      qs('#btnPagarCartao').classList.remove('hidden');
-    });
-    
-    qs('#btnProcessarCartao').addEventListener('click', async () => {
-      await processPayment('credit_card');
+    qs('#btnPagar').addEventListener('click', async () => {
+      await processPayment();
     });
     qs('#btnFinalizar').addEventListener('click', async () => {
       if (!state.carrinho.length) { toast('Adicione produtos antes de finalizar.'); return; }
@@ -1532,7 +1490,7 @@
     });
 
     // Processar pagamento
-    async function processPayment(paymentMethod) {
+    async function processPayment() {
       if (!state.carrinho.length) {
         toast('Adicione produtos antes de finalizar.');
         return;
@@ -1554,7 +1512,7 @@
         const configValidation = validateConfig();
         if (!configValidation.isValid) {
           toast('Sistema de pagamento em configuração. Use o modo demo.');
-          await processPaymentDemo(paymentMethod);
+          await processPaymentDemo();
           return;
         }
         
@@ -1653,7 +1611,7 @@
     }
     
     // Processar pagamento demo (quando APIs não estão configuradas)
-    async function processPaymentDemo(paymentMethod) {
+    async function processPaymentDemo() {
       const orderData = {
         itens: state.carrinho,
         subtotal: state.carrinho.reduce((s,i)=>s+i.preco*i.qtd,0),
@@ -1678,7 +1636,7 @@
           prazo: state.freteSelecionado.prazo,
           preco: state.freteSelecionado.preco
         } : null,
-        payment_method: paymentMethod
+        payment_method: 'demo'
       };
       
       const docRef = await db.collection('pedidos').add(orderData);
