@@ -1599,24 +1599,51 @@
           } : {}
         };
         
-        // Criar pedido
-        const result = await orderManager.createOrder(orderData);
+        // Criar preferência no Mercado Pago
+        const paymentData = {
+          items: orderData.items.map(item => ({
+            id: item.id,
+            nome: item.nome,
+            descricao: `${item.cor} - ${item.tamanho}`,
+            quantidade: item.quantidade,
+            preco: item.preco
+          })),
+          payer: {
+            nome: orderData.user_name,
+            email: orderData.user_email,
+            telefone: null
+          },
+          external_reference: `TFI-${Date.now()}`,
+          user_id: orderData.user_id
+        };
         
-        if (result.success) {
-          if (result.payment_url) {
-            // Redirecionar para pagamento
-            window.open(result.payment_url, '_blank');
-            toast('Redirecionando para pagamento...');
-          } else {
-            // Pagamento processado
-            toast('Pagamento processado com sucesso!');
-            state.carrinho = [];
-            saveCart();
-            updateCartCount();
-            navigate('#minha-conta');
+        console.log('🛒 Criando preferência Mercado Pago...');
+        const preferenceResult = await mercadoPagoService.createPreference(paymentData);
+        
+        if (preferenceResult.success) {
+          // Salvar pedido no Firebase com status pendente
+          const orderRef = await db.collection('pedidos').add({
+            ...orderData,
+            status: 'pending_payment',
+            payment_id: preferenceResult.preference_id,
+            external_reference: paymentData.external_reference,
+            created_at: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          
+          // Redirecionar para checkout do Mercado Pago
+          const checkoutUrl = apiConfig.mercadoPago.sandbox 
+            ? preferenceResult.sandbox_init_point 
+            : preferenceResult.init_point;
+          
+          console.log('🚀 Redirecionando para Mercado Pago:', checkoutUrl);
+          
+          // Confirmar redirecionamento
+          if (confirm('Redirecionar para o Mercado Pago para finalizar o pagamento?')) {
+            window.location.href = checkoutUrl;
           }
+          
         } else {
-          toast(`Erro: ${result.error}`);
+          toast(`Erro ao criar pagamento: ${preferenceResult.error}`);
         }
         
       } catch (error) {
