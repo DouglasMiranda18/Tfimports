@@ -1238,7 +1238,7 @@
       qs('#cartSubtotal').textContent = fmt(subtotal);
     }
 
-    // Checkout demo
+    // Checkout
     function renderCheckoutResumo() {
       const box = qs('#resumoCheckout'); box.innerHTML='';
       if (!state.carrinho.length) {
@@ -1508,13 +1508,12 @@
       }
       
       try {
-        // Validar configuração das APIs
-        const configValidation = validateConfig();
-        if (!configValidation.isValid) {
-          toast('Sistema de pagamento em configuração. Use o modo demo.');
-          await processPaymentDemo();
-          return;
-        }
+                    // Validar configuração das APIs
+            const configValidation = validateConfig();
+            if (!configValidation.isValid) {
+              toast('Sistema de pagamento em configuração. Verifique as credenciais.');
+              return;
+            }
         
         // Preparar dados do pedido
         const orderData = {
@@ -1610,46 +1609,7 @@
       }
     }
     
-    // Processar pagamento demo (quando APIs não estão configuradas)
-    async function processPaymentDemo() {
-      const orderData = {
-        itens: state.carrinho,
-        subtotal: state.carrinho.reduce((s,i)=>s+i.preco*i.qtd,0),
-        frete: state.freteSelecionado?.preco || 0,
-        total: state.carrinho.reduce((s,i)=>s+i.preco*i.qtd,0) + (state.freteSelecionado?.preco || 0),
-        status: 'pendente',
-        criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
-        userId: state.user.uid,
-        email: state.user.email,
-        nomeUsuario: state.user.displayName || 'Usuário',
-        endereco: state.enderecoCompleto || {
-          cep: qs('#cep').value.replace(/\D/g, '') || '',
-          logradouro: qs('#logradouro').value || '',
-          bairro: qs('#bairro').value || '',
-          cidade: qs('#cidade').value || '',
-          uf: qs('#uf').value || '',
-          numero: qs('#numero').value || '',
-          complemento: qs('#complemento').value || ''
-        },
-        freteSelecionado: state.freteSelecionado ? {
-          nome: state.freteSelecionado.nome,
-          prazo: state.freteSelecionado.prazo,
-          preco: state.freteSelecionado.preco
-        } : null,
-        payment_method: 'demo'
-      };
-      
-      const docRef = await db.collection('pedidos').add(orderData);
-      
-      state.carrinho = [];
-      saveCart();
-      updateCartCount();
-      
-      toast(`Pedido #${docRef.id.slice(-6)} criado em modo demo!`);
-      setTimeout(() => {
-        navigate('#minha-conta');
-      }, 1500);
-    }
+
 
     function toast(msg) {
       const t = document.createElement('div');

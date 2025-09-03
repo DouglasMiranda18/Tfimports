@@ -16,10 +16,8 @@ export const apiConfig = {
   // Melhor Envio
   melhorEnvio: {
     token: import.meta.env.VITE_MELHOR_ENVIO_TOKEN || 'TEST-12345678901234567890123456789012',
-    sandbox: import.meta.env.VITE_MELHOR_ENVIO_SANDBOX === 'true' || true, // true para teste, false para produção
-    baseUrl: import.meta.env.VITE_MELHOR_ENVIO_SANDBOX === 'true' ? 
-      'https://sandbox.melhorenvio.com.br' : 
-      'https://www.melhorenvio.com.br'
+    sandbox: false, // false para produção
+    baseUrl: 'https://www.melhorenvio.com.br'
   },
   
   // Configurações da loja
