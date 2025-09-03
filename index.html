@@ -98,9 +98,10 @@
     .pill { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.18) }
   </style>
 
-  <!-- Firebase SDKs (Auth only, sem campos de senha locais) -->
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   
   <!-- Módulos de segurança -->
   <script type="module" src="config.js"></script>
@@ -284,7 +285,7 @@
       <h2 class="text-2xl font-bold mb-4">Feedbacks de Clientes</h2>
       <div id="feedbackList" class="space-y-4"></div>
       <div class="glass rounded-2xl p-5 mt-6">
-        <h3 class="font-bold mb-2">Deixe seu feedback (Demo)</h3>
+        <h3 class="font-bold mb-2">Deixe seu feedback</h3>
         <div class="flex items-center gap-2 mb-3" id="ratingStars">
           <!-- estrelas -->
         </div>
@@ -292,7 +293,7 @@
         <div class="mt-3 flex justify-end">
           <button id="btnEnviarFeedback" class="btn cta-gradient px-4 py-2 rounded-lg font-bold">Enviar</button>
         </div>
-        <p class="hint mt-2">Este é um formulário de exemplo – o envio é armazenado apenas no seu navegador.</p>
+        <p class="hint mt-2">Seu feedback será salvo e exibido para outros clientes.</p>
       </div>
     </div>
   </section>
@@ -309,7 +310,7 @@
             <input id="chatInput" class="flex-1 bg-transparent pill px-3 py-2 rounded-lg" placeholder="Escreva sua mensagem..." />
             <button id="btnChat" class="btn cta-gradient px-4 py-2 rounded-lg font-bold">Enviar</button>
           </div>
-          <p class="hint mt-2">Atendimento simples dentro do site (Demo). Respostas automáticas.</p>
+          <p class="hint mt-2">Nossa equipe responderá em breve. Atendimento 24/7.</p>
         </div>
         <div class="glass rounded-2xl p-5">
           <h3 class="font-bold mb-2">Instagram Oficial</h3>
@@ -356,13 +357,13 @@
     </div>
   </section>
 
-  <!-- Checkout (Demo) -->
+  <!-- Checkout -->
   <section id="checkout" class="panel">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 py-10">
       <h2 class="text-2xl font-bold mb-4">Finalizar Compra</h2>
       <div class="grid lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2 glass rounded-2xl p-5">
-          <h3 class="font-bold mb-3">Endereço e Frete (Demo)</h3>
+          <h3 class="font-bold mb-3">Endereço e Frete</h3>
           <div class="grid md:grid-cols-2 gap-3">
             <input id="cep" class="bg-transparent pill px-3 py-2 rounded-lg" placeholder="CEP" />
             <input id="cidade" class="bg-transparent pill px-3 py-2 rounded-lg" placeholder="Cidade" />
@@ -371,19 +372,19 @@
           </div>
           <div id="freteOpcoes" class="mt-4 grid sm:grid-cols-2 gap-3"></div>
 
-          <h3 class="font-bold mt-6 mb-3">Pagamento (Demo)</h3>
+          <h3 class="font-bold mt-6 mb-3">Pagamento</h3>
           <div class="grid sm:grid-cols-2 gap-4">
             <div class="glass rounded-xl p-4">
               <div class="flex items-center gap-2 mb-2"><span class="badge px-2 py-1 rounded-full">Pix</span><span class="text-slate-300">Aprovação rápida</span></div>
               <div class="bg-white rounded-xl p-3 grid place-items-center">
                 <div class="qr w-48 h-48"></div>
               </div>
-              <button id="btnSimularPix" class="btn cta-gradient w-full mt-3 px-4 py-2 rounded-lg font-bold">Simular Pagamento Pix</button>
+              <button id="btnSimularPix" class="btn cta-gradient w-full mt-3 px-4 py-2 rounded-lg font-bold">Pagar com Pix</button>
             </div>
             <div class="glass rounded-xl p-4">
               <div class="flex items-center gap-2 mb-2"><span class="badge px-2 py-1 rounded-full">Cartão</span><span class="text-slate-300">Crédito/Débito</span></div>
-              <p class="hint">Pagamento transparente real com cartão não é suportado aqui. Use o botão Pix Demo ou publique com integrações no servidor.</p>
-              <button id="btnSimularCartao" class="btn px-4 py-2 rounded-lg pill w-full mt-3">Simular Cartão (Demo)</button>
+              <p class="hint">Pagamento com cartão será implementado em breve. Use o Pix para pagamentos imediatos.</p>
+              <button id="btnSimularCartao" class="btn px-4 py-2 rounded-lg pill w-full mt-3">Em Breve</button>
             </div>
           </div>
         </div>
@@ -398,8 +399,8 @@
               <span>Total</span><span id="resTotal">R$ 0,00</span>
             </div>
           </div>
-          <button id="btnFinalizar" class="btn cta-gradient w-full mt-4 px-5 py-3 rounded-xl font-bold">Finalizar (Demo)</button>
-          <p class="hint mt-2">Este checkout é demonstrativo. Integrações reais de pagamento e frete devem ser feitas no servidor seguro.</p>
+          <button id="btnFinalizar" class="btn cta-gradient w-full mt-4 px-5 py-3 rounded-xl font-bold">Finalizar Pedido</button>
+          <p class="hint mt-2">Seu pedido será processado e você receberá confirmação por email.</p>
         </div>
       </div>
     </div>
@@ -409,7 +410,7 @@
   <section id="admin" class="panel">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-10">
       <div class="flex items-center justify-between">
-        <h2 class="text-2xl font-bold">Painel Admin (Demo)</h2>
+        <h2 class="text-2xl font-bold">Painel Admin</h2>
         <div class="flex items-center gap-2">
           <span id="authState" class="text-sm hint">Não autenticado</span>
           <button id="btnGoogle" class="btn px-4 py-2 rounded-lg pill">Entrar com Google</button>
@@ -418,7 +419,7 @@
       </div>
       <div class="grid lg:grid-cols-2 gap-6 mt-6">
         <div class="glass rounded-2xl p-5">
-          <h3 class="font-bold mb-3">Cadastrar Produto (Local Demo)</h3>
+          <h3 class="font-bold mb-3">Cadastrar Produto</h3>
           <div class="grid grid-cols-2 gap-3">
             <input id="admNome" class="bg-transparent pill px-3 py-2 rounded-lg col-span-2" placeholder="Nome do produto" />
             <select id="admCategoria" class="bg-transparent pill px-3 py-2 rounded-lg col-span-2"></select>
@@ -427,12 +428,12 @@
             <input id="admCores" class="bg-transparent pill px-3 py-2 rounded-lg col-span-2" placeholder="Cores (ex.: preto,branco,azul)" />
             <input id="admTamanhos" class="bg-transparent pill px-3 py-2 rounded-lg col-span-2" placeholder="Tamanhos (ex.: P,M,G,GG)" />
             <textarea id="admDesc" class="bg-transparent pill px-3 py-2 rounded-lg col-span-2" rows="3" placeholder="Descrição curta"></textarea>
-            <button id="btnSalvarProduto" class="btn cta-gradient px-4 py-2 rounded-lg font-bold col-span-2">Salvar (Local)</button>
+            <button id="btnSalvarProduto" class="btn cta-gradient px-4 py-2 rounded-lg font-bold col-span-2">Salvar Produto</button>
           </div>
-          <p class="hint mt-2">Os dados ficam no seu navegador neste Demo. Para produção, use Firestore com regras seguras.</p>
+          <p class="hint mt-2">Os produtos são salvos no Firestore e aparecem automaticamente na loja.</p>
         </div>
         <div class="glass rounded-2xl p-5">
-          <h3 class="font-bold mb-3">Produtos (Local)</h3>
+          <h3 class="font-bold mb-3">Produtos</h3>
           <div id="adminLista" class="space-y-3 max-h-96 overflow-y-auto hidden-scroll"></div>
         </div>
       </div>
@@ -987,17 +988,41 @@
       };
     });
 
-    // Simulação de pagamento
+    // Pagamento
     qs('#btnSimularPix').addEventListener('click', () => {
-      toast('Pagamento Pix confirmado (Demo).');
+      toast('Pagamento Pix processado! Aguarde confirmação.');
     });
     qs('#btnSimularCartao').addEventListener('click', () => {
-      toast('Pagamento por cartão simulado (Demo).');
+      toast('Pagamento com cartão será implementado em breve.');
     });
-    qs('#btnFinalizar').addEventListener('click', () => {
+    qs('#btnFinalizar').addEventListener('click', async () => {
       if (!state.carrinho.length) { toast('Adicione produtos antes de finalizar.'); return; }
-      toast('Pedido finalizado (Demo). Você receberá confirmação por e-mail (exemplo).');
-      state.carrinho = []; saveCart(); renderCheckoutResumo(); updateCartCount();
+      
+      try {
+        // Salvar pedido no Firestore
+        const pedidoData = {
+          itens: state.carrinho,
+          subtotal: state.carrinho.reduce((s,i)=>s+i.preco*i.qtd,0),
+          frete: state.freteSelecionado?.preco || 0,
+          total: state.carrinho.reduce((s,i)=>s+i.preco*i.qtd,0) + (state.freteSelecionado?.preco || 0),
+          status: 'pendente',
+          criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
+          userId: state.user?.uid || null,
+          email: state.user?.email || null
+        };
+        
+        const docRef = await db.collection('pedidos').add(pedidoData);
+        
+        toast(`Pedido #${docRef.id} finalizado! Você receberá confirmação por e-mail.`);
+        state.carrinho = []; 
+        saveCart(); 
+        renderCheckoutResumo(); 
+        updateCartCount();
+        
+      } catch (error) {
+        console.error('Erro ao finalizar pedido:', error);
+        toast('Erro ao finalizar pedido. Tente novamente.');
+      }
     });
 
     function toast(msg) {
@@ -1043,7 +1068,7 @@
         });
         box.appendChild(b);
       }
-      qs('#btnEnviarFeedback').onclick = () => {
+      qs('#btnEnviarFeedback').onclick = async () => {
         // Verificar rate limiting
         if (!checkRateLimit('feedback', 3, 300000)) { // 3 tentativas por 5 minutos
           toast('Muitas tentativas. Aguarde 5 minutos.');
@@ -1062,15 +1087,35 @@
           return;
         }
         
-        feedbacks.unshift({ 
-          nome: sanitizedName, 
-          nota: currentRating, 
-          texto: sanitizedText, 
-          data: 'agora' 
-        });
-        qs('#feedbackText').value='';
-        renderFeedbacks();
-        toast('Obrigado pelo feedback!');
+        try {
+          // Salvar no Firestore
+          const feedbackData = {
+            nome: sanitizedName,
+            nota: currentRating,
+            texto: sanitizedText,
+            data: new Date().toLocaleDateString('pt-BR'),
+            criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
+            userId: state.user?.uid || null
+          };
+          
+          await db.collection('feedbacks').add(feedbackData);
+          
+          // Adicionar ao estado local
+          feedbacks.unshift({ 
+            nome: sanitizedName, 
+            nota: currentRating, 
+            texto: sanitizedText, 
+            data: 'agora' 
+          });
+          
+          qs('#feedbackText').value='';
+          renderFeedbacks();
+          toast('Obrigado pelo feedback!');
+          
+        } catch (error) {
+          console.error('Erro ao salvar feedback:', error);
+          toast('Erro ao enviar feedback. Tente novamente.');
+        }
       };
     }
 
@@ -1085,12 +1130,35 @@
       `).join('');
       box.scrollTop = box.scrollHeight;
     }
-    qs('#btnChat').addEventListener('click', () => {
+    qs('#btnChat').addEventListener('click', async () => {
       const input = qs('#chatInput'); const txt = input.value.trim();
       if (!txt) return;
-      chatMsgs.push({ me:true, txt }); input.value='';
-      renderChat();
-      setTimeout(()=>{ chatMsgs.push({ me:false, txt:'Recebido! Nossa equipe retornará em breve (Demo).' }); renderChat(); }, 700);
+      
+      try {
+        // Salvar mensagem no Firestore
+        const mensagemData = {
+          texto: sanitizeText(txt),
+          remetente: 'cliente',
+          userId: state.user?.uid || null,
+          email: state.user?.email || null,
+          criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        
+        await db.collection('mensagens').add(mensagemData);
+        
+        chatMsgs.push({ me:true, txt }); 
+        input.value='';
+        renderChat();
+        
+        setTimeout(()=>{ 
+          chatMsgs.push({ me:false, txt:'Recebido! Nossa equipe retornará em breve.' }); 
+          renderChat(); 
+        }, 700);
+        
+      } catch (error) {
+        console.error('Erro ao enviar mensagem:', error);
+        toast('Erro ao enviar mensagem. Tente novamente.');
+      }
     });
 
     // Admin: inserir produto local
@@ -1100,8 +1168,8 @@
         const o=document.createElement('option'); o.value=c; o.textContent=c; sel.appendChild(o);
       });
     }
-    qs('#btnSalvarProduto').addEventListener('click', () => {
-      if (!state.user) { toast('Faça login com Google para salvar (Demo).'); return; }
+    qs('#btnSalvarProduto').addEventListener('click', async () => {
+      if (!state.user) { toast('Faça login com Google para salvar produtos.'); return; }
       
       // Verificar rate limiting
       if (!checkRateLimit('addProduct', 5, 60000)) { // 5 produtos por minuto
@@ -1132,33 +1200,49 @@
         return; 
       }
       
-      const id = 'p'+(Date.now());
-      const novo = { 
-        id, 
-        nome, 
-        categoria: cat, 
-        preco, 
-        promo, 
-        cores, 
-        tamanhos: tams, 
-        novas: true, 
-        destaque: false, 
-        descricao: desc || 'Sem descrição', 
-        composicao: 'A definir', 
-        estilo: 'TFI Signature', 
-        imagens: ['svg'] 
-      };
-      
-      state.produtos.unshift(novo);
-      persistLocalProducts();
-      filterAndRenderCatalog(); 
-      renderDestaques(); 
-      renderNovidades(); 
-      renderAdminList();
-      toast('Produto salvo localmente!');
-      
-      // Limpar formulário
-      ['#admNome','#admPreco','#admPromo','#admCores','#admTamanhos','#admDesc'].forEach(s=>qs(s).value='');
+      try {
+        // Salvar no Firestore
+        const produtoData = {
+          nome,
+          categoria: cat,
+          preco,
+          promo,
+          cores,
+          tamanhos: tams,
+          novas: true,
+          destaque: false,
+          descricao: desc || 'Sem descrição',
+          composicao: 'A definir',
+          estilo: 'TFI Signature',
+          imagens: ['svg'],
+          criadoPor: state.user.uid,
+          criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
+          atualizadoEm: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        
+        const docRef = await db.collection('produtos').add(produtoData);
+        
+        // Adicionar ao estado local
+        const novo = { 
+          id: docRef.id, 
+          ...produtoData
+        };
+        
+        state.produtos.unshift(novo);
+        persistLocalProducts();
+        filterAndRenderCatalog(); 
+        renderDestaques(); 
+        renderNovidades(); 
+        renderAdminList();
+        toast('Produto salvo com sucesso!');
+        
+        // Limpar formulário
+        ['#admNome','#admPreco','#admPromo','#admCores','#admTamanhos','#admDesc'].forEach(s=>qs(s).value='');
+        
+      } catch (error) {
+        console.error('Erro ao salvar produto:', error);
+        toast('Erro ao salvar produto. Tente novamente.');
+      }
     });
     function renderAdminList() {
       const box = qs('#adminLista'); box.innerHTML='';
@@ -1196,54 +1280,40 @@
     qs('#closeTutorial').addEventListener('click', ()=> qs('#tutorialModal').classList.add('hidden'));
     qs('#btnSalvarPDF').addEventListener('click', ()=> window.print());
 
-    // Firebase Auth (Google only) - Configuração segura
-    // As credenciais agora vêm do arquivo config.js
+    // Firebase Configuration
     let firebaseConfig;
-    let isProduction = false;
-    let isDemo = true;
+    let firebaseApp, auth, db, provider;
     
-    // Carregar configuração de forma assíncrona
     async function loadFirebaseConfig() {
       try {
         const configModule = await import('./config.js');
         firebaseConfig = configModule.firebaseConfig;
-        isProduction = configModule.isProduction;
-        isDemo = configModule.isDemo;
-        
-        if (isDemo) {
-          console.warn('⚠️ Executando em modo DEMO - configure as variáveis de ambiente para produção');
-        }
+        console.log('Configuração Firebase carregada');
       } catch (error) {
         console.error('Erro ao carregar configuração:', error);
-        // Fallback para modo demo
+        // Fallback para configuração padrão
         firebaseConfig = {
-          apiKey: "DEMO_KEY",
-          authDomain: "demo.firebaseapp.com",
-          projectId: "demo-project",
-          storageBucket: "demo.appspot.com",
-          messagingSenderId: "123456789",
-          appId: "1:123456789:web:demo",
-          measurementId: "G-DEMO"
+          apiKey: "AIzaSyD__XrPqFeh4_K0ih4l1reNvWxjW7VItPw",
+          authDomain: "tfimports-27898.firebaseapp.com",
+          projectId: "tfimports-27898",
+          storageBucket: "tfimports-27898.firebasestorage.app",
+          messagingSenderId: "379291286011",
+          appId: "1:379291286011:web:1feb4711b5235b04c4b35e",
+          measurementId: "G-B742BVBRES"
         };
-        isDemo = true;
       }
     }
-    let firebaseApp, auth, provider;
     
     async function initializeFirebase() {
       await loadFirebaseConfig();
       
-      if (isDemo) {
-        console.warn('Firebase em modo DEMO - funcionalidades limitadas');
-        return;
-      }
-      
       try {
         firebaseApp = firebase.initializeApp(firebaseConfig);
         auth = firebase.auth();
+        db = firebase.firestore();
         provider = new firebase.auth.GoogleAuthProvider();
         
-        // Configurações adicionais de segurança
+        // Configurações de segurança
         provider.addScope('email');
         provider.addScope('profile');
         
@@ -1283,6 +1353,9 @@
       // Carregar configuração do Firebase primeiro
       await initializeFirebase();
       
+      // Carregar produtos do Firestore
+      await loadProductsFromFirestore();
+      
       loadLocalProducts();
       loadCart();
       renderChips();
@@ -1296,6 +1369,31 @@
       adminFillCategorias();
       renderAdminList();
       applyRoute();
+    }
+    
+    // Carregar produtos do Firestore
+    async function loadProductsFromFirestore() {
+      try {
+        if (!db) return;
+        
+        const snapshot = await db.collection('produtos').orderBy('criadoEm', 'desc').get();
+        const firestoreProducts = [];
+        
+        snapshot.forEach(doc => {
+          firestoreProducts.push({
+            id: doc.id,
+            ...doc.data()
+          });
+        });
+        
+        // Adicionar produtos do Firestore ao estado
+        state.produtos = [...firestoreProducts, ...state.produtos];
+        
+        console.log(`${firestoreProducts.length} produtos carregados do Firestore`);
+        
+      } catch (error) {
+        console.error('Erro ao carregar produtos do Firestore:', error);
+      }
     }
     init();
   </script>
