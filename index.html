@@ -105,6 +105,12 @@
   <!-- Módulos de segurança -->
   <script type="module" src="config.js"></script>
   <script type="module" src="security.js"></script>
+  
+  <!-- Módulos de integração -->
+  <script type="module" src="api-config.js"></script>
+  <script type="module" src="mercado-pago.js"></script>
+  <script type="module" src="melhor-envio.js"></script>
+  <script type="module" src="order-manager.js"></script>
 </head>
 <body class="font-[InterVar] selection:bg-emerald-300 selection:text-black">
   <!-- Header -->
@@ -375,17 +381,59 @@
 
           <h3 class="font-bold mt-6 mb-3">Pagamento</h3>
           <div class="grid sm:grid-cols-2 gap-4">
+            <!-- PIX -->
             <div class="glass rounded-xl p-4">
-              <div class="flex items-center gap-2 mb-2"><span class="badge px-2 py-1 rounded-full">Pix</span><span class="text-slate-300">Aprovação rápida</span></div>
-              <div class="bg-white rounded-xl p-3 grid place-items-center">
-                <div class="qr w-48 h-48"></div>
+              <div class="flex items-center gap-2 mb-2">
+                <span class="badge px-2 py-1 rounded-full">PIX</span>
+                <span class="text-slate-300">Aprovação instantânea</span>
               </div>
-              <button id="btnSimularPix" class="btn cta-gradient w-full mt-3 px-4 py-2 rounded-lg font-bold">Pagar com Pix</button>
+              <div class="text-sm text-slate-300 mb-3">
+                Pague instantaneamente com PIX e receba confirmação imediata.
+              </div>
+              <button id="btnPagarPix" class="btn cta-gradient w-full px-4 py-2 rounded-lg font-bold">
+                Pagar com PIX
+              </button>
             </div>
+            
+            <!-- Cartão de Crédito -->
             <div class="glass rounded-xl p-4">
-              <div class="flex items-center gap-2 mb-2"><span class="badge px-2 py-1 rounded-full">Cartão</span><span class="text-slate-300">Crédito/Débito</span></div>
-              <p class="hint">Pagamento com cartão será implementado em breve. Use o Pix para pagamentos imediatos.</p>
-              <button id="btnSimularCartao" class="btn px-4 py-2 rounded-lg pill w-full mt-3">Em Breve</button>
+              <div class="flex items-center gap-2 mb-2">
+                <span class="badge px-2 py-1 rounded-full">Cartão</span>
+                <span class="text-slate-300">Crédito/Débito</span>
+              </div>
+              <div class="text-sm text-slate-300 mb-3">
+                Pagamento seguro com cartão de crédito ou débito.
+              </div>
+              <button id="btnPagarCartao" class="btn px-4 py-2 rounded-lg pill w-full">
+                Pagar com Cartão
+              </button>
+            </div>
+          </div>
+          
+          <!-- Formulário de Cartão (oculto inicialmente) -->
+          <div id="cardForm" class="glass rounded-xl p-4 mt-4 hidden">
+            <h4 class="font-bold mb-3">Dados do Cartão</h4>
+            <div class="grid grid-cols-2 gap-3">
+              <input id="cardNumber" class="bg-transparent pill px-3 py-2 rounded-lg col-span-2" placeholder="Número do cartão" maxlength="19" />
+              <input id="cardName" class="bg-transparent pill px-3 py-2 rounded-lg col-span-2" placeholder="Nome no cartão" />
+              <input id="cardExpiry" class="bg-transparent pill px-3 py-2 rounded-lg" placeholder="MM/AA" maxlength="5" />
+              <input id="cardCvv" class="bg-transparent pill px-3 py-2 rounded-lg" placeholder="CVV" maxlength="4" />
+              <select id="cardInstallments" class="bg-transparent pill px-3 py-2 rounded-lg col-span-2">
+                <option value="1">1x sem juros</option>
+                <option value="2">2x sem juros</option>
+                <option value="3">3x sem juros</option>
+                <option value="4">4x sem juros</option>
+                <option value="5">5x sem juros</option>
+                <option value="6">6x sem juros</option>
+              </select>
+            </div>
+            <div class="flex gap-3 mt-4">
+              <button id="btnProcessarCartao" class="btn cta-gradient px-4 py-2 rounded-lg font-bold flex-1">
+                Processar Pagamento
+              </button>
+              <button id="btnCancelarCartao" class="btn px-4 py-2 rounded-lg pill">
+                Cancelar
+              </button>
             </div>
           </div>
         </div>
@@ -679,6 +727,12 @@
   <script type="module">
     // Importar funções de segurança
     import { checkRateLimit, sanitizeText, validateProduct } from './security.js';
+    
+    // Importar serviços de integração
+    import { mercadoPagoService } from './mercado-pago.js';
+    import { melhorEnvioService } from './melhor-envio.js';
+    import { OrderManager } from './order-manager.js';
+    import { validateConfig } from './api-config.js';
     
     // Estado global (local)
     const state = {
@@ -1193,39 +1247,107 @@
       qs('#resFrete').textContent = fmt(frete);
       qs('#resTotal').textContent = fmt(subtotal + frete);
     }
-    qs('#btnCalcFrete').addEventListener('click', () => {
+    qs('#btnCalcFrete').addEventListener('click', async () => {
       const cep = (qs('#cep').value||'').replace(/\D/g,'');
-      const op = qs('#freteOpcoes'); op.innerHTML='';
+      const op = qs('#freteOpcoes'); 
+      op.innerHTML='<div class="hint text-center py-4">Calculando frete...</div>';
+      
       if (cep.length < 8) {
-        op.innerHTML = '<div class="hint">Informe um CEP válido.</div>'; return;
+        op.innerHTML = '<div class="hint text-center py-4">Informe um CEP válido.</div>'; 
+        return;
       }
-      // Cálculo fictício (Demo), substitua por Melhor Envio no backend
-      const subtotal = state.carrinho.reduce((s,i)=>s+i.preco*i.qtd,0);
-      const base = subtotal > 400 ? 0 : 24.9;
-      const opcoes = [
-        { id:'exp', nome:'Expresso', prazo:'2-4 dias', preco: base + 19.9 },
-        { id:'std', nome:'Padrão', prazo:'4-8 dias', preco: base + 9.9 },
-      ];
-      opcoes.forEach(o=>{
-        const d = document.createElement('label');
-        d.className = 'glass rounded-xl p-3 flex items-center justify-between cursor-pointer';
-        d.innerHTML = `<div><div class="font-bold">${o.nome}</div><div class="hint text-sm">${o.prazo}</div></div>
-          <div class="flex items-center gap-3"><div class="font-extrabold">${fmt(o.preco)}</div><input type="radio" name="frete" value="${o.id}"></div>`;
-        op.appendChild(d);
-      });
-      op.onclick = (e) => {
-        const r = e.target.closest('input[type=radio]'); if (!r) return;
-        const o = (r.value==='exp') ? opcoes[0] : opcoes[1];
-        state.freteSelecionado = o; updateTotals();
-      };
+      
+      try {
+        // Validar CEP primeiro
+        const cepValidation = await melhorEnvioService.validateCEP(cep);
+        if (!cepValidation.success) {
+          op.innerHTML = `<div class="hint text-center py-4">${cepValidation.error}</div>`;
+          return;
+        }
+        
+        // Preencher cidade e UF automaticamente
+        qs('#cidade').value = cepValidation.cidade;
+        qs('#uf').value = cepValidation.uf;
+        
+        // Calcular frete com Melhor Envio
+        const shippingData = {
+          cepDestino: cep,
+          produtos: state.carrinho.map(item => ({
+            id: item.id,
+            nome: item.nome,
+            preco: item.preco,
+            quantidade: item.qtd,
+            peso: 0.3 // Peso padrão em kg
+          })),
+          pesoTotal: state.carrinho.reduce((total, item) => total + (0.3 * item.qtd), 0)
+        };
+        
+        const result = await melhorEnvioService.calculateShipping(shippingData);
+        
+        if (result.success && result.options.length > 0) {
+          op.innerHTML = '';
+          
+          result.options.forEach(option => {
+            const d = document.createElement('label');
+            d.className = 'glass rounded-xl p-3 flex items-center justify-between cursor-pointer hover:ring-2 hover:ring-emerald-400/40';
+            d.innerHTML = `
+              <div>
+                <div class="font-bold">${option.name}</div>
+                <div class="hint text-sm">${option.company} • ${option.delivery_time} dias úteis</div>
+              </div>
+              <div class="flex items-center gap-3">
+                <div class="font-extrabold">${fmt(option.price)}</div>
+                <input type="radio" name="frete" value="${option.id}" data-company="${option.company_id}">
+              </div>
+            `;
+            op.appendChild(d);
+          });
+          
+          op.onclick = (e) => {
+            const r = e.target.closest('input[type=radio]'); 
+            if (!r) return;
+            
+            const selectedOption = result.options.find(opt => opt.id === r.value);
+            state.freteSelecionado = {
+              id: selectedOption.id,
+              nome: selectedOption.name,
+              empresa: selectedOption.company,
+              preco: selectedOption.price,
+              prazo: `${selectedOption.delivery_time} dias úteis`,
+              company_id: selectedOption.company_id
+            };
+            
+            updateTotals();
+            toast('Frete selecionado!');
+          };
+          
+        } else {
+          op.innerHTML = '<div class="hint text-center py-4">Não foi possível calcular o frete para este CEP.</div>';
+        }
+        
+      } catch (error) {
+        console.error('Erro ao calcular frete:', error);
+        op.innerHTML = '<div class="hint text-center py-4">Erro ao calcular frete. Tente novamente.</div>';
+      }
     });
 
     // Pagamento
-    qs('#btnSimularPix').addEventListener('click', () => {
-      toast('Pagamento Pix processado! Aguarde confirmação.');
+    qs('#btnPagarPix').addEventListener('click', async () => {
+      await processPayment('pix');
     });
-    qs('#btnSimularCartao').addEventListener('click', () => {
-      toast('Pagamento com cartão será implementado em breve.');
+    
+    qs('#btnPagarCartao').addEventListener('click', () => {
+      qs('#cardForm').classList.remove('hidden');
+      qs('#btnPagarCartao').classList.add('hidden');
+    });
+    
+    qs('#btnCancelarCartao').addEventListener('click', () => {
+      qs('#cardForm').classList.add('hidden');
+      qs('#btnPagarCartao').classList.remove('hidden');
+    });
+    
+    qs('#btnProcessarCartao').addEventListener('click', async () => {
+      await processPayment('credit_card');
     });
     qs('#btnFinalizar').addEventListener('click', async () => {
       if (!state.carrinho.length) { toast('Adicione produtos antes de finalizar.'); return; }
@@ -1292,6 +1414,137 @@
         toast('Erro ao finalizar pedido. Tente novamente.');
       }
     });
+
+    // Processar pagamento
+    async function processPayment(paymentMethod) {
+      if (!state.carrinho.length) {
+        toast('Adicione produtos antes de finalizar.');
+        return;
+      }
+      
+      if (!state.user) {
+        toast('Faça login para finalizar o pedido.');
+        openLoginModal();
+        return;
+      }
+      
+      if (!state.freteSelecionado) {
+        toast('Selecione uma opção de frete.');
+        return;
+      }
+      
+      try {
+        // Validar configuração das APIs
+        const configValidation = validateConfig();
+        if (!configValidation.isValid) {
+          toast('Sistema de pagamento em configuração. Use o modo demo.');
+          await processPaymentDemo(paymentMethod);
+          return;
+        }
+        
+        // Preparar dados do pedido
+        const orderData = {
+          user_id: state.user.uid,
+          user_email: state.user.email,
+          user_name: state.user.displayName || 'Usuário',
+          items: state.carrinho.map(item => ({
+            id: item.id,
+            nome: item.nome,
+            preco: item.preco,
+            quantidade: item.qtd,
+            cor: item.cor,
+            tamanho: item.tam
+          })),
+          subtotal: state.carrinho.reduce((s,i)=>s+i.preco*i.qtd,0),
+          shipping: {
+            service_id: state.freteSelecionado.id,
+            company_id: state.freteSelecionado.company_id,
+            price: state.freteSelecionado.preco,
+            name: state.freteSelecionado.nome,
+            delivery_time: state.freteSelecionado.prazo
+          },
+          total: state.carrinho.reduce((s,i)=>s+i.preco*i.qtd,0) + state.freteSelecionado.preco,
+          shipping_address: {
+            cep: qs('#cep').value,
+            cidade: qs('#cidade').value,
+            uf: qs('#uf').value,
+            logradouro: 'Endereço completo',
+            numero: '123',
+            bairro: 'Centro',
+            complemento: ''
+          },
+          payment_method: paymentMethod,
+          payment_data: paymentMethod === 'credit_card' ? {
+            card_number: qs('#cardNumber').value,
+            card_name: qs('#cardName').value,
+            card_expiry: qs('#cardExpiry').value,
+            card_cvv: qs('#cardCvv').value,
+            installments: parseInt(qs('#cardInstallments').value)
+          } : {}
+        };
+        
+        // Criar pedido
+        const result = await orderManager.createOrder(orderData);
+        
+        if (result.success) {
+          if (result.payment_url) {
+            // Redirecionar para pagamento
+            window.open(result.payment_url, '_blank');
+            toast('Redirecionando para pagamento...');
+          } else {
+            // Pagamento processado
+            toast('Pagamento processado com sucesso!');
+            state.carrinho = [];
+            saveCart();
+            updateCartCount();
+            navigate('#minha-conta');
+          }
+        } else {
+          toast(`Erro: ${result.error}`);
+        }
+        
+      } catch (error) {
+        console.error('Erro ao processar pagamento:', error);
+        toast('Erro ao processar pagamento. Tente novamente.');
+      }
+    }
+    
+    // Processar pagamento demo (quando APIs não estão configuradas)
+    async function processPaymentDemo(paymentMethod) {
+      const orderData = {
+        itens: state.carrinho,
+        subtotal: state.carrinho.reduce((s,i)=>s+i.preco*i.qtd,0),
+        frete: state.freteSelecionado?.preco || 0,
+        total: state.carrinho.reduce((s,i)=>s+i.preco*i.qtd,0) + (state.freteSelecionado?.preco || 0),
+        status: 'pendente',
+        criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
+        userId: state.user.uid,
+        email: state.user.email,
+        nomeUsuario: state.user.displayName || 'Usuário',
+        endereco: {
+          cep: qs('#cep').value || '',
+          cidade: qs('#cidade').value || '',
+          uf: qs('#uf').value || ''
+        },
+        freteSelecionado: state.freteSelecionado ? {
+          nome: state.freteSelecionado.nome,
+          prazo: state.freteSelecionado.prazo,
+          preco: state.freteSelecionado.preco
+        } : null,
+        payment_method: paymentMethod
+      };
+      
+      const docRef = await db.collection('pedidos').add(orderData);
+      
+      state.carrinho = [];
+      saveCart();
+      updateCartCount();
+      
+      toast(`Pedido #${docRef.id.slice(-6)} criado em modo demo!`);
+      setTimeout(() => {
+        navigate('#minha-conta');
+      }, 1500);
+    }
 
     function toast(msg) {
       const t = document.createElement('div');
@@ -1780,6 +2033,9 @@
     let firebaseConfig;
     let firebaseApp, auth, db, provider;
     
+    // Serviços de integração
+    let orderManager;
+    
     async function loadFirebaseConfig() {
       try {
         const configModule = await import('./config.js');
@@ -1812,6 +2068,9 @@
         // Configurações de segurança
         provider.addScope('email');
         provider.addScope('profile');
+        
+        // Inicializar OrderManager
+        orderManager = new OrderManager(db);
         
         console.log('Firebase inicializado com sucesso');
       } catch (e) {
