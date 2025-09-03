@@ -60,17 +60,30 @@ export const endpoints = {
 export function validateConfig() {
   const errors = [];
   
-  if (!apiConfig.mercadoPago.publicKey || apiConfig.mercadoPago.publicKey.includes('TEST-1234') || apiConfig.mercadoPago.publicKey.includes('123456')) {
+  // Validar Mercado Pago - aceitar credenciais reais
+  if (!apiConfig.mercadoPago.publicKey) {
     errors.push('Mercado Pago Public Key não configurada');
   }
   
-  if (!apiConfig.mercadoPago.accessToken || apiConfig.mercadoPago.accessToken.includes('TEST-1234') || apiConfig.mercadoPago.accessToken.includes('123456')) {
+  if (!apiConfig.mercadoPago.accessToken) {
     errors.push('Mercado Pago Access Token não configurado');
   }
   
+  // Validar Melhor Envio
   if (!apiConfig.melhorEnvio.token || apiConfig.melhorEnvio.token.includes('TEST-1234')) {
     errors.push('Melhor Envio Token não configurado');
   }
+  
+  console.log('🔍 Validando configuração:', {
+    mercadoPago: {
+      publicKey: apiConfig.mercadoPago.publicKey ? '✅ Configurada' : '❌ Não configurada',
+      accessToken: apiConfig.mercadoPago.accessToken ? '✅ Configurado' : '❌ Não configurado'
+    },
+    melhorEnvio: {
+      token: apiConfig.melhorEnvio.token ? '✅ Configurado' : '❌ Não configurado'
+    },
+    errors: errors
+  });
   
   return {
     isValid: errors.length === 0,
