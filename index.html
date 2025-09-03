@@ -1508,12 +1508,19 @@
       }
       
       try {
-                    // Validar configuração das APIs
-            const configValidation = validateConfig();
-            if (!configValidation.isValid) {
-              toast('Sistema de pagamento em configuração. Verifique as credenciais.');
-              return;
-            }
+        console.log('🔍 Iniciando processamento de pagamento...');
+        
+        // Validar configuração das APIs
+        const configValidation = validateConfig();
+        console.log('🔍 Resultado da validação:', configValidation);
+        
+        if (!configValidation.isValid) {
+          console.error('❌ Configuração inválida:', configValidation.errors);
+          toast('Sistema de pagamento em configuração. Verifique as credenciais.');
+          return;
+        }
+        
+        console.log('✅ Configuração válida, continuando...');
         
         // Preparar dados do pedido
         const orderData = {
@@ -1550,6 +1557,8 @@
           payment_data: {}
         };
         
+        console.log('📦 Dados do pedido preparados:', orderData);
+        
         // Criar preferência no Mercado Pago
         const paymentData = {
           items: orderData.items.map(item => ({
@@ -1568,10 +1577,24 @@
           user_id: orderData.user_id
         };
         
+        console.log('🛒 Dados para preferência:', paymentData);
         console.log('🛒 Criando preferência Mercado Pago...');
+        
+        // Verificar se o serviço está disponível
+        if (typeof mercadoPagoService === 'undefined') {
+          console.error('❌ MercadoPagoService não está disponível');
+          toast('Erro: Serviço de pagamento não disponível');
+          return;
+        }
+        
+        console.log('✅ MercadoPagoService disponível, criando preferência...');
         const preferenceResult = await mercadoPagoService.createPreference(paymentData);
         
+        console.log('🔄 Resultado da criação da preferência:', preferenceResult);
+        
         if (preferenceResult.success) {
+          console.log('✅ Preferência criada com sucesso, salvando pedido...');
+          
           // Salvar pedido no Firebase com status pendente
           const orderRef = await db.collection('pedidos').add({
             ...orderData,
@@ -1581,11 +1604,14 @@
             created_at: firebase.firestore.FieldValue.serverTimestamp()
           });
           
+          console.log('✅ Pedido salvo no Firebase:', orderRef.id);
+          
           // Redirecionar para checkout do Mercado Pago
           const checkoutUrl = apiConfig.mercadoPago.sandbox 
             ? preferenceResult.sandbox_init_point 
             : preferenceResult.init_point;
           
+          console.log('🚀 URL de checkout:', checkoutUrl);
           console.log('🚀 Redirecionando para Mercado Pago:', checkoutUrl);
           
           // Confirmar redirecionamento
@@ -1594,11 +1620,13 @@
           }
           
         } else {
+          console.error('❌ Erro ao criar preferência:', preferenceResult.error);
           toast(`Erro ao criar pagamento: ${preferenceResult.error}`);
         }
         
       } catch (error) {
-        console.error('Erro ao processar pagamento:', error);
+        console.error('❌ Erro ao processar pagamento:', error);
+        console.error('❌ Stack trace:', error.stack);
         toast('Erro ao processar pagamento. Tente novamente.');
       }
     }
