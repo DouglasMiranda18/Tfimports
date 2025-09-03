@@ -753,7 +753,7 @@
         const id = b.getAttribute('data-id'); const act = b.getAttribute('data-action');
         if (act === 'ver') { openProduto(id); }
         if (act === 'add') { addToCart(id); }
-      }, { once: true });
+      });
     }
 
     // Loja: filtros
@@ -829,12 +829,15 @@
         `;
         grid.appendChild(el);
       });
-      grid.onclick = (e) => {
+      // Remover event listeners antigos e adicionar novo
+      grid.replaceWith(grid.cloneNode(true));
+      const newGrid = qs('#catalogoGrid');
+      newGrid.addEventListener('click', (e) => {
         const b = e.target.closest('button'); if (!b) return;
         const id = b.getAttribute('data-id'); const act = b.getAttribute('data-action');
         if (act === 'ver') openProduto(id);
         if (act === 'add') addToCart(id);
-      };
+      });
     }
 
     // Novidades
@@ -863,12 +866,15 @@
         `;
         grid.appendChild(el);
       });
-      grid.onclick = (e) => {
+      // Remover event listeners antigos e adicionar novo
+      grid.replaceWith(grid.cloneNode(true));
+      const newGrid = qs('#novidadesGrid');
+      newGrid.addEventListener('click', (e) => {
         const b = e.target.closest('button'); if (!b) return;
         const id = b.getAttribute('data-id'); const act = b.getAttribute('data-action');
         if (act === 'ver') openProduto(id);
         if (act === 'add') addToCart(id);
-      };
+      });
     }
 
     // Produto detalhe
