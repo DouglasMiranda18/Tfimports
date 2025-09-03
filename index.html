@@ -2468,6 +2468,110 @@
       }
     }
     init();
+
+    // Função de teste para verificar API do Mercado Pago
+    window.testMercadoPago = async function() {
+      try {
+        console.log('🧪 Testando API do Mercado Pago...');
+        
+        // Verificar se o serviço está disponível
+        if (typeof mercadoPagoService === 'undefined') {
+          console.error('❌ MercadoPagoService não está disponível');
+          return false;
+        }
+        
+        console.log('✅ MercadoPagoService disponível');
+        
+        // Verificar configuração
+        const configValidation = validateConfig();
+        console.log('🔍 Configuração:', configValidation);
+        
+        if (!configValidation.isValid) {
+          console.error('❌ Configuração inválida:', configValidation.errors);
+          return false;
+        }
+        
+        console.log('✅ Configuração válida');
+        
+        // Testar conexão com a API
+        const testUrl = 'https://api.mercadopago.com/v1/payment_methods?country_id=BR';
+        console.log('🌐 Testando conexão com:', testUrl);
+        
+        const response = await fetch(testUrl, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${apiConfig.mercadoPago.accessToken}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        console.log('📡 Status da resposta:', response.status);
+        console.log('📡 Headers da resposta:', Object.fromEntries(response.headers.entries()));
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log('✅ API funcionando! Dados recebidos:', data);
+          return true;
+        } else {
+          const errorText = await response.text();
+          console.error('❌ Erro na API:', response.status, errorText);
+          return false;
+        }
+        
+      } catch (error) {
+        console.error('❌ Erro no teste:', error);
+        console.error('❌ Stack trace:', error.stack);
+        return false;
+      }
+    };
+
+    // Função para verificar CSP
+    window.checkCSP = function() {
+      console.log('🔒 Verificando Content Security Policy...');
+      
+      // Verificar se há meta tag CSP
+      const cspMeta = document.querySelector('meta[http-equiv="Content-Security-Policy"]');
+      if (cspMeta) {
+        console.log('✅ Meta tag CSP encontrada:', cspMeta.content);
+      } else {
+        console.log('❌ Meta tag CSP não encontrada');
+      }
+      
+      // Verificar se há headers CSP no Netlify
+      console.log('🌐 Para verificar headers do Netlify, use:');
+      console.log('curl -I https://tfimports01.com.br');
+      
+      return true;
+    };
+
+    // Função para verificar todas as configurações
+    window.checkAllConfigs = function() {
+      console.log('🔍 Verificando todas as configurações...');
+      
+      // Verificar configuração da API
+      const configValidation = validateConfig();
+      console.log('📋 Configuração da API:', configValidation);
+      
+      // Verificar se os serviços estão disponíveis
+      console.log('🛒 MercadoPagoService:', typeof mercadoPagoService !== 'undefined' ? '✅ Disponível' : '❌ Não disponível');
+      console.log('🚚 MelhorEnvioService:', typeof melhorEnvioService !== 'undefined' ? '✅ Disponível' : '❌ Não disponível');
+      
+      // Verificar configurações específicas
+      console.log('💳 Mercado Pago:', {
+        publicKey: apiConfig.mercadoPago.publicKey ? '✅ Configurada' : '❌ Não configurada',
+        accessToken: apiConfig.mercadoPago.accessToken ? '✅ Configurado' : '❌ Não configurado',
+        sandbox: apiConfig.mercadoPago.sandbox,
+        baseUrl: apiConfig.mercadoPago.baseUrl
+      });
+      
+      console.log('📦 Melhor Envio:', {
+        token: apiConfig.melhorEnvio.token ? '✅ Configurado' : '❌ Não configurado',
+        sandbox: apiConfig.melhorEnvio.sandbox,
+        baseUrl: apiConfig.melhorEnvio.baseUrl
+      });
+      
+      return true;
+    };
   </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9721b30b149bf202',t:'MTc1NTY5MDkwMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
