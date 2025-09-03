@@ -568,6 +568,7 @@
             <select id="admCategoria" class="bg-transparent pill px-3 py-2 rounded-lg col-span-2"></select>
             <input id="admPreco" class="bg-transparent pill px-3 py-2 rounded-lg" placeholder="Preço (R$)" />
             <input id="admPromo" class="bg-transparent pill px-3 py-2 rounded-lg" placeholder="Preço promocional (opcional)" />
+            <input id="admImagem" class="bg-transparent pill px-3 py-2 rounded-lg col-span-2" placeholder="URL da imagem (opcional)" />
             <input id="admCores" class="bg-transparent pill px-3 py-2 rounded-lg col-span-2" placeholder="Cores (ex.: preto,branco,azul)" />
             <input id="admTamanhos" class="bg-transparent pill px-3 py-2 rounded-lg col-span-2" placeholder="Tamanhos (ex.: P,M,G,GG)" />
             <textarea id="admDesc" class="bg-transparent pill px-3 py-2 rounded-lg col-span-2" rows="3" placeholder="Descrição curta"></textarea>
@@ -849,15 +850,29 @@
       });
     }
 
-    // Produto card SVG placeholder
-    function svgThumb() {
-      return `
-        <div class="card-img rounded-2xl aspect-[4/3] grid place-items-center">
-          <svg viewBox="0 0 140 100" class="w-24 h-24">
-            <rect x="10" y="10" width="120" height="80" rx="12" fill="#0b1a34"/>
-            <path d="M20 75 L55 35 L85 55 L120 25" stroke="#1dd1a1" stroke-width="5" fill="none"/>
-          </svg>
-        </div>`;
+    // Produto card com imagem ou placeholder
+    function produtoThumb(produto) {
+      if (produto.imagem) {
+        return `
+          <div class="card-img rounded-2xl aspect-[4/3] overflow-hidden">
+            <img src="${produto.imagem}" alt="${produto.nome}" class="w-full h-full object-cover" 
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <div class="w-full h-full flex items-center justify-center bg-gray-800" style="display:none;">
+              <svg viewBox="0 0 140 100" class="w-24 h-24">
+                <rect x="10" y="10" width="120" height="80" rx="12" fill="#0b1a34"/>
+                <path d="M20 75 L55 35 L85 55 L120 25" stroke="#1dd1a1" stroke-width="5" fill="none"/>
+              </svg>
+            </div>
+          </div>`;
+      } else {
+        return `
+          <div class="card-img rounded-2xl aspect-[4/3] grid place-items-center">
+            <svg viewBox="0 0 140 100" class="w-24 h-24">
+              <rect x="10" y="10" width="120" height="80" rx="12" fill="#0b1a34"/>
+              <path d="M20 75 L55 35 L85 55 L120 25" stroke="#1dd1a1" stroke-width="5" fill="none"/>
+            </svg>
+          </div>`;
+      }
     }
 
     // Destaques
@@ -868,7 +883,7 @@
         const el = document.createElement('div');
         el.className = 'glass rounded-2xl overflow-hidden hover:ring-2 hover:ring-emerald-400/40';
         el.innerHTML = `
-          ${svgThumb()}
+          ${produtoThumb(p)}
           <div class="p-4">
             <div class="flex items-center justify-between">
               <h3 class="font-bold">${p.nome}</h3>
@@ -952,7 +967,7 @@
         const el = document.createElement('div');
         el.className = 'glass rounded-2xl overflow-hidden hover:ring-2 hover:ring-emerald-400/40';
         el.innerHTML = `
-          ${svgThumb()}
+          ${produtoThumb(p)}
           <div class="p-4">
             <h3 class="font-bold">${p.nome}</h3>
             <div class="mt-1 text-sm hint">${p.categoria}</div>
@@ -987,7 +1002,7 @@
         const el = document.createElement('div');
         el.className = 'glass rounded-2xl overflow-hidden';
         el.innerHTML = `
-          ${svgThumb()}
+          ${produtoThumb(p)}
           <div class="p-4">
             <div class="flex items-center justify-between">
               <h3 class="font-bold">${p.nome}</h3>
@@ -1557,6 +1572,10 @@
     qs('#btnSalvarProduto').addEventListener('click', async () => {
       if (!state.user) { toast('Faça login com Google para salvar produtos.'); return; }
       
+      // Verificar se é edição
+      const editId = qs('#btnSalvarProduto').getAttribute('data-edit-id');
+      const isEdit = !!editId;
+      
       // Verificar rate limiting
       if (!checkRateLimit('addProduct', 5, 60000)) { // 5 produtos por minuto
         toast('Muitas tentativas. Aguarde 1 minuto.');
@@ -1568,6 +1587,7 @@
       const cat = qs('#admCategoria').value;
       const preco = parseFloat(qs('#admPreco').value.replace(',','.'))||0;
       const promo = qs('#admPromo').value ? parseFloat(qs('#admPromo').value.replace(',','.')) : null;
+      const imagem = qs('#admImagem').value.trim();
       const cores = qs('#admCores').value.split(',').map(s=>sanitizeText(s.trim())).filter(Boolean);
       const tams = qs('#admTamanhos').value.split(',').map(s=>sanitizeText(s.trim())).filter(Boolean);
       const desc = sanitizeText(qs('#admDesc').value.trim());
@@ -1587,43 +1607,74 @@
       }
       
       try {
-        // Salvar no Firestore
-        const produtoData = {
-          nome,
-          categoria: cat,
-          preco,
-          promo,
-          cores,
-          tamanhos: tams,
-          novas: true,
-          destaque: false,
-          descricao: desc || 'Sem descrição',
-          composicao: 'A definir',
-          estilo: 'TFI Signature',
-          imagens: ['svg'],
-          criadoPor: state.user.uid,
-          criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
-          atualizadoEm: firebase.firestore.FieldValue.serverTimestamp()
-        };
+        if (isEdit) {
+          // Atualizar produto existente
+          const produtoData = {
+            nome,
+            categoria: cat,
+            preco,
+            promo,
+            cores,
+            tamanhos: tams,
+            descricao: desc || 'Sem descrição',
+            imagem: imagem || null,
+            imagens: imagem ? [imagem] : ['svg'],
+            atualizadoEm: firebase.firestore.FieldValue.serverTimestamp()
+          };
+          
+          await db.collection('produtos').doc(editId).update(produtoData);
+          
+          // Atualizar no estado local
+          const idx = state.produtos.findIndex(p => p.id === editId);
+          if (idx >= 0) {
+            state.produtos[idx] = { ...state.produtos[idx], ...produtoData };
+          }
+          
+          toast('Produto atualizado com sucesso!');
+          
+        } else {
+          // Criar novo produto
+          const produtoData = {
+            nome,
+            categoria: cat,
+            preco,
+            promo,
+            cores,
+            tamanhos: tams,
+            novas: true,
+            destaque: false,
+            descricao: desc || 'Sem descrição',
+            composicao: 'A definir',
+            estilo: 'TFI Signature',
+            imagem: imagem || null,
+            imagens: imagem ? [imagem] : ['svg'],
+            criadoPor: state.user.uid,
+            criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
+            atualizadoEm: firebase.firestore.FieldValue.serverTimestamp()
+          };
+          
+          const docRef = await db.collection('produtos').add(produtoData);
+          
+          // Adicionar ao estado local
+          const novo = { 
+            id: docRef.id, 
+            ...produtoData
+          };
+          
+          state.produtos.unshift(novo);
+          toast('Produto salvo com sucesso!');
+        }
         
-        const docRef = await db.collection('produtos').add(produtoData);
-        
-        // Adicionar ao estado local
-        const novo = { 
-          id: docRef.id, 
-          ...produtoData
-        };
-        
-        state.produtos.unshift(novo);
         persistLocalProducts();
         filterAndRenderCatalog(); 
         renderDestaques(); 
         renderNovidades(); 
         renderAdminList();
-        toast('Produto salvo com sucesso!');
         
-        // Limpar formulário
-        ['#admNome','#admPreco','#admPromo','#admCores','#admTamanhos','#admDesc'].forEach(s=>qs(s).value='');
+        // Limpar formulário e resetar botão
+        ['#admNome','#admPreco','#admPromo','#admImagem','#admCores','#admTamanhos','#admDesc'].forEach(s=>qs(s).value='');
+        qs('#btnSalvarProduto').textContent = 'Salvar Produto';
+        qs('#btnSalvarProduto').removeAttribute('data-edit-id');
         
       } catch (error) {
         console.error('Erro ao salvar produto:', error);
@@ -1635,11 +1686,26 @@
       state.produtos.slice(0,20).forEach(p=>{
         const row = document.createElement('div');
         row.className='glass rounded-xl p-3 flex items-center justify-between';
-        row.innerHTML = `<div><div class="font-bold">${p.nome}</div><div class="hint text-sm">${p.categoria}</div></div>
-        <div class="flex items-center gap-2">
-          <button class="btn pill px-3 py-1 rounded-lg" data-id="${p.id}" data-act="dest">${p.destaque?'Remover destaque':'Destacar'}</button>
-          <button class="btn pill px-3 py-1 rounded-lg" data-id="${p.id}" data-act="del">Excluir</button>
-        </div>`;
+        row.innerHTML = `
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-lg overflow-hidden bg-gray-800">
+              ${p.imagem ? 
+                `<img src="${p.imagem}" alt="${p.nome}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                 <div class="w-full h-full flex items-center justify-center text-gray-400" style="display:none;">📦</div>` :
+                `<div class="w-full h-full flex items-center justify-center text-gray-400">📦</div>`
+              }
+            </div>
+            <div>
+              <div class="font-bold">${p.nome}</div>
+              <div class="hint text-sm">${p.categoria} • ${fmt(p.promo ?? p.preco)}</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button class="btn pill px-3 py-1 rounded-lg text-xs" data-id="${p.id}" data-act="edit">Editar</button>
+            <button class="btn pill px-3 py-1 rounded-lg text-xs" data-id="${p.id}" data-act="dest">${p.destaque?'Remover destaque':'Destacar'}</button>
+            <button class="btn pill px-3 py-1 rounded-lg text-xs hover:bg-red-500/20 hover:text-red-300" data-id="${p.id}" data-act="del">Excluir</button>
+          </div>
+        `;
         box.appendChild(row);
       });
       box.onclick = async (e)=>{
@@ -1648,18 +1714,42 @@
         const idx = state.produtos.findIndex(p=>p.id===id); if (idx<0) return;
         
         try {
-          if (act==='dest') {
+          if (act==='edit') {
+            // Preencher formulário com dados do produto
+            const produto = state.produtos[idx];
+            qs('#admNome').value = produto.nome || '';
+            qs('#admCategoria').value = produto.categoria || '';
+            qs('#admPreco').value = produto.preco || '';
+            qs('#admPromo').value = produto.promo || '';
+            qs('#admImagem').value = produto.imagem || '';
+            qs('#admCores').value = produto.cores ? produto.cores.join(', ') : '';
+            qs('#admTamanhos').value = produto.tamanhos ? produto.tamanhos.join(', ') : '';
+            qs('#admDesc').value = produto.descricao || '';
+            
+            // Alterar botão para "Atualizar"
+            qs('#btnSalvarProduto').textContent = 'Atualizar Produto';
+            qs('#btnSalvarProduto').setAttribute('data-edit-id', id);
+            
+            // Scroll para o formulário
+            qs('#admNome').scrollIntoView({ behavior: 'smooth' });
+            toast('Formulário preenchido. Edite e clique em "Atualizar Produto".');
+          }
+          else if (act==='dest') {
             state.produtos[idx].destaque = !state.produtos[idx].destaque;
             // Atualizar no Firestore
             await db.collection('produtos').doc(id).update({
               destaque: state.produtos[idx].destaque,
               atualizadoEm: firebase.firestore.FieldValue.serverTimestamp()
             });
+            toast('Destaque atualizado!');
           }
-          if (act==='del') {
-            // Remover do Firestore
-            await db.collection('produtos').doc(id).delete();
-            state.produtos.splice(idx,1);
+          else if (act==='del') {
+            if (confirm('Tem certeza que deseja excluir este produto?')) {
+              // Remover do Firestore
+              await db.collection('produtos').doc(id).delete();
+              state.produtos.splice(idx,1);
+              toast('Produto excluído!');
+            }
           }
           
           persistLocalProducts(); 
@@ -1945,7 +2035,11 @@
     });
     
     if (auth) {
-      auth.onAuthStateChanged(u => { state.user = u || null; updateAuthUI(); });
+      auth.onAuthStateChanged(u => { 
+        state.user = u || null; 
+        updateAuthUI(); 
+        console.log('Estado de autenticação:', u ? 'Logado' : 'Deslogado');
+      });
     }
 
     // Mini util: year
