@@ -7,6 +7,26 @@
   <meta name="description" content="TFI IMPORTS — Moda masculina premium inspirada no lifestyle Playboy. Exclusividade, atitude e sofisticação. Compre online: camisetas, calças, bermudas, cuecas premium e mais." />
   <meta name="theme-color" content="#0b1220" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 64 64%27%3E%3Crect width=%2764%27 height=%2764%27 rx=%2712%27 fill=%27%230b1220%27/%3E%3Cpath d=%27M13 46c8-2 14-9 19-18 2-4 5-7 9-9 4-2 9-2 10 2s-2 10-7 13c-3 2-6 2-9 3-6 2-9 6-10 10-1 3-7 3-12-1z%27 fill=%27%2346d39a%27/%3E%3Ctext x=%2732%27 y=%2738%27 font-size=%2722%27 text-anchor=%27middle%27 fill=%27%23e5edf8%27 font-family=%27Georgia, serif%27%3ETF%3C/text%3E%3C/svg%3E" />
+  
+  <!-- Content Security Policy -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://www.gstatic.com;
+    style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com;
+    img-src 'self' data: https:;
+    connect-src 'self' https://*.firebaseapp.com https://*.googleapis.com;
+    font-src 'self' data:;
+    object-src 'none';
+    base-uri 'self';
+    form-action 'self';
+    frame-ancestors 'none';
+  " />
+  
+  <!-- Outros headers de segurança -->
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+  <meta http-equiv="X-Frame-Options" content="DENY" />
+  <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @font-face {
@@ -81,6 +101,10 @@
   <!-- Firebase SDKs (Auth only, sem campos de senha locais) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  
+  <!-- Módulos de segurança -->
+  <script type="module" src="config.js"></script>
+  <script type="module" src="security.js"></script>
 </head>
 <body class="font-[InterVar] selection:bg-emerald-300 selection:text-black">
   <!-- Header -->
@@ -468,7 +492,10 @@
     </div>
   </footer>
 
-  <script>
+  <script type="module">
+    // Importar funções de segurança
+    import { checkRateLimit, sanitizeText, validateProduct } from './security.js';
+    
     // Estado global (local)
     const state = {
       user: null,
@@ -1017,9 +1044,30 @@
         box.appendChild(b);
       }
       qs('#btnEnviarFeedback').onclick = () => {
+        // Verificar rate limiting
+        if (!checkRateLimit('feedback', 3, 300000)) { // 3 tentativas por 5 minutos
+          toast('Muitas tentativas. Aguarde 5 minutos.');
+          return;
+        }
+        
         const txt = qs('#feedbackText').value.trim();
         if (!txt) { toast('Escreva um comentário.'); return; }
-        feedbacks.unshift({ nome: state.user?.displayName || 'Cliente', nota: currentRating, texto: txt, data: 'agora' });
+        
+        // Sanitizar dados
+        const sanitizedText = sanitizeText(txt);
+        const sanitizedName = sanitizeText(state.user?.displayName || 'Cliente');
+        
+        if (sanitizedText.length < 3) {
+          toast('Comentário muito curto.');
+          return;
+        }
+        
+        feedbacks.unshift({ 
+          nome: sanitizedName, 
+          nota: currentRating, 
+          texto: sanitizedText, 
+          data: 'agora' 
+        });
         qs('#feedbackText').value='';
         renderFeedbacks();
         toast('Obrigado pelo feedback!');
@@ -1054,20 +1102,62 @@
     }
     qs('#btnSalvarProduto').addEventListener('click', () => {
       if (!state.user) { toast('Faça login com Google para salvar (Demo).'); return; }
-      const nome = qs('#admNome').value.trim();
+      
+      // Verificar rate limiting
+      if (!checkRateLimit('addProduct', 5, 60000)) { // 5 produtos por minuto
+        toast('Muitas tentativas. Aguarde 1 minuto.');
+        return;
+      }
+      
+      // Coletar e sanitizar dados
+      const nome = sanitizeText(qs('#admNome').value.trim());
       const cat = qs('#admCategoria').value;
       const preco = parseFloat(qs('#admPreco').value.replace(',','.'))||0;
       const promo = qs('#admPromo').value ? parseFloat(qs('#admPromo').value.replace(',','.')) : null;
-      const cores = qs('#admCores').value.split(',').map(s=>s.trim()).filter(Boolean);
-      const tams = qs('#admTamanhos').value.split(',').map(s=>s.trim()).filter(Boolean);
-      const desc = qs('#admDesc').value.trim();
-      if (!nome || !preco || !cores.length || !tams.length) { toast('Preencha os campos obrigatórios.'); return; }
+      const cores = qs('#admCores').value.split(',').map(s=>sanitizeText(s.trim())).filter(Boolean);
+      const tams = qs('#admTamanhos').value.split(',').map(s=>sanitizeText(s.trim())).filter(Boolean);
+      const desc = sanitizeText(qs('#admDesc').value.trim());
+      
+      // Validar dados
+      const produto = { nome, categoria: cat, preco, promo, cores, tamanhos: tams, descricao: desc };
+      const validation = validateProduct(produto);
+      
+      if (!validation.isValid) {
+        toast('Erro: ' + validation.errors.join(', '));
+        return;
+      }
+      
+      if (!nome || !preco || !cores.length || !tams.length) { 
+        toast('Preencha os campos obrigatórios.'); 
+        return; 
+      }
+      
       const id = 'p'+(Date.now());
-      const novo = { id, nome, categoria: cat, preco, promo, cores, tamanhos:tams, novas:true, destaque:false, descricao:desc||'Sem descrição', composicao:'A definir', estilo:'TFI Signature', imagens:['svg'] };
+      const novo = { 
+        id, 
+        nome, 
+        categoria: cat, 
+        preco, 
+        promo, 
+        cores, 
+        tamanhos: tams, 
+        novas: true, 
+        destaque: false, 
+        descricao: desc || 'Sem descrição', 
+        composicao: 'A definir', 
+        estilo: 'TFI Signature', 
+        imagens: ['svg'] 
+      };
+      
       state.produtos.unshift(novo);
       persistLocalProducts();
-      filterAndRenderCatalog(); renderDestaques(); renderNovidades(); renderAdminList();
+      filterAndRenderCatalog(); 
+      renderDestaques(); 
+      renderNovidades(); 
+      renderAdminList();
       toast('Produto salvo localmente!');
+      
+      // Limpar formulário
       ['#admNome','#admPreco','#admPromo','#admCores','#admTamanhos','#admDesc'].forEach(s=>qs(s).value='');
     });
     function renderAdminList() {
@@ -1106,23 +1196,61 @@
     qs('#closeTutorial').addEventListener('click', ()=> qs('#tutorialModal').classList.add('hidden'));
     qs('#btnSalvarPDF').addEventListener('click', ()=> window.print());
 
-    // Firebase Auth (Google only)
-    const firebaseConfig = {
-      apiKey: "AIzaSyD__XrPqFeh4_K0ih4l1reNvWxjW7VItPw",
-      authDomain: "tfimports-27898.firebaseapp.com",
-      projectId: "tfimports-27898",
-      storageBucket: "tfimports-27898.firebasestorage.app",
-      messagingSenderId: "379291286011",
-      appId: "1:379291286011:web:1feb4711b5235b04c4b35e",
-      measurementId: "G-B742BVBRES"
-    };
+    // Firebase Auth (Google only) - Configuração segura
+    // As credenciais agora vêm do arquivo config.js
+    let firebaseConfig;
+    let isProduction = false;
+    let isDemo = true;
+    
+    // Carregar configuração de forma assíncrona
+    async function loadFirebaseConfig() {
+      try {
+        const configModule = await import('./config.js');
+        firebaseConfig = configModule.firebaseConfig;
+        isProduction = configModule.isProduction;
+        isDemo = configModule.isDemo;
+        
+        if (isDemo) {
+          console.warn('⚠️ Executando em modo DEMO - configure as variáveis de ambiente para produção');
+        }
+      } catch (error) {
+        console.error('Erro ao carregar configuração:', error);
+        // Fallback para modo demo
+        firebaseConfig = {
+          apiKey: "DEMO_KEY",
+          authDomain: "demo.firebaseapp.com",
+          projectId: "demo-project",
+          storageBucket: "demo.appspot.com",
+          messagingSenderId: "123456789",
+          appId: "1:123456789:web:demo",
+          measurementId: "G-DEMO"
+        };
+        isDemo = true;
+      }
+    }
     let firebaseApp, auth, provider;
-    try {
-      firebaseApp = firebase.initializeApp(firebaseConfig);
-      auth = firebase.auth();
-      provider = new firebase.auth.GoogleAuthProvider();
-    } catch (e) {
-      console.warn('Firebase não inicializado neste ambiente.', e);
+    
+    async function initializeFirebase() {
+      await loadFirebaseConfig();
+      
+      if (isDemo) {
+        console.warn('Firebase em modo DEMO - funcionalidades limitadas');
+        return;
+      }
+      
+      try {
+        firebaseApp = firebase.initializeApp(firebaseConfig);
+        auth = firebase.auth();
+        provider = new firebase.auth.GoogleAuthProvider();
+        
+        // Configurações adicionais de segurança
+        provider.addScope('email');
+        provider.addScope('profile');
+        
+        console.log('Firebase inicializado com sucesso');
+      } catch (e) {
+        console.error('Erro ao inicializar Firebase:', e);
+      }
     }
     function updateAuthUI() {
       qs('#authState').textContent = state.user ? `Olá, ${state.user.displayName||'admin'}` : 'Não autenticado';
@@ -1151,7 +1279,10 @@
     qs('#year').textContent = new Date().getFullYear();
 
     // Inicialização
-    function init() {
+    async function init() {
+      // Carregar configuração do Firebase primeiro
+      await initializeFirebase();
+      
       loadLocalProducts();
       loadCart();
       renderChips();
