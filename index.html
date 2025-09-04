@@ -108,7 +108,7 @@
   
   <!-- Módulos de integração -->
   <script type="module" src="api-config.js"></script>
-  <script type="module" src="mercado-pago.js"></script>
+  <script type="module" src="asaas.js"></script>
   <script type="module" src="melhor-envio.js"></script>
   <script type="module" src="order-manager.js"></script>
 </head>
@@ -741,7 +741,7 @@
     import { checkRateLimit, sanitizeText, validateProduct } from './security.js';
     
     // Importar serviços de integração
-    import { mercadoPagoService } from './mercado-pago.js';
+    import { asaasService } from './asaas.js';
     import { melhorEnvioService } from './melhor-envio.js';
     import { OrderManager } from './order-manager.js';
     import { validateConfig } from './api-config.js';
@@ -1577,51 +1577,53 @@
           user_id: orderData.user_id
         };
         
-        console.log('🛒 Dados para preferência:', paymentData);
-        console.log('🛒 Criando preferência Mercado Pago...');
+        console.log('🛒 Dados para pagamento:', paymentData);
+        console.log('🛒 Criando pagamento Asaas...');
         
         // Verificar se o serviço está disponível
-        if (typeof mercadoPagoService === 'undefined') {
-          console.error('❌ MercadoPagoService não está disponível');
+        if (typeof asaasService === 'undefined') {
+          console.error('❌ AsaasService não está disponível');
           toast('Erro: Serviço de pagamento não disponível');
           return;
         }
         
-        console.log('✅ MercadoPagoService disponível, criando preferência...');
-        const preferenceResult = await mercadoPagoService.createPreference(paymentData);
+        console.log('✅ AsaasService disponível, criando pagamento...');
+        const paymentResult = await asaasService.createPixPayment(paymentData);
         
-        console.log('🔄 Resultado da criação da preferência:', preferenceResult);
+        console.log('🔄 Resultado da criação do pagamento:', paymentResult);
         
-        if (preferenceResult.success) {
-          console.log('✅ Preferência criada com sucesso, salvando pedido...');
+        if (paymentResult.success) {
+          console.log('✅ Pagamento criado com sucesso, salvando pedido...');
           
           // Salvar pedido no Firebase com status pendente
           const orderRef = await db.collection('pedidos').add({
             ...orderData,
             status: 'pending_payment',
-            payment_id: preferenceResult.preference_id,
+            payment_id: paymentResult.paymentId,
             external_reference: paymentData.external_reference,
             created_at: firebase.firestore.FieldValue.serverTimestamp()
           });
           
           console.log('✅ Pedido salvo no Firebase:', orderRef.id);
           
-          // Redirecionar para checkout do Mercado Pago
-          const checkoutUrl = apiConfig.mercadoPago.sandbox 
-            ? preferenceResult.sandbox_init_point 
-            : preferenceResult.init_point;
-          
-          console.log('🚀 URL de checkout:', checkoutUrl);
-          console.log('🚀 Redirecionando para Mercado Pago:', checkoutUrl);
-          
-          // Confirmar redirecionamento
-          if (confirm('Redirecionar para o Mercado Pago para finalizar o pagamento?')) {
-            window.location.href = checkoutUrl;
+          // Mostrar QR Code PIX ou redirecionar
+          if (paymentResult.qrCode) {
+            console.log('📱 QR Code PIX gerado:', paymentResult.qrCode);
+            
+            // Mostrar modal com QR Code PIX
+            showPixModal(paymentResult);
+          } else if (paymentResult.paymentUrl) {
+            console.log('🚀 URL de pagamento:', paymentResult.paymentUrl);
+            
+            // Confirmar redirecionamento
+            if (confirm('Redirecionar para o Asaas para finalizar o pagamento?')) {
+              window.location.href = paymentResult.paymentUrl;
+            }
           }
           
         } else {
-          console.error('❌ Erro ao criar preferência:', preferenceResult.error);
-          toast(`Erro ao criar pagamento: ${preferenceResult.error}`);
+          console.error('❌ Erro ao criar pagamento:', paymentResult.error);
+          toast(`Erro ao criar pagamento: ${paymentResult.error}`);
         }
         
       } catch (error) {
@@ -2469,18 +2471,67 @@
     }
     init();
 
-    // Função de teste para verificar API do Mercado Pago
-    window.testMercadoPago = async function() {
+    // Função para mostrar modal do PIX
+    function showPixModal(paymentResult) {
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+      modal.innerHTML = `
+        <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+          <h3 class="text-xl font-bold mb-4 text-center">Pagamento PIX</h3>
+          
+          ${paymentResult.qrCode ? `
+            <div class="text-center mb-4">
+              <img src="${paymentResult.qrCode}" alt="QR Code PIX" class="mx-auto mb-4" style="max-width: 200px;">
+              <p class="text-sm text-gray-600">Escaneie o QR Code com seu app de pagamento</p>
+            </div>
+          ` : ''}
+          
+          ${paymentResult.pixCopyPaste ? `
+            <div class="mb-4">
+              <label class="block text-sm font-medium mb-2">Código PIX (Copiar e Colar):</label>
+              <textarea readonly class="w-full p-2 border rounded text-xs" rows="4">${paymentResult.pixCopyPaste}</textarea>
+              <button onclick="navigator.clipboard.writeText('${paymentResult.pixCopyPaste}')" 
+                      class="mt-2 bg-blue-500 text-white px-4 py-2 rounded text-sm">
+                Copiar Código
+              </button>
+            </div>
+          ` : ''}
+          
+          <div class="text-center">
+            <p class="text-sm text-gray-600 mb-4">
+              Após o pagamento, envie o comprovante para:<br>
+              <strong>WhatsApp: (84) 99999-9999</strong>
+            </p>
+            
+            <div class="flex gap-2">
+              <button onclick="this.closest('.fixed').remove()" 
+                      class="flex-1 bg-gray-500 text-white px-4 py-2 rounded">
+                Fechar
+              </button>
+              <button onclick="window.open('https://wa.me/5584999999999?text=Comprovante%20de%20pagamento%20PIX', '_blank')" 
+                      class="flex-1 bg-green-500 text-white px-4 py-2 rounded">
+                WhatsApp
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(modal);
+    }
+
+    // Função de teste para verificar API do Asaas
+    window.testAsaas = async function() {
       try {
-        console.log('🧪 Testando API do Mercado Pago...');
+        console.log('🧪 Testando API do Asaas...');
         
         // Verificar se o serviço está disponível
-        if (typeof mercadoPagoService === 'undefined') {
-          console.error('❌ MercadoPagoService não está disponível');
+        if (typeof asaasService === 'undefined') {
+          console.error('❌ AsaasService não está disponível');
           return false;
         }
         
-        console.log('✅ MercadoPagoService disponível');
+        console.log('✅ AsaasService disponível');
         
         // Verificar configuração
         const configValidation = validateConfig();
@@ -2553,15 +2604,14 @@
       console.log('📋 Configuração da API:', configValidation);
       
       // Verificar se os serviços estão disponíveis
-      console.log('🛒 MercadoPagoService:', typeof mercadoPagoService !== 'undefined' ? '✅ Disponível' : '❌ Não disponível');
+      console.log('💳 AsaasService:', typeof asaasService !== 'undefined' ? '✅ Disponível' : '❌ Não disponível');
       console.log('🚚 MelhorEnvioService:', typeof melhorEnvioService !== 'undefined' ? '✅ Disponível' : '❌ Não disponível');
       
       // Verificar configurações específicas
-      console.log('💳 Mercado Pago:', {
-        publicKey: apiConfig.mercadoPago.publicKey ? '✅ Configurada' : '❌ Não configurada',
-        accessToken: apiConfig.mercadoPago.accessToken ? '✅ Configurado' : '❌ Não configurado',
-        sandbox: apiConfig.mercadoPago.sandbox,
-        baseUrl: apiConfig.mercadoPago.baseUrl
+      console.log('💳 Asaas:', {
+        apiKey: apiConfig.asaas.apiKey && apiConfig.asaas.apiKey !== 'SUA_API_KEY_AQUI' ? '✅ Configurada' : '❌ Não configurada',
+        environment: apiConfig.asaas.environment,
+        baseUrl: apiConfig.asaas.baseUrl
       });
       
       console.log('📦 Melhor Envio:', {

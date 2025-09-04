@@ -1,5 +1,5 @@
-// Netlify Function para Mercado Pago
-// Resolve problemas de CORS fazendo a chamada do servidor
+// Netlify Function para Asaas
+// Cria pagamentos via Asaas API
 
 const https = require('https');
 
@@ -36,9 +36,15 @@ exports.handler = async (event, context) => {
     const data = JSON.parse(event.body);
     console.log('📋 Dados parseados:', data);
     
-    // Credenciais do Mercado Pago (produção)
-    const accessToken = 'APP_USR-5032663457298044-090316-620de3416b9f7f60d475223dd78c6b99-2018162925';
-    console.log('🔑 Access Token configurado');
+    // API Key do Asaas (você vai configurar depois)
+    const apiKey = process.env.ASAAS_API_KEY || 'SUA_API_KEY_AQUI';
+    const environment = process.env.ASAAS_ENVIRONMENT || 'sandbox';
+    const baseUrl = environment === 'production' 
+      ? 'https://www.asaas.com/api/v3' 
+      : 'https://sandbox.asaas.com/api/v3';
+    
+    console.log('🔑 API Key configurada:', apiKey ? 'Sim' : 'Não');
+    console.log('🌍 Ambiente:', environment);
     
     // Validar dados obrigatórios
     if (!data.items || !Array.isArray(data.items) || data.items.length === 0) {
@@ -49,51 +55,40 @@ exports.handler = async (event, context) => {
       throw new Error('Dados do cliente são obrigatórios');
     }
     
-    // Criar preferência
-    const preference = {
-      items: data.items.map(item => ({
-        id: item.id,
-        title: item.nome,
-        description: item.descricao || '',
-        quantity: parseInt(item.quantidade) || 1,
-        unit_price: parseFloat(item.preco) || 0,
-        currency_id: 'BRL'
-      })),
-      payer: {
-        name: data.cliente.nome,
-        email: data.cliente.email,
-        phone: data.cliente.telefone ? {
-          number: data.cliente.telefone
-        } : undefined
-      },
-      back_urls: {
-        success: `${data.baseUrl}/#checkout-success`,
-        failure: `${data.baseUrl}/#checkout-failure`,
-        pending: `${data.baseUrl}/#checkout-pending`
-      },
-      auto_return: 'approved',
-      external_reference: data.pedidoId || 'pedido-' + Date.now(),
-      notification_url: `${data.baseUrl}/.netlify/functions/webhook-mercado-pago`,
-      payment_methods: {
-        excluded_payment_methods: [],
-        excluded_payment_types: [],
-        installments: 12
+    // Calcular valor total
+    const totalValue = data.items.reduce((total, item) => {
+      return total + (parseFloat(item.preco) * parseInt(item.quantidade));
+    }, 0);
+    
+    console.log('💰 Valor total:', totalValue);
+    
+    // Criar pagamento
+    const payment = {
+      customer: 'cliente-padrao', // Por enquanto usar cliente padrão
+      billingType: data.tipoPagamento || 'PIX', // PIX, CREDIT_CARD, BOLETO
+      value: totalValue.toFixed(2),
+      dueDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      description: `Pedido ${data.pedidoId || 'pedido-' + Date.now()} - TFI IMPORTS`,
+      externalReference: data.pedidoId || 'pedido-' + Date.now(),
+      callback: {
+        successUrl: `${data.baseUrl}/#checkout-success`,
+        autoRedirect: true
       }
     };
     
-    console.log('🛒 Preferência criada:', JSON.stringify(preference, null, 2));
+    console.log('🛒 Pagamento criado:', JSON.stringify(payment, null, 2));
 
-    // Chamar API do Mercado Pago usando https
+    // Chamar API do Asaas
     const result = await new Promise((resolve, reject) => {
-      const postData = JSON.stringify(preference);
+      const postData = JSON.stringify(payment);
       
       const options = {
-        hostname: 'api.mercadopago.com',
+        hostname: environment === 'production' ? 'www.asaas.com' : 'sandbox.asaas.com',
         port: 443,
-        path: '/v1/checkout/preferences',
+        path: '/api/v3/payments',
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
+          'access_token': apiKey,
           'Content-Type': 'application/json',
           'Content-Length': Buffer.byteLength(postData)
         }
@@ -114,7 +109,7 @@ exports.handler = async (event, context) => {
               reject(new Error('Erro ao parsear resposta: ' + e.message));
             }
           } else {
-            reject(new Error(`Mercado Pago API error: ${res.statusCode} - ${data}`));
+            reject(new Error(`Asaas API error: ${res.statusCode} - ${data}`));
           }
         });
       });
@@ -127,21 +122,24 @@ exports.handler = async (event, context) => {
       req.end();
     });
     
-    console.log('✅ Resposta do Mercado Pago:', result);
+    console.log('✅ Resposta do Asaas:', result);
 
     return {
       statusCode: 200,
       headers,
       body: JSON.stringify({
         success: true,
-        preferenceId: result.id,
-        initPoint: result.init_point,
-        sandboxInitPoint: result.sandbox_init_point
+        paymentId: result.id,
+        status: result.status,
+        paymentUrl: result.invoiceUrl,
+        qrCode: result.pixTransaction?.qrCode,
+        pixCopyPaste: result.pixTransaction?.payload,
+        pixKey: result.pixTransaction?.pixKey
       }),
     };
 
   } catch (error) {
-    console.error('Erro na função Mercado Pago:', error);
+    console.error('❌ Erro na função Asaas:', error);
     
     return {
       statusCode: 500,

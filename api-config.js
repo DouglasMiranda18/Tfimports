@@ -2,15 +2,14 @@
 // IMPORTANTE: Estas chaves devem ser configuradas no Firebase Functions ou servidor seguro
 
 export const apiConfig = {
-  // Mercado Pago
-  mercadoPago: {
-    publicKey: import.meta.env.VITE_MERCADO_PAGO_PUBLIC_KEY || 'APP_USR-9e9ec536-b2c8-40eb-bd4a-69d5be0b0539',
-    accessToken: import.meta.env.VITE_MERCADO_PAGO_ACCESS_TOKEN || 'APP_USR-5032663457298044-090316-620de3416b9f7f60d475223dd78c6b99-2018162925',
-    sandbox: import.meta.env.VITE_MERCADO_PAGO_SANDBOX === 'true' || false, // false para produção
-    baseUrl: 'https://api.mercadopago.com',
-    userId: '2018162925',
-    appId: '5032663457298044',
-    clientSecret: import.meta.env.VITE_MERCADO_PAGO_CLIENT_SECRET || 'POvnfQOswweLVB5zUXtyRbtFF11d8OhD'
+  // Asaas - Sistema de Pagamento
+  asaas: {
+    apiKey: import.meta.env.VITE_ASAAS_API_KEY || 'SUA_API_KEY_AQUI',
+    environment: import.meta.env.VITE_ASAAS_ENVIRONMENT || 'sandbox', // sandbox ou production
+    baseUrl: import.meta.env.VITE_ASAAS_ENVIRONMENT === 'production' 
+      ? 'https://www.asaas.com/api/v3' 
+      : 'https://sandbox.asaas.com/api/v3',
+    webhookToken: import.meta.env.VITE_ASAAS_WEBHOOK_TOKEN || 'SEU_WEBHOOK_TOKEN_AQUI'
   },
   
   // Melhor Envio
@@ -34,11 +33,12 @@ export const apiConfig = {
 
 // URLs dos endpoints
 export const endpoints = {
-  mercadoPago: {
-    preferences: '/v1/checkout/preferences',
-    payments: '/v1/payments',
-    orders: '/merchant_orders',
-    webhooks: '/v1/webhooks'
+  asaas: {
+    customers: '/customers',
+    payments: '/payments',
+    subscriptions: '/subscriptions',
+    webhooks: '/webhooks',
+    notifications: '/notifications'
   },
   melhorEnvio: {
     calculate: '/api/v2/me/shipment/calculate',
@@ -58,13 +58,9 @@ export const endpoints = {
 export function validateConfig() {
   const errors = [];
   
-  // Validar Mercado Pago - aceitar credenciais reais
-  if (!apiConfig.mercadoPago.publicKey) {
-    errors.push('Mercado Pago Public Key não configurada');
-  }
-  
-  if (!apiConfig.mercadoPago.accessToken) {
-    errors.push('Mercado Pago Access Token não configurado');
+  // Validar Asaas
+  if (!apiConfig.asaas.apiKey || apiConfig.asaas.apiKey === 'SUA_API_KEY_AQUI') {
+    errors.push('Asaas API Key não configurada');
   }
   
   // Validar Melhor Envio - aceitar qualquer token não vazio
@@ -73,9 +69,9 @@ export function validateConfig() {
   }
   
   console.log('🔍 Validando configuração:', {
-    mercadoPago: {
-      publicKey: apiConfig.mercadoPago.publicKey ? '✅ Configurada' : '❌ Não configurada',
-      accessToken: apiConfig.mercadoPago.accessToken ? '✅ Configurado' : '❌ Não configurado'
+    asaas: {
+      apiKey: apiConfig.asaas.apiKey && apiConfig.asaas.apiKey !== 'SUA_API_KEY_AQUI' ? '✅ Configurada' : '❌ Não configurada',
+      environment: apiConfig.asaas.environment
     },
     melhorEnvio: {
       token: apiConfig.melhorEnvio.token ? '✅ Configurado' : '❌ Não configurado'
@@ -97,8 +93,8 @@ export function getHeaders(api) {
   };
   
   switch (api) {
-    case 'mercadoPago':
-      headers['Authorization'] = `Bearer ${apiConfig.mercadoPago.accessToken}`;
+    case 'asaas':
+      headers['access_token'] = apiConfig.asaas.apiKey;
       break;
     case 'melhorEnvio':
       headers['Authorization'] = `Bearer ${apiConfig.melhorEnvio.token}`;
