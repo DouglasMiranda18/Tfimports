@@ -10,66 +10,45 @@ export class MercadoPagoService {
   // Criar preferência de pagamento para Checkout Pro
   async createPreference(paymentData) {
     try {
-      console.log('🛒 Criando preferência Mercado Pago:', paymentData);
+      console.log('🛒 Criando preferência Mercado Pago via Netlify Function:', paymentData);
       
-      const preference = {
-        items: paymentData.items.map(item => ({
-          id: item.id,
-          title: item.nome,
-          description: item.descricao || '',
-          quantity: item.quantidade,
-          unit_price: parseFloat(item.preco),
-          currency_id: 'BRL'
-        })),
-        payer: {
-          name: paymentData.payer.nome,
+      // Preparar dados para a Netlify Function
+      const requestData = {
+        items: paymentData.items,
+        cliente: {
+          nome: paymentData.payer.nome,
           email: paymentData.payer.email,
-          phone: paymentData.payer.telefone ? {
-            area_code: paymentData.payer.telefone.substring(0, 2),
-            number: paymentData.payer.telefone.substring(2)
-          } : undefined
+          telefone: paymentData.payer.telefone
         },
-        back_urls: {
-          success: `${window.location.origin}/#checkout?status=success&payment_id={PAYMENT_ID}`,
-          failure: `${window.location.origin}/#checkout?status=failure&payment_id={PAYMENT_ID}`,
-          pending: `${window.location.origin}/#checkout?status=pending&payment_id={PAYMENT_ID}`
-        },
-        auto_return: 'approved',
-        external_reference: paymentData.external_reference,
-        notification_url: `${window.location.origin}/api/notifications/mercado-pago`,
-        metadata: {
-          order_id: paymentData.external_reference,
-          user_id: paymentData.user_id,
-          store: 'TFI IMPORTS'
-        },
-        // Configurações específicas do Checkout Pro
-        payment_methods: {
-          excluded_payment_methods: [],
-          excluded_payment_types: [],
-          installments: 12 // Até 12x
-        },
-        expires: true,
-        expiration_date_to: new Date(Date.now() + 30 * 60 * 1000).toISOString() // 30 minutos
+        pedidoId: paymentData.external_reference,
+        baseUrl: window.location.origin
       };
-
-      const response = await fetch(`${this.baseUrl}${endpoints.mercadoPago.preferences}`, {
+      
+      // Chamar Netlify Function em vez da API diretamente
+      const response = await fetch('/.netlify/functions/mercado-pago', {
         method: 'POST',
-        headers: getHeaders('mercadoPago'),
-        body: JSON.stringify(preference)
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData),
       });
 
       if (!response.ok) {
-        throw new Error(`Erro ao criar preferência: ${response.status}`);
+        throw new Error(`Erro na função: ${response.status}`);
       }
 
-      const data = await response.json();
-      console.log('✅ Preferência criada:', data);
+      const result = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Erro desconhecido');
+      }
+
+      console.log('✅ Preferência criada com sucesso:', result);
       
       return {
-        success: true,
-        preference_id: data.id,
-        init_point: data.init_point,
-        sandbox_init_point: data.sandbox_init_point
+        id: result.preferenceId,
+        init_point: result.initPoint,
+        sandbox_init_point: result.sandboxInitPoint
       };
 
     } catch (error) {
