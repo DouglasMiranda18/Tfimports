@@ -890,6 +890,41 @@
     function isAdmin() {
       return state.user && state.user.email === state.adminEmail;
     }
+    
+    // Verificar se há dados de usuário salvos localmente (fallback)
+    function checkLocalUserData() {
+      try {
+        const localUser = localStorage.getItem('tfi_user');
+        if (localUser && !state.user) {
+          const userData = JSON.parse(localUser);
+          // Só usar dados locais se o Firebase não estiver disponível
+          if (!auth) {
+            state.user = userData;
+            updateAuthUI();
+            console.log('Usando dados de usuário salvos localmente');
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao verificar dados locais do usuário:', error);
+      }
+    }
+    
+    // Salvar dados do usuário localmente como backup
+    function saveLocalUserData() {
+      if (state.user) {
+        try {
+          localStorage.setItem('tfi_user', JSON.stringify({
+            uid: state.user.uid,
+            email: state.user.email,
+            displayName: state.user.displayName
+          }));
+        } catch (error) {
+          console.error('Erro ao salvar dados locais do usuário:', error);
+        }
+      } else {
+        localStorage.removeItem('tfi_user');
+      }
+    }
 
     // Navegação SPA
     function navigate(hash) {
@@ -2312,8 +2347,25 @@
         provider.addScope('email');
         provider.addScope('profile');
         
+        // Configurar persistência de autenticação
+        await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+        
         // Inicializar OrderManager
         orderManager = new OrderManager(db);
+        
+        // Configurar listener de mudança de estado de autenticação
+        auth.onAuthStateChanged(u => { 
+          state.user = u || null; 
+          updateAuthUI(); 
+          console.log('Estado de autenticação:', u ? 'Logado' : 'Deslogado');
+          
+          // Garantir que os dados sejam salvos localmente
+          if (u) {
+            saveLocalUserData();
+          } else {
+            localStorage.removeItem('tfi_user');
+          }
+        });
         
         console.log('Firebase inicializado com sucesso');
       } catch (e) {
@@ -2323,6 +2375,9 @@
     function updateAuthUI() {
       if (state.user) {
         const isUserAdmin = isAdmin();
+        
+        // Salvar dados do usuário localmente como backup
+        saveLocalUserData();
         
         // Atualizar estado do admin
         qs('#authState').textContent = `Olá, ${state.user.displayName||'admin'}`;
@@ -2339,6 +2394,9 @@
         qs('#navAdminMobile').classList.toggle('hidden', !isUserAdmin);
         
       } else {
+        // Usuário não logado - limpar dados locais
+        localStorage.removeItem('tfi_user');
+        
         // Usuário não logado
         qs('#authState').textContent = 'Não autenticado';
         qs('#btnLogout').classList.add('hidden');
@@ -2570,19 +2628,16 @@
       }
     });
     
-    if (auth) {
-      auth.onAuthStateChanged(u => { 
-        state.user = u || null; 
-        updateAuthUI(); 
-        console.log('Estado de autenticação:', u ? 'Logado' : 'Deslogado');
-      });
-    }
+    // onAuthStateChanged agora está dentro de initializeFirebase()
 
     // Mini util: year
     qs('#year').textContent = new Date().getFullYear();
 
     // Inicialização
     async function init() {
+      // Verificar dados locais do usuário primeiro (fallback)
+      checkLocalUserData();
+      
       // Carregar configuração do Firebase primeiro
       await initializeFirebase();
       
