@@ -136,7 +136,6 @@
         <a href="#home" data-route class="hover:text-emerald-300">Home</a>
         <a href="#loja" data-route class="hover:text-emerald-300">Loja</a>
         <a href="#novidades" data-route class="hover:text-emerald-300">Novidades</a>
-        <a href="#favoritos" data-route class="hover:text-emerald-300" id="navFavoritos">Favoritos</a>
         <a href="#feedbacks" data-route class="hover:text-emerald-300">Feedbacks</a>
         <a href="#contato" data-route class="hover:text-emerald-300">Contato</a>
         <a href="#minha-conta" data-route id="navMinhaConta" class="ml-2 px-3 py-1 rounded-full pill hidden">Minha Conta</a>
@@ -145,12 +144,6 @@
 
       <div class="flex items-center gap-2 sm:gap-3">
         <button id="btnLogin" class="btn px-3 py-2 rounded-lg pill text-slate-200 hover:text-white text-sm sm:text-base">Entrar</button>
-        
-        <!-- Contador de Favoritos -->
-        <a href="#favoritos" data-route id="miniFavorites" class="relative btn px-3 py-2 rounded-lg pill hover:text-white">
-          <span class="text-lg">❤️</span>
-          <span id="favoritesCount" class="absolute -top-2 -right-2 bg-red-400 text-white text-xs font-bold w-5 h-5 sm:w-6 sm:h-6 rounded-full grid place-items-center">0</span>
-        </a>
         
         <!-- Contador de Carrinho -->
         <a href="#carrinho" data-route id="miniCart" class="relative btn px-3 py-2 rounded-lg pill hover:text-white">
@@ -166,10 +159,6 @@
         <a href="#home" data-route class="hover:text-emerald-300">Home</a>
         <a href="#loja" data-route class="hover:text-emerald-300">Loja</a>
         <a href="#novidades" data-route class="hover:text-emerald-300">Novidades</a>
-        <a href="#favoritos" data-route class="hover:text-emerald-300 flex items-center justify-between" id="navFavoritosMobile">
-          <span>Favoritos</span>
-          <span id="favoritesCountMobile" class="bg-red-400 text-white text-xs font-bold px-2 py-1 rounded-full">0</span>
-        </a>
         <a href="#feedbacks" data-route class="hover:text-emerald-300">Feedbacks</a>
         <a href="#contato" data-route class="hover:text-emerald-300">Contato</a>
         <a href="#minha-conta" data-route id="navMinhaContaMobile" class="px-3 py-2 rounded-lg pill text-center hidden">Minha Conta</a>
@@ -463,17 +452,17 @@
               <p class="text-slate-300 text-sm">
                 Escolha sua forma de pagamento preferida no Mercado Pago
               </p>
-            </div>
+              </div>
             
             <div class="grid grid-cols-3 gap-2 mb-4 text-xs text-slate-400">
               <div class="flex items-center gap-1">
                 <span>📱</span>
                 <span>PIX</span>
-              </div>
+            </div>
               <div class="flex items-center gap-1">
                 <span>💳</span>
                 <span>Cartão</span>
-              </div>
+            </div>
               <div class="flex items-center gap-1">
                 <span>📄</span>
                 <span>Boleto</span>
@@ -702,7 +691,7 @@
           <div class="font-semibold">Adicionar ao carrinho</div>
           <div class="text-sm text-slate-400">Adicionar diretamente ao carrinho</div>
         </button>
-      </div>
+    </div>
     </div>
   </div>
 
@@ -719,14 +708,14 @@
         <div>
           <label class="block text-sm text-slate-300 mb-2">Email</label>
           <input id="loginEmail" type="email" class="w-full bg-transparent pill px-3 py-3 rounded-lg text-sm sm:text-base" placeholder="seu@email.com" />
-        </div>
+      </div>
         <div>
           <label class="block text-sm text-slate-300 mb-2">Senha</label>
           <input id="loginPassword" type="password" class="w-full bg-transparent pill px-3 py-3 rounded-lg text-sm sm:text-base" placeholder="Sua senha" />
-        </div>
+    </div>
         <button id="btnEmailLogin" class="btn cta-gradient w-full px-4 py-3 rounded-lg font-bold text-sm sm:text-base">Entrar</button>
         <button id="btnShowRegister" class="btn pill w-full px-4 py-2 rounded-lg text-sm sm:text-base">Criar conta</button>
-      </div>
+  </div>
       
       <!-- Registro com Email/Senha -->
       <div id="registerForm" class="space-y-4 hidden">
@@ -1070,12 +1059,12 @@
         `;
         grid.appendChild(el);
       });
-      grid.addEventListener('click', e => {
+      grid.addEventListener('click', async e => {
         const b = e.target.closest('button'); if (!b) return;
         const id = b.getAttribute('data-id'); const act = b.getAttribute('data-action');
         if (act === 'ver') { openProduto(id); }
         if (act === 'add') { openTipoPecaModal(id); }
-        if (act === 'favoritar') { toggleFavorito(id); }
+        if (act === 'favoritar') { await toggleFavorito(id); }
       });
     }
 
@@ -1287,32 +1276,57 @@
     }
 
     // Favoritos
-    function loadFavoritos() {
-      try { state.favoritos = JSON.parse(localStorage.getItem('tfi_favoritos')||'[]'); } catch { state.favoritos = []; }
+    async function loadFavoritos() {
+      if (state.user && db) {
+        // Carregar favoritos do usuário do Firestore
+        try {
+          const userFavs = await db.collection('usuarios').doc(state.user.uid).get();
+          if (userFavs.exists) {
+            state.favoritos = userFavs.data().favoritos || [];
+          } else {
+            state.favoritos = [];
+          }
+        } catch (error) {
+          console.error('Erro ao carregar favoritos:', error);
+          state.favoritos = [];
+        }
+      } else {
+        // Fallback para localStorage se não estiver logado
+        try { state.favoritos = JSON.parse(localStorage.getItem('tfi_favoritos')||'[]'); } catch { state.favoritos = []; }
+      }
       updateFavoritosUI();
     }
-    function saveFavoritos() {
-      localStorage.setItem('tfi_favoritos', JSON.stringify(state.favoritos));
+    
+    async function saveFavoritos() {
+      if (state.user && db) {
+        // Salvar favoritos do usuário no Firestore
+        try {
+          await db.collection('usuarios').doc(state.user.uid).set({
+            favoritos: state.favoritos
+          }, { merge: true });
+        } catch (error) {
+          console.error('Erro ao salvar favoritos:', error);
+        }
+      } else {
+        // Fallback para localStorage se não estiver logado
+        localStorage.setItem('tfi_favoritos', JSON.stringify(state.favoritos));
+      }
       updateFavoritosUI();
     }
-    function toggleFavorito(id) {
+    
+    async function toggleFavorito(id) {
       const index = state.favoritos.indexOf(id);
       if (index > -1) {
         state.favoritos.splice(index, 1);
       } else {
         state.favoritos.push(id);
       }
-      saveFavoritos();
+      await saveFavoritos();
     }
     function isFavorito(id) {
       return state.favoritos.includes(id);
     }
     function updateFavoritosUI() {
-      // Atualizar contadores de favoritos
-      const count = state.favoritos.length;
-      qs('#favoritesCount').textContent = count;
-      qs('#favoritesCountMobile').textContent = count;
-      
       // Atualizar botões de favorito em todos os cards
       qsa('.favorito-btn').forEach(btn => {
         const id = btn.getAttribute('data-id');
@@ -1330,8 +1344,27 @@
       const grid = qs('#favoritosGrid');
       const vazio = qs('#favoritosVazio');
       
+      // Verificar se usuário está logado
+      if (!state.user) {
+        grid.innerHTML = '';
+        vazio.innerHTML = `
+          <div class="text-6xl mb-4">🔒</div>
+          <h3 class="text-xl font-bold mb-2">Faça login para ver seus favoritos</h3>
+          <p class="text-slate-400 mb-6">Entre na sua conta para acessar seus produtos favoritos!</p>
+          <button onclick="openLoginModal()" class="btn cta-gradient px-6 py-3 rounded-xl font-bold">Fazer Login</button>
+        `;
+        vazio.classList.remove('hidden');
+        return;
+      }
+      
       if (state.favoritos.length === 0) {
         grid.innerHTML = '';
+        vazio.innerHTML = `
+          <div class="text-6xl mb-4">💔</div>
+          <h3 class="text-xl font-bold mb-2">Nenhum favorito ainda</h3>
+          <p class="text-slate-400 mb-6">Explore nossa loja e adicione produtos aos seus favoritos!</p>
+          <a href="#loja" data-route class="btn cta-gradient px-6 py-3 rounded-xl font-bold">Explorar Loja</a>
+        `;
         vazio.classList.remove('hidden');
         return;
       }
@@ -1372,13 +1405,12 @@
       });
       
       // Adicionar event listeners para os botões na página de favoritos
-      grid.addEventListener('click', e => {
+      grid.addEventListener('click', async e => {
         const b = e.target.closest('button'); if (!b) return;
         const id = b.getAttribute('data-id'); const act = b.getAttribute('data-action');
         if (act === 'ver') { openProduto(id); }
         if (act === 'add') { openTipoPecaModal(id); }
-        if (act === 'favoritar') { toggleFavorito(id); }
-        if (act === 'favoritar') { toggleFavorito(id); renderFavoritos(); }
+        if (act === 'favoritar') { await toggleFavorito(id); }
       });
     }
 
@@ -1582,7 +1614,7 @@
           op.innerHTML = '';
           
           result.options.forEach(option => {
-            const d = document.createElement('label');
+        const d = document.createElement('label');
             d.className = 'glass rounded-xl p-3 flex items-center justify-between cursor-pointer hover:ring-2 hover:ring-emerald-400/40';
             d.innerHTML = `
               <div>
@@ -1594,10 +1626,10 @@
                 <input type="radio" name="frete" value="${option.id}" data-company="${option.company_id}">
               </div>
             `;
-            op.appendChild(d);
-          });
+        op.appendChild(d);
+      });
           
-          op.onclick = (e) => {
+      op.onclick = (e) => {
             const r = e.target.closest('input[type=radio]'); 
             if (!r) return;
             
@@ -1980,8 +2012,52 @@
     // Renderizar favoritos do usuário
     function renderUserFavorites() {
       const favoritesContainer = qs('#userFavorites');
-      favoritesContainer.innerHTML = '<div class="text-slate-300 text-center py-8">Nenhum favorito ainda</div>';
-      // Implementar sistema de favoritos depois se necessário
+      
+      if (!state.user) {
+        favoritesContainer.innerHTML = '<div class="text-slate-300 text-center py-8">Faça login para ver seus favoritos</div>';
+        return;
+      }
+      
+      if (state.favoritos.length === 0) {
+        favoritesContainer.innerHTML = `
+          <div class="text-slate-300 text-center py-8">
+            <div class="text-4xl mb-2">❤️</div>
+            <div class="text-lg font-bold mb-1">Nenhum favorito ainda</div>
+            <div class="text-sm">Adicione produtos aos favoritos para vê-los aqui</div>
+          </div>
+        `;
+        return;
+      }
+      
+      // Mostrar favoritos do usuário
+      favoritesContainer.innerHTML = '';
+      state.favoritos.slice(0, 8).forEach(id => {
+        const p = state.produtos.find(x => x.id === id);
+        if (!p) return;
+        
+        const favEl = document.createElement('div');
+        favEl.className = 'glass rounded-xl p-3 hover:ring-2 hover:ring-emerald-400/40 cursor-pointer';
+        favEl.onclick = () => openProduto(p.id);
+        favEl.innerHTML = `
+          <div class="aspect-square rounded-lg overflow-hidden mb-2">
+            <img src="${p.imagens[0]}" alt="${p.nome}" class="w-full h-full object-cover">
+          </div>
+          <div class="text-sm font-bold truncate">${p.nome}</div>
+          <div class="text-emerald-400 font-bold">${fmt(p.preco)}</div>
+        `;
+        favoritesContainer.appendChild(favEl);
+      });
+      
+      if (state.favoritos.length > 8) {
+        const moreEl = document.createElement('div');
+        moreEl.className = 'text-center py-4';
+        moreEl.innerHTML = `
+          <a href="#favoritos" data-route class="btn pill px-4 py-2 text-sm">
+            Ver todos os ${state.favoritos.length} favoritos
+          </a>
+        `;
+        favoritesContainer.appendChild(moreEl);
+      }
     }
 
     // Feedbacks
@@ -2374,16 +2450,20 @@
         orderManager = new OrderManager(db);
         
         // Configurar listener de mudança de estado de autenticação
-        auth.onAuthStateChanged(u => { 
+        auth.onAuthStateChanged(async u => { 
           state.user = u || null; 
           updateAuthUI(); 
           console.log('Estado de autenticação:', u ? 'Logado' : 'Deslogado');
           
-          // Garantir que os dados sejam salvos localmente
+          // Carregar favoritos do usuário quando logar
           if (u) {
+            await loadFavoritos();
             saveLocalUserData();
           } else {
             localStorage.removeItem('tfi_user');
+            // Limpar favoritos quando deslogar
+            state.favoritos = [];
+            updateFavoritosUI();
           }
         });
         
