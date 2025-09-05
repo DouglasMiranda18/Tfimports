@@ -229,7 +229,7 @@
               <div class="col-span-3 glass rounded-2xl p-4 flex items-center justify-between">
                 <div>
                   <div class="text-sm text-slate-300">Coleção destaque</div>
-                  <div class="text-lg font-bold">TFI Black Label</div>
+                  <div class="text-lg font-bold" id="homeCollectionName">TFI Black Label</div>
                 </div>
                 <a href="#loja" data-route class="btn px-4 py-2 rounded-lg cta-gradient font-bold">Ver</a>
               </div>
@@ -681,6 +681,38 @@
           <div id="adminLista" class="space-y-3 max-h-96 overflow-y-auto hidden-scroll"></div>
         </div>
       </div>
+      
+      <!-- Seção Coleção Destaque -->
+      <div class="mt-6 glass rounded-2xl p-5">
+        <h3 class="font-bold mb-3">Coleção Destaque</h3>
+        <div class="grid md:grid-cols-2 gap-6">
+          <div>
+            <div class="mb-4">
+              <label class="text-sm text-slate-300 mb-2 block">Nome da Coleção</label>
+              <input id="featuredCollectionName" class="w-full bg-slate-800 text-white px-3 py-2 rounded-lg border border-slate-600 focus:border-emerald-400 focus:outline-none" placeholder="Ex: TFI Black Label" value="TFI Black Label" />
+            </div>
+            <div class="mb-4">
+              <label class="text-sm text-slate-300 mb-2 block">Produtos em Destaque (máx. 3)</label>
+              <div id="featuredProductsList" class="space-y-2 max-h-48 overflow-y-auto hidden-scroll">
+                <!-- Produtos serão carregados aqui -->
+              </div>
+            </div>
+            <button id="btnSaveFeatured" class="btn cta-gradient px-4 py-2 rounded-lg font-bold">Salvar Coleção</button>
+          </div>
+          <div>
+            <div class="text-sm text-slate-300 mb-2">Preview da Coleção</div>
+            <div class="glass rounded-xl p-4 border border-emerald-400/30">
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-sm font-semibold">Coleção destaque</span>
+                <span class="badge text-xs">Novo</span>
+              </div>
+              <div class="text-lg font-bold mb-2" id="previewCollectionName">TFI Black Label</div>
+              <div class="text-sm text-slate-400 mb-3">Produtos selecionados: <span id="previewProductCount">0</span></div>
+              <button class="btn pill px-3 py-1 text-xs">Ver</button>
+            </div>
+          </div>
+        </div>
+      </div>
 
 
         </div>
@@ -818,6 +850,10 @@
       user: null,
       adminEmail: 'admin@tfimports.com.br', // Email do administrador
       favoritos: [], // Array de IDs dos produtos favoritos
+      featuredCollection: {
+        name: 'TFI Black Label',
+        products: [] // Array de IDs dos produtos em destaque (máx. 3)
+      },
       categorias: [
         "Camisetas","Calças","Bermudas de linho","Bermudas de sarja","Cueca premium",
         "Camiseta dry fit","Camisa peruana","Camisa polo","Regata USA","Meias","Bermuda high"
@@ -1052,7 +1088,17 @@
     function renderDestaques() {
       const grid = qs('#featuredGrid');
       grid.innerHTML = '';
-      state.produtos.filter(p => p.destaque).slice(0,6).forEach(p => {
+      
+      // Usar produtos da coleção destaque personalizada
+      const featuredProducts = state.featuredCollection.products
+        .map(id => state.produtos.find(p => p.id === id))
+        .filter(Boolean)
+        .slice(0, 3);
+      
+      // Se não houver produtos na coleção, usar produtos com destaque
+      const productsToShow = featuredProducts.length > 0 ? featuredProducts : state.produtos.filter(p => p.destaque).slice(0,6);
+      
+      productsToShow.forEach(p => {
         const el = document.createElement('div');
         el.className = 'glass rounded-2xl overflow-hidden hover:ring-2 hover:ring-emerald-400/40';
         el.innerHTML = `
@@ -2333,6 +2379,17 @@
         toast('Erro ao salvar produto. Tente novamente.');
       }
     });
+
+    // Event listeners para coleção destaque
+    qs('#featuredCollectionName').addEventListener('input', (e) => {
+      state.featuredCollection.name = e.target.value;
+      updateFeaturedPreview();
+    });
+
+    qs('#btnSaveFeatured').addEventListener('click', () => {
+      saveFeaturedCollection();
+      toast('Coleção destaque salva com sucesso!');
+    });
     function renderAdminList() {
       const box = qs('#adminLista'); box.innerHTML='';
       state.produtos.slice(0,20).forEach(p=>{
@@ -2427,6 +2484,110 @@
         const arr = JSON.parse(localStorage.getItem('tfi_products')||'[]');
         if (Array.isArray(arr) && arr.length) state.produtos = arr;
       } catch {}
+    }
+
+    // Admin: Gerenciar Coleção Destaque
+    function renderFeaturedProductsList() {
+      const container = qs('#featuredProductsList');
+      container.innerHTML = '';
+      
+      state.produtos.forEach(produto => {
+        const isSelected = state.featuredCollection.products.includes(produto.id);
+        const canSelect = !isSelected && state.featuredCollection.products.length < 3;
+        
+        const item = document.createElement('div');
+        item.className = `flex items-center justify-between p-2 rounded-lg border ${isSelected ? 'border-emerald-400 bg-emerald-400/10' : 'border-slate-600'}`;
+        item.innerHTML = `
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded bg-slate-700 flex items-center justify-center">
+              ${produto.imagem ? `<img src="${produto.imagem}" alt="${produto.nome}" class="w-6 h-6 rounded object-cover">` : '📦'}
+            </div>
+            <div>
+              <div class="text-sm font-medium">${produto.nome}</div>
+              <div class="text-xs text-slate-400">${produto.categoria}</div>
+            </div>
+          </div>
+          <button class="btn pill px-3 py-1 text-xs ${isSelected ? 'bg-emerald-500 text-black' : canSelect ? 'hover:bg-emerald-500/20' : 'opacity-50 cursor-not-allowed'}" 
+                  data-id="${produto.id}" 
+                  ${!canSelect && !isSelected ? 'disabled' : ''}>
+            ${isSelected ? 'Remover' : 'Adicionar'}
+          </button>
+        `;
+        
+        if (canSelect || isSelected) {
+          item.querySelector('button').addEventListener('click', () => {
+            toggleFeaturedProduct(produto.id);
+          });
+        }
+        
+        container.appendChild(item);
+      });
+      
+      updateFeaturedPreview();
+    }
+
+    function toggleFeaturedProduct(productId) {
+      const index = state.featuredCollection.products.indexOf(productId);
+      
+      if (index > -1) {
+        // Remover produto
+        state.featuredCollection.products.splice(index, 1);
+      } else if (state.featuredCollection.products.length < 3) {
+        // Adicionar produto
+        state.featuredCollection.products.push(productId);
+      }
+      
+      renderFeaturedProductsList();
+      saveFeaturedCollection();
+    }
+
+    function updateFeaturedPreview() {
+      qs('#previewCollectionName').textContent = state.featuredCollection.name;
+      qs('#previewProductCount').textContent = state.featuredCollection.products.length;
+      
+      // Atualizar também o nome na home
+      const homeElement = qs('#homeCollectionName');
+      if (homeElement) {
+        homeElement.textContent = state.featuredCollection.name;
+      }
+    }
+
+    function saveFeaturedCollection() {
+      // Salvar no localStorage
+      localStorage.setItem('tfi_featured_collection', JSON.stringify(state.featuredCollection));
+      
+      // Salvar no Firestore se estiver logado
+      if (state.user && db) {
+        db.collection('configuracoes').doc('featured_collection').set(state.featuredCollection)
+          .catch(error => console.error('Erro ao salvar coleção destaque:', error));
+      }
+      
+      // Atualizar a seção destaque na home
+      renderDestaques();
+    }
+
+    function loadFeaturedCollection() {
+      // Carregar do localStorage
+      const saved = localStorage.getItem('tfi_featured_collection');
+      if (saved) {
+        try {
+          state.featuredCollection = JSON.parse(saved);
+        } catch (error) {
+          console.error('Erro ao carregar coleção destaque:', error);
+        }
+      }
+      
+      // Carregar do Firestore se estiver logado
+      if (state.user && db) {
+        db.collection('configuracoes').doc('featured_collection').get()
+          .then(doc => {
+            if (doc.exists) {
+              state.featuredCollection = doc.data();
+              renderFeaturedProductsList();
+            }
+          })
+          .catch(error => console.error('Erro ao carregar coleção destaque do Firestore:', error));
+      }
     }
 
 
@@ -2786,6 +2947,8 @@
       renderChat();
       adminFillCategorias();
       renderAdminList();
+      loadFeaturedCollection();
+      renderFeaturedProductsList();
       applyRoute();
     }
     
