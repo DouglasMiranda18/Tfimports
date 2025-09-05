@@ -88,11 +88,44 @@
       gap: 1.5rem; 
       justify-content: center;
       justify-items: center;
+      max-width: 1200px;
+      margin: 0 auto;
     }
     @media (max-width: 640px) {
       .grid-auto-fit { 
         grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
         gap: 1rem;
+        max-width: none;
+        margin: 0;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+      .grid-auto-fit::-webkit-scrollbar {
+        display: none;
+      }
+      .grid-auto-fit::before,
+      .grid-auto-fit::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 20px;
+        height: 20px;
+        background: linear-gradient(45deg, transparent, rgba(29, 209, 161, 0.3));
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 10;
+      }
+      .grid-auto-fit::before {
+        left: 10px;
+        background: linear-gradient(45deg, transparent, rgba(29, 209, 161, 0.3));
+      }
+      .grid-auto-fit::after {
+        right: 10px;
+        background: linear-gradient(225deg, transparent, rgba(29, 209, 161, 0.3));
       }
     }
     .hidden-scroll::-webkit-scrollbar { display: none; }
@@ -244,7 +277,9 @@
       <!-- Destaques -->
       <div class="mt-8 text-center">
         <h2 class="text-2xl font-bold mb-4">Destaques</h2>
-        <div id="featuredGrid" class="grid-auto-fit"></div>
+        <div class="relative">
+          <div id="featuredGrid" class="grid-auto-fit"></div>
+        </div>
       </div>
     </div>
   </section>
