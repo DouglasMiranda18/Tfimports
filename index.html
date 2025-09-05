@@ -2311,7 +2311,10 @@
       
       try {
         if (isEdit) {
-          // Atualizar produto existente
+          // Verificar se o documento existe no Firestore
+          const docRef = db.collection('produtos').doc(editId);
+          const docSnapshot = await docRef.get();
+          
           const produtoData = {
             nome,
             categoria: cat,
@@ -2325,7 +2328,17 @@
             atualizadoEm: firebase.firestore.FieldValue.serverTimestamp()
           };
           
-          await db.collection('produtos').doc(editId).update(produtoData);
+          if (docSnapshot.exists) {
+            // Documento existe, atualizar
+            await docRef.update(produtoData);
+          } else {
+            // Documento não existe, criar novo
+            await docRef.set({
+              ...produtoData,
+              criadoPor: state.user.uid,
+              criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+            });
+          }
           
           // Atualizar no estado local
           const idx = state.produtos.findIndex(p => p.id === editId);
@@ -2381,7 +2394,45 @@
         
       } catch (error) {
         console.error('Erro ao salvar produto:', error);
-        toast('Erro ao salvar produto. Tente novamente.');
+        
+        // Mensagem de erro mais específica
+        if (error.code === 'permission-denied') {
+          toast('Erro de permissão. Verifique se você tem acesso de administrador.');
+        } else if (error.code === 'not-found') {
+          toast('Produto não encontrado. Tente recarregar a página.');
+        } else if (error.message.includes('No document to update')) {
+          toast('Produto não existe no servidor. Criando novo produto...');
+          // Tentar criar como novo produto
+          try {
+            const docRef = await db.collection('produtos').add({
+              nome,
+              categoria: cat,
+              preco,
+              promo,
+              cores,
+              tamanhos: tams,
+              descricao: desc || 'Sem descrição',
+              imagem: imagem || null,
+              imagens: imagem ? [imagem] : ['svg'],
+              criadoPor: state.user.uid,
+              criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
+              atualizadoEm: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            
+            // Atualizar ID no estado local
+            const idx = state.produtos.findIndex(p => p.id === editId);
+            if (idx >= 0) {
+              state.produtos[idx].id = docRef.id;
+            }
+            
+            toast('Produto criado com sucesso!');
+          } catch (createError) {
+            console.error('Erro ao criar produto:', createError);
+            toast('Erro ao criar produto. Tente novamente.');
+          }
+        } else {
+          toast('Erro ao salvar produto. Tente novamente.');
+        }
       }
     });
 
@@ -2607,10 +2658,13 @@
       // Salvar no localStorage
       localStorage.setItem('tfi_featured_collection', JSON.stringify(state.featuredCollection));
       
-      // Salvar no Firestore se estiver logado
-      if (state.user && db) {
+      // Salvar no Firestore se estiver logado e for admin
+      if (state.user && db && isAdmin()) {
         db.collection('configuracoes').doc('featured_collection').set(state.featuredCollection)
-          .catch(error => console.error('Erro ao salvar coleção destaque:', error));
+          .catch(error => {
+            console.error('Erro ao salvar coleção destaque:', error);
+            toast('Erro ao salvar no servidor. Dados salvos localmente.');
+          });
       }
       
       // Atualizar a seção destaque na home
@@ -2628,8 +2682,8 @@
         }
       }
       
-      // Carregar do Firestore se estiver logado
-      if (state.user && db) {
+      // Carregar do Firestore se estiver logado e for admin
+      if (state.user && db && isAdmin()) {
         db.collection('configuracoes').doc('featured_collection').get()
           .then(doc => {
             if (doc.exists) {
@@ -2637,7 +2691,14 @@
               renderFeaturedProductsList();
             }
           })
-          .catch(error => console.error('Erro ao carregar coleção destaque do Firestore:', error));
+          .catch(error => {
+            console.error('Erro ao carregar coleção destaque do Firestore:', error);
+            // Continuar com dados do localStorage se houver erro
+            renderFeaturedProductsList();
+          });
+      } else {
+        // Se não for admin, usar apenas dados locais
+        renderFeaturedProductsList();
       }
     }
 
