@@ -1282,11 +1282,20 @@
       const wrap = qs('#produtoWrap');
       wrap.innerHTML = `
         <div class="glass rounded-2xl p-5">
-          <div class="rounded-xl card-img aspect-square grid place-items-center">
-            <svg viewBox="0 0 160 160" class="w-40 h-40">
-              <rect x="15" y="15" width="130" height="130" rx="16" fill="#0b1a34"/>
-              <path d="M30 120 L70 60 L110 80 L135 45" stroke="#1dd1a1" stroke-width="6" fill="none"/>
-            </svg>
+          <div class="rounded-xl card-img aspect-square grid place-items-center overflow-hidden">
+            ${p.imagem ? 
+              `<img src="${p.imagem}" alt="${p.nome}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+               <div class="w-full h-full flex items-center justify-center text-gray-400" style="display:none;">
+                 <svg viewBox="0 0 160 160" class="w-40 h-40">
+                   <rect x="15" y="15" width="130" height="130" rx="16" fill="#0b1a34"/>
+                   <path d="M30 120 L70 60 L110 80 L135 45" stroke="#1dd1a1" stroke-width="6" fill="none"/>
+                 </svg>
+               </div>` :
+              `<svg viewBox="0 0 160 160" class="w-40 h-40">
+                <rect x="15" y="15" width="130" height="130" rx="16" fill="#0b1a34"/>
+                <path d="M30 120 L70 60 L110 80 L135 45" stroke="#1dd1a1" stroke-width="6" fill="none"/>
+              </svg>`
+            }
           </div>
         </div>
         <div>
