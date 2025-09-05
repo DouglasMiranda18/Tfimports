@@ -143,12 +143,21 @@
       </nav>
 
       <div class="flex items-center gap-2 sm:gap-3">
+        <!-- Botão Home -->
+        <a href="#home" data-route class="btn px-3 py-2 rounded-lg pill hover:text-white group">
+          <svg class="w-5 h-5 sm:w-6 sm:h-6 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+          </svg>
+        </a>
+        
         <button id="btnLogin" class="btn px-3 py-2 rounded-lg pill text-slate-200 hover:text-white text-sm sm:text-base">Entrar</button>
         
         <!-- Contador de Carrinho -->
-        <a href="#carrinho" data-route id="miniCart" class="relative btn px-3 py-2 rounded-lg pill hover:text-white">
-          <span class="text-lg">🛒</span>
-          <span id="cartCount" class="absolute -top-2 -right-2 bg-emerald-400 text-black text-xs font-bold w-5 h-5 sm:w-6 sm:h-6 rounded-full grid place-items-center">0</span>
+        <a href="#carrinho" data-route id="miniCart" class="relative btn px-3 py-2 rounded-lg pill hover:text-white group">
+          <svg class="w-5 h-5 sm:w-6 sm:h-6 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
+          </svg>
+          <span id="cartCount" class="absolute -top-2 -right-2 bg-gradient-to-r from-emerald-400 to-emerald-500 text-black text-xs font-bold w-5 h-5 sm:w-6 sm:h-6 rounded-full grid place-items-center shadow-lg">0</span>
         </a>
         
         <button id="btnMenu" class="md:hidden btn px-3 py-2 rounded-lg pill">☰</button>
@@ -156,7 +165,12 @@
     </div>
     <div id="mobileNav" class="md:hidden hidden glass border-t border-white/10">
       <div class="px-4 py-3 flex flex-col gap-3">
-        <a href="#home" data-route class="hover:text-emerald-300">Home</a>
+        <a href="#home" data-route class="hover:text-emerald-300 flex items-center gap-2 transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+          </svg>
+          Home
+        </a>
         <a href="#loja" data-route class="hover:text-emerald-300">Loja</a>
         <a href="#novidades" data-route class="hover:text-emerald-300">Novidades</a>
         <a href="#feedbacks" data-route class="hover:text-emerald-300">Feedbacks</a>
@@ -939,6 +953,9 @@
       qsa('[data-route]').forEach(a => a.classList.toggle('nav-active', a.getAttribute('href') === hash));
       qsa('.panel').forEach(p => p.classList.remove('active'));
       const id = hash.replace('#','');
+      
+      // Fechar menu mobile ao navegar
+      qs('#mobileNav').classList.add('hidden');
       
       // Proteger painel admin - apenas admin pode acessar
       if (id === 'admin') {
