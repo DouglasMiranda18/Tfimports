@@ -206,26 +206,9 @@
         </div>
         <div class="relative">
           <div class="glass shadow-soft rounded-3xl p-6 ring-accent">
-            <div class="grid grid-cols-3 gap-3">
-              <!-- Vitrines SVG (substitua por fotos reais depois) -->
-              <div class="card-img rounded-2xl h-36 flex items-center justify-center">
-                <svg viewBox="0 0 120 120" class="w-24 h-24">
-                  <rect x="10" y="10" width="100" height="100" rx="16" fill="#0b1a34"/>
-                  <path d="M20 90 L45 40 L75 60 L100 30" stroke="#1dd1a1" stroke-width="6" fill="none"/>
-                </svg>
-              </div>
-              <div class="card-img rounded-2xl h-36 flex items-center justify-center">
-                <svg viewBox="0 0 120 120" class="w-24 h-24">
-                  <circle cx="60" cy="60" r="42" fill="#0b1a34"/>
-                  <path d="M35 70 Q60 30 85 70" stroke="#1dd1a1" stroke-width="6" fill="none"/>
-                </svg>
-              </div>
-              <div class="card-img rounded-2xl h-36 flex items-center justify-center">
-                <svg viewBox="0 0 120 120" class="w-24 h-24">
-                  <rect x="25" y="25" width="70" height="70" rx="12" fill="#0b1a34"/>
-                  <path d="M30 80 L90 80" stroke="#1dd1a1" stroke-width="6"/>
-                </svg>
-              </div>
+            <div class="grid grid-cols-3 gap-3" id="featuredProductsPreview">
+              <!-- Produtos da coleção destaque serão inseridos aqui dinamicamente -->
+            </div>
               <div class="col-span-3 glass rounded-2xl p-4 flex items-center justify-between">
                 <div>
                   <div class="text-sm text-slate-300">Coleção destaque</div>
@@ -1141,6 +1124,70 @@
         if (act === 'add') { openTipoPecaModal(id); }
         if (act === 'favoritar') { await toggleFavorito(id); }
       });
+      
+      // Atualizar também a seção de preview na home
+      renderFeaturedProductsPreview();
+    }
+    
+    // Preview dos produtos na seção destaque da home
+    function renderFeaturedProductsPreview() {
+      const preview = qs('#featuredProductsPreview');
+      if (!preview) return;
+      
+      preview.innerHTML = '';
+      
+      // Usar produtos da coleção destaque personalizada
+      const featuredProducts = state.featuredCollection.products
+        .map(id => state.produtos.find(p => p.id === id))
+        .filter(Boolean)
+        .slice(0, 3);
+      
+      // Se não houver produtos na coleção, usar produtos com destaque
+      const productsToShow = featuredProducts.length > 0 ? featuredProducts : state.produtos.filter(p => p.destaque).slice(0, 3);
+      
+      // Preencher com até 3 produtos
+      for (let i = 0; i < 3; i++) {
+        const produto = productsToShow[i];
+        const div = document.createElement('div');
+        div.className = 'card-img rounded-2xl h-36 overflow-hidden cursor-pointer hover:ring-2 hover:ring-emerald-400/40 transition-all relative';
+        
+        if (produto) {
+          div.innerHTML = `
+            ${produto.imagem ? 
+              `<img src="${produto.imagem}" alt="${produto.nome}" class="w-full h-full object-cover" 
+                   onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+               <div class="w-full h-full flex items-center justify-center bg-gray-800" style="display:none;">
+                 <svg viewBox="0 0 120 120" class="w-16 h-16">
+                   <rect x="10" y="10" width="100" height="100" rx="16" fill="#0b1a34"/>
+                   <path d="M20 90 L45 40 L75 60 L100 30" stroke="#1dd1a1" stroke-width="6" fill="none"/>
+                 </svg>
+               </div>` :
+              `<div class="w-full h-full flex items-center justify-center bg-gray-800">
+                <svg viewBox="0 0 120 120" class="w-16 h-16">
+                  <rect x="10" y="10" width="100" height="100" rx="16" fill="#0b1a34"/>
+                  <path d="M20 90 L45 40 L75 60 L100 30" stroke="#1dd1a1" stroke-width="6" fill="none"/>
+                </svg>
+              </div>`
+            }
+            <div class="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-30 transition-all flex items-end p-2">
+              <div class="text-white text-xs font-semibold truncate w-full">${produto.nome}</div>
+            </div>
+          `;
+          div.addEventListener('click', () => openProduto(produto.id));
+        } else {
+          // Placeholder vazio
+          div.innerHTML = `
+            <div class="w-full h-full flex items-center justify-center bg-gray-800">
+              <svg viewBox="0 0 120 120" class="w-16 h-16">
+                <rect x="10" y="10" width="100" height="100" rx="16" fill="#0b1a34"/>
+                <path d="M20 90 L45 40 L75 60 L100 30" stroke="#1dd1a1" stroke-width="6" fill="none"/>
+              </svg>
+            </div>
+          `;
+        }
+        
+        preview.appendChild(div);
+      }
     }
 
     // Loja: filtros
