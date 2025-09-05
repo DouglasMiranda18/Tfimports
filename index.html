@@ -70,8 +70,6 @@
     .star { color: #ffd166; }
     .badge { background: rgba(29, 209, 161, .12); color: var(--accent); border: 1px solid rgba(29,209,161,.35); }
     .nav-active { color: var(--accent); }
-    .categoria-filter.active { background: linear-gradient(90deg, var(--accent), var(--accent-2)); color: #041313; font-weight: bold; }
-    .categoria-filter:not(.active):hover { background: rgba(15, 23, 42, 0.8); color: var(--accent); }
     .gradient-title {
       background: linear-gradient(90deg, #bcd5ff, #7fb7ff);
       -webkit-background-clip: text;
@@ -149,8 +147,9 @@
         
         <!-- Contador de Carrinho -->
         <a href="#carrinho" data-route id="miniCart" class="relative btn px-3 py-2 rounded-lg pill hover:text-white group">
-          <svg class="w-5 h-5 sm:w-6 sm:h-6 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path>
+          <svg class="w-5 h-5 sm:w-6 sm:h-6 transition-transform group-hover:scale-110" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M7 4V2C7 1.45 7.45 1 8 1H16C16.55 1 17 1.45 17 2V4H20C20.55 4 21 4.45 21 5S20.55 6 20 6H19V19C19 20.1 18.1 21 17 21H7C5.9 21 5 20.1 5 19V6H4C3.45 6 3 5.55 3 5S3.45 4 4 4H7ZM9 3V4H15V3H9ZM7 6V19H17V6H7Z"/>
+            <path d="M9 8V17H11V8H9ZM13 8V17H15V8H13Z"/>
           </svg>
           <span id="cartCount" class="absolute -top-2 -right-2 bg-gradient-to-r from-emerald-400 to-emerald-500 text-black text-xs font-bold w-5 h-5 sm:w-6 sm:h-6 rounded-full grid place-items-center shadow-lg">0</span>
         </a>
@@ -265,9 +264,9 @@
           <div class="space-y-4">
             <div>
               <div class="text-sm text-slate-300 mb-2">Categoria</div>
-              <div id="filterCategoria" class="space-y-2">
-                <button class="w-full text-left btn px-3 py-2 rounded-lg pill text-sm categoria-filter active" data-categoria="">Todas</button>
-              </div>
+              <select id="filterCategoria" class="w-full bg-slate-800 text-white px-3 py-2 rounded-lg border border-slate-600 focus:border-emerald-400 focus:outline-none">
+                <option value="">Todas</option>
+              </select>
             </div>
             <div>
               <div class="text-sm text-slate-300 mb-2">Tamanho</div>
@@ -1089,20 +1088,11 @@
 
     // Loja: filtros
     function initFilters() {
-      const container = qs('#filterCategoria');
+      const sel = qs('#filterCategoria');
       state.categorias.forEach(c => {
-        const btn = document.createElement('button');
-        btn.className = 'w-full text-left btn px-3 py-2 rounded-lg pill text-sm categoria-filter';
-        btn.textContent = c;
-        btn.setAttribute('data-categoria', c);
-        btn.addEventListener('click', () => {
-          // Remover active de todos os botões
-          qsa('#filterCategoria .categoria-filter').forEach(b => b.classList.remove('active'));
-          // Adicionar active ao clicado
-          btn.classList.add('active');
-          filterAndRenderCatalog();
-        });
-        container.appendChild(btn);
+        const opt = document.createElement('option');
+        opt.value = c; opt.textContent = c;
+        sel.appendChild(opt);
       });
       const sizes = ["PP","P","M","G","GG","XG"];
       const wrapT = qs('#filterTamanho');
@@ -1129,10 +1119,7 @@
         wrapC.appendChild(b);
       });
       qs('#btnLimparFiltros').addEventListener('click', () => {
-        // Limpar categoria
-        qsa('#filterCategoria .categoria-filter').forEach(b => b.classList.remove('active'));
-        qs('#filterCategoria .categoria-filter[data-categoria=""]').classList.add('active');
-        // Limpar tamanhos e cores
+        qs('#filterCategoria').value = '';
         qsa('#filterTamanho button, #filterCor button').forEach(b => b.classList.remove('badge'));
         filterAndRenderCatalog();
       });
@@ -1140,8 +1127,7 @@
     }
     function filterAndRenderCatalog() {
       const grid = qs('#catalogoGrid');
-      const catBtn = qs('#filterCategoria .categoria-filter.active');
-      const cat = catBtn ? catBtn.getAttribute('data-categoria') : '';
+      const cat = qs('#filterCategoria').value;
       const sizesSel = qsa('#filterTamanho button.badge').map(b => b.textContent.trim());
       const coresSel = qsa('#filterCor button.badge').map(b => b.textContent.trim());
       let arr = [...state.produtos];
