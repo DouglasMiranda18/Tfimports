@@ -672,6 +672,9 @@
             <input id="admCores" class="bg-transparent pill px-3 py-2 rounded-lg col-span-2" placeholder="Cores (ex.: preto,branco,azul)" />
             <input id="admTamanhos" class="bg-transparent pill px-3 py-2 rounded-lg col-span-2" placeholder="Tamanhos (ex.: P,M,G,GG)" />
             <textarea id="admDesc" class="bg-transparent pill px-3 py-2 rounded-lg col-span-2" rows="3" placeholder="Descrição curta"></textarea>
+            <input id="admComposicao" class="bg-transparent pill px-3 py-2 rounded-lg" placeholder="Composição (ex.: 100% Algodão)" />
+            <input id="admEstilo" class="bg-transparent pill px-3 py-2 rounded-lg" placeholder="Estilo (ex.: TFI Signature)" />
+            <input id="admEnvio" class="bg-transparent pill px-3 py-2 rounded-lg" placeholder="Envio (ex.: Rápido e rastreável)" />
             <button id="btnSalvarProduto" class="btn cta-gradient px-4 py-2 rounded-lg font-bold col-span-2">Salvar Produto</button>
           </div>
           <p class="hint mt-2">Os produtos são salvos no Firestore e aparecem automaticamente na loja.</p>
@@ -1326,7 +1329,7 @@
           <div class="mt-6 grid grid-cols-3 gap-3">
             <div class="glass rounded-xl p-3"><div class="text-sm font-bold">Composição</div><div class="hint">${p.composicao}</div></div>
             <div class="glass rounded-xl p-3"><div class="text-sm font-bold">Estilo</div><div class="hint">${p.estilo}</div></div>
-            <div class="glass rounded-xl p-3"><div class="text-sm font-bold">Envio</div><div class="hint">Rápido e rastreável</div></div>
+            <div class="glass rounded-xl p-3"><div class="text-sm font-bold">Envio</div><div class="hint">${p.envio || 'Rápido e rastreável'}</div></div>
           </div>
         </div>
       `;
@@ -2303,9 +2306,12 @@
       const cores = qs('#admCores').value.split(',').map(s=>sanitizeText(s.trim())).filter(Boolean);
       const tams = qs('#admTamanhos').value.split(',').map(s=>sanitizeText(s.trim())).filter(Boolean);
       const desc = sanitizeText(qs('#admDesc').value.trim());
+      const composicao = sanitizeText(qs('#admComposicao').value.trim()) || 'A definir';
+      const estilo = sanitizeText(qs('#admEstilo').value.trim()) || 'TFI Signature';
+      const envio = sanitizeText(qs('#admEnvio').value.trim()) || 'Rápido e rastreável';
       
       // Validar dados
-      const produto = { nome, categoria: cat, preco, promo, cores, tamanhos: tams, descricao: desc };
+      const produto = { nome, categoria: cat, preco, promo, cores, tamanhos: tams, descricao: desc, composicao, estilo, envio };
       const validation = validateProduct(produto);
       
       if (!validation.isValid) {
@@ -2332,6 +2338,9 @@
             cores,
             tamanhos: tams,
             descricao: desc || 'Sem descrição',
+            composicao,
+            estilo,
+            envio,
             imagem: imagem || null,
             imagens: imagem ? [imagem] : ['svg'],
             atualizadoEm: firebase.firestore.FieldValue.serverTimestamp()
@@ -2397,7 +2406,7 @@
       renderAdminList();
         
         // Limpar formulário e resetar botão
-        ['#admNome','#admPreco','#admPromo','#admImagem','#admCores','#admTamanhos','#admDesc'].forEach(s=>qs(s).value='');
+        ['#admNome','#admPreco','#admPromo','#admImagem','#admCores','#admTamanhos','#admDesc','#admComposicao','#admEstilo','#admEnvio'].forEach(s=>qs(s).value='');
         qs('#btnSalvarProduto').textContent = 'Salvar Produto';
         qs('#btnSalvarProduto').removeAttribute('data-edit-id');
         
@@ -2421,6 +2430,9 @@
               cores,
               tamanhos: tams,
               descricao: desc || 'Sem descrição',
+              composicao,
+              estilo,
+              envio,
               imagem: imagem || null,
               imagens: imagem ? [imagem] : ['svg'],
               criadoPor: state.user.uid,
@@ -2525,6 +2537,9 @@
             qs('#admCores').value = produto.cores ? produto.cores.join(', ') : '';
             qs('#admTamanhos').value = produto.tamanhos ? produto.tamanhos.join(', ') : '';
             qs('#admDesc').value = produto.descricao || '';
+            qs('#admComposicao').value = produto.composicao || '';
+            qs('#admEstilo').value = produto.estilo || '';
+            qs('#admEnvio').value = produto.envio || '';
             
             // Alterar botão para "Atualizar"
             qs('#btnSalvarProduto').textContent = 'Atualizar Produto';
