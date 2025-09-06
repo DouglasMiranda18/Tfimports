@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feijoada da Dayse - Cardápio Online</title>
+    <!-- Firebase App (the core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <!-- Firebase Auth -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <!-- Firebase Firestore -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <!-- Firebase Storage -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    <!-- Google Maps -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCvZbk7zdnHDm-rCc6dFGwXWYLzwM8avAE&libraries=places"></script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        marrom: '#3e2214',
+                        caramelo: '#d58940',
+                        vermelho: '#ae3f33',
+                        bordo: '#5c1d20',
+                    },
+                    fontFamily: {
+                        'poppins': ['Poppins', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+
+<body>
+    <!-- Product Details Modal -->
+    <div id="productDetailsModal"
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4 overflow-hidden">
+            <div class="relative">
+                <!-- Close button -->
+                <button id="closeProductModal" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 z-10"
+                    title="Fechar modal" aria-label="Fechar">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+
+                <!-- Product Image -->
+                <div id="modalProductImage" class="h-96 bg-gray-200 flex items-center justify-center overflow-hidden">
+                    <img id="modalProductImageElement" src="" alt="" class="w-full h-full object-contain"
+                        style="display: none;">
+                    <svg id="modalProductImagePlaceholder" xmlns="http://www.w3.org/2000/svg"
+                        class="h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Product Details -->
+            <div class="p-6">
+                <h3 id="modalProductName" class="text-2xl font-bold text-marrom mb-2"></h3>
+                <p id="modalProductDescription" class="text-gray-600 mb-4"></p>
+                <div class="flex justify-between items-center mb-6">
+                    <span id="modalProductPrice" class="text-2xl font-bold text-vermelho"></span>
+                </div>
+                <button id="confirmAddToCart"
+                    class="w-full bg-vermelho hover:bg-red-800 text-white font-medium py-3 px-6 rounded-lg transition-colors flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20"
+                        fill="currentColor">
+                        <path fill-rule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                            clip-rule="evenodd" />
+                    </svg>
+                    Confirmar e adicionar ao carrinho
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="bg-marrom text-white shadow-lg fixed w-full z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center">
+                <div class="mr-3">
+                    <img src="imagens/Feijoada Da Dayse(Logotipo).png" alt="logo" class="w-10 h-10">
+
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold">Feijoada da Dayse</h1>
+                </div>
+            </div>
+            <nav class="hidden md:flex space-x-6">
+                <a href="#inicio" class="hover:text-caramelo transition-colors">Início</a>
+                <a href="#cardapio" class="hover:text-caramelo transition-colors">Cardápio</a>
+                <a href="#sobre" class="hover:text-caramelo transition-colors">Sobre</a>
+                <a href="#contato" class="hover:text-caramelo transition-colors">Contato</a>
+                <button id="adminBtn" class="hover:text-caramelo transition-colors">Admin</button>
+                <button id="cartBtn" class="hover:text-caramelo transition-colors flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    <span id="cartItemCount" class="ml-1">0</span>
+                </button>
+            </nav>
+            <button id="mobileMenuBtn" class="md:hidden text-white" title="Abrir menu de navegação" aria-label="Menu">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg> </button>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobileMenu" class="hidden md:hidden bg-marrom pb-4 px-4">
+            <a href="#inicio" class="block py-2 hover:text-caramelo transition-colors">Início</a>
+            <a href="#cardapio" class="block py-2 hover:text-caramelo transition-colors">Cardápio</a>
+            <a href="#sobre" class="block py-2 hover:text-caramelo transition-colors">Sobre</a>
+            <a href="#contato" class="block py-2 hover:text-caramelo transition-colors">Contato</a>
+            <button id="adminBtnMobile" class="block py-2 hover:text-caramelo transition-colors">Admin</button>
+            <button id="cartBtnMobile" class="block py-2 hover:text-caramelo transition-colors flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                Carrinho (<span id="cartItemCountMobile">0</span>)
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="pt-24 pb-12">
+        <!-- Hero Section -->
+        <section id="inicio" class="relative h-[500px] bg-gradient-to-r from-bordo to-marrom flex items-center">
+            <div class="absolute inset-0 bg-black opacity-50"></div>
+            <div class="container mx-auto px-4 relative z-10 text-white">
+                <h2 class="text-4xl md:text-5xl font-bold mb-4">Feijoada da Dayse</h2>
+                <p class="text-xl md:text-2xl mb-8 max-w-2xl">A melhor feijoada da região, feita com ingredientes
+                    selecionados e muito amor.</p>
+                <a href="#cardapio"
+                    class="bg-caramelo hover:bg-amber-600 text-white font-bold py-3 px-6 rounded-lg transition-colors inline-flex items-center">
+                    Ver Cardápio
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" viewBox="0 0 20 20"
+                        fill="currentColor">
+                        <path fill-rule="evenodd"
+                            d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
+                            clip-rule="evenodd" />
+                    </svg>
+                </a>
+            </div>
+        </section>
+
+        <!-- AVISO DE RESTAURANTE FECHADO -->
+        <div id="closedBanner" class="hidden bg-red-600 text-white text-center py-4 text-lg font-bold">Restaurante
+            fechado no momento. Não estamos aceitando pedidos.</div>
+
+        <!-- Menu Categories -->
+        <section id="cardapio" class="py-12 bg-white">
+            <div class="container mx-auto px-4">
+                <h2 class="text-3xl font-bold text-center mb-2 text-marrom">Nosso Cardápio</h2>
+                <p class="text-center text-gray-600 mb-8">Confira nossas deliciosas opções</p>
+
+                <div class="flex flex-wrap justify-center gap-4 mb-10">
+                    <button class="category-btn bg-caramelo text-white py-2 px-4 rounded-full active"
+                        data-category="all">
+                        Todos
+                    </button>
+                    <button class="category-btn bg-gray-200 text-gray-800 py-2 px-4 rounded-full"
+                        data-category="comidas">
+                        Comidas
+                    </button>
+                    <button class="category-btn bg-gray-200 text-gray-800 py-2 px-4 rounded-full"
+                        data-category="acompanhamentos">
+                        Acompanhamentos
+                    </button>
+                    <button class="category-btn bg-gray-200 text-gray-800 py-2 px-4 rounded-full"
+                        data-category="bebidas">
+                        Bebidas
+                    </button>
+                    <button class="category-btn bg-gray-200 text-gray-800 py-2 px-4 rounded-full"
+                        data-category="sobremesas">
+                        Sobremesas
+                    </button>
+                </div>
+
+                <!-- Menu Items -->
+                <div id="menu-items" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Menu items will be loaded here from Firebase -->
+                    <div class="flex justify-center items-center col-span-full py-12">
+                        <div class="loader"></div>
+                        <span class="ml-3 text-gray-600">Carregando cardápio...</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="sobre" class="py-16 bg-gray-100">
+            <div class="container mx-auto px-4">
+                <div class="flex flex-col md:flex-row items-center">
+                    <div class="md:w-1/2 mb-8 md:mb-0">
+                        <div class="bg-vermelho rounded-lg p-4 inline-block mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-white" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                            </svg>
+                        </div>
+                        <h2 class="text-3xl font-bold mb-4 text-marrom">Nossa História</h2>
+                        <p class="text-gray-700 mb-4">A Feijoada da Dayse surgiu em 7 de setembro de 2019, em Piedade,
+                            Jaboatão dos Guararapes, trazendo consigo muito mais do que comida — trazendo sabor, carinho
+                            e aquele tempero que conquista.</p>
+
+                        <p class="text-gray-700 mb-4">Desde o início, nos dedicamos a oferecer uma feijoada de respeito,
+                            feita com ingredientes de
+                            qualidade e um tempero que é só nosso. Mais do que isso, acreditamos que o bom atendimento
+                            faz toda a diferença. Cada cliente é recebido com atenção e simpatia, como se fosse da casa.
+                        </p>
+
+                        <p class="text-gray-700 mb-4">Com o tempo, nosso cardápio cresceu para atender aos mais variados
+                            gostos. Hoje, além da feijoada, também servimos dobradinha, sururu, sarapatel e outros
+                            pratos tradicionais que aquecem o coração.</p>
+
+                        <p class="text-gray-700 mb-6">Servimos de quinta a domingo, sempre com o mesmo compromisso:
+                            entregar sabor, qualidade e
+                            aquele toque caseiro que faz lembrar a comida da vó.</p>
+
+                        <div class="flex space-x-4">
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-vermelho">6+</div>
+                                <div class="text-sm text-gray-600">Anos de experiência</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-vermelho">1000+</div>
+                                <div class="text-sm text-gray-600">Clientes satisfeitos</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-vermelho">20+</div>
+                                <div class="text-sm text-gray-600">Pratos especiais</div>
+                            </div>
+                        </div>
+                    </div>
+                    <img src="imagens/Feijoada.jpeg" alt="Feijoada da Dayse"
+                        class="rounded-lg h-64 md:h-70 w-full object-cover">
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contato" class="py-16 bg-white">
+            <div class="container mx-auto px-4">
+                <h2 class="text-3xl font-bold text-center mb-2 text-marrom">Entre em Contato</h2>
+                <p class="text-center text-gray-600 mb-12">Estamos à disposição para atender você</p>
+
+                <div class="flex flex-col md:flex-row gap-8">
+                    <div class="md:w-1/2 bg-gray-50 p-8 rounded-lg shadow-md">
+                        <h3 class="text-xl font-semibold mb-4 text-marrom">Informações de Contato</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-start">
+                                <div class="bg-caramelo p-2 rounded-full mr-4">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white"
+                                        viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd"
+                                            d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-medium text-gray-800">Endereço</h4>
+                                    <p class="text-gray-600">R. São Sebastião, 802 - Piedade</p>
+                                    <p class="text-gray-600">Jaboatão dos Guararapes - PE</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="bg-caramelo p-2 rounded-full mr-4">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white"
+                                        viewBox="0 0 20 20" fill="currentColor">
+                                        <path
+                                            d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-medium text-gray-800">Telefone</h4>
+                                    <p class="text-gray-600">(81) 98748-4019</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="bg-caramelo p-2 rounded-full mr-4">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white"
+                                        viewBox="0 0 20 20" fill="currentColor">
+                                        <path
+                                            d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                                        <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-medium text-gray-800">Email</h4>
+                                    <p class="text-gray-600">contato@feijoadadadayse.com.br</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="bg-caramelo p-2 rounded-full mr-4">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white"
+                                        viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd"
+                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-medium text-gray-800">Horário de Funcionamento</h4>
+                                    <p class="text-gray-600">Quinta a Domingo: 10h às 15h</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="md:w-1/2 bg-gray-50 p-8 rounded-lg shadow-md">
+                        <h3 class="text-xl font-semibold mb-4 text-marrom">O que dizem nossos clientes</h3>
+                        <div class="relative">
+                            <!-- Carrossel de Feedback -->
+                            <div id="feedbackCarousel" class="overflow-hidden">
+                                <div id="feedbackSlides" class="flex transition-transform duration-500">
+                                    <!-- Slide 1 -->
+                                    <div class="w-full flex-shrink-0 p-4">
+                                        <div class="bg-white rounded-lg p-6 shadow-sm">
+                                            <div class="flex items-center mb-4">
+                                                <div
+                                                    class="h-12 w-12 rounded-full bg-caramelo flex items-center justify-center text-white text-xl font-semibold">
+                                                    M
+                                                </div>
+                                                <div class="ml-4">
+                                                    <h4 class="font-medium text-gray-800">Carla Patricia</h4>
+                                                    <div class="flex text-yellow-400">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+                                                            viewBox="0 0 20 20" fill="currentColor">
+                                                            <path
+                                                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                        </svg>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+                                                            viewBox="0 0 20 20" fill="currentColor">
+                                                            <path
+                                                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                        </svg>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+                                                            viewBox="0 0 20 20" fill="currentColor">
+                                                            <path
+                                                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                        </svg>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+                                                            viewBox="0 0 20 20" fill="currentColor">
+                                                            <path
+                                                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                        </svg>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+                                                            viewBox="0 0 20 20" fill="currentColor">
+                                                            <path
+                                                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                        </svg>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+                                                            viewBox="0 0 20 20" fill="currentColor">
+                                                            <path
+                                                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                        </svg>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+                                                            viewBox="0 0 20 20" fill="currentColor">
+                                                            <path
+                                                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                        </svg>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+                                                            viewBox="0 0 20 20" fill="currentColor">
+                                                            <path
+                                                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                        </svg>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <p class="text-gray-600">"A melhor feijoada que já comi! O tempero é
+                                                perfeito e o atendimento é excelente. Recomendo muito!"</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Slide 2 -->
+                                    <div class="w-full flex-shrink-0 p-4">
+                                        <div class="bg-white rounded-lg p-6 shadow-sm">
+                                            <div class="flex items-center mb-4">
+                                                <div
+                                                    class="h-12 w-12 rounded-full bg-vermelho flex items-center justify-center text-white text-xl font-semibold">
+                                                    J
+                                                </div>
+                                                <div class="ml-4">
+                                                    <h4 class="font-medium text-gray-800">Bruna Abreu</h4>
+                                                    <div class="flex text-yellow-400">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+                                                            viewBox="0 0 20 20" fill="currentColor">
+                                                            <path
+                                                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                        </svg>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+                                                            viewBox="0 0 20 20" fill="currentColor">
+                                                            <path
+                                                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                        </svg>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+                                                            viewBox="0 0 20 20" fill="currentColor">
+                                                            <path
+                                                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                        </svg>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+                                                            viewBox="0 0 20 20" fill="currentColor">
+                                                            <path
+                                                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                        </svg>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+                                                            viewBox="0 0 20 20" fill="currentColor">
+                                                            <path
+                                                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                        </svg>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+                                                            viewBox="0 0 20 20" fill="currentColor">
+                                                            <path
+                                                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                        </svg>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+                                                            viewBox="0 0 20 20" fill="currentColor">
+                                                            <path
+                                                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                        </svg>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+                                                            viewBox="0 0 20 20" fill="currentColor">
+                                                            <path
+                                                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                        </svg>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <p class="text-gray-600">"Sururu e sarapatel impecáveis! Ambiente acolhedor
+                                                e preço justo. Sempre Peço!"</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Slide 3 -->
+                                    <div class="w-full flex-shrink-0 p-4">
+                                        <div class="bg-white rounded-lg p-6 shadow-sm">
+                                            <div class="flex items-center mb-4">
+                                                <div
+                                                    class="h-12 w-12 rounded-full bg-marrom flex items-center justify-center text-white text-xl font-semibold">
+                                                    A
+                                                </div>
+                                                <div class="ml-4">
+                                                    <h4 class="font-medium text-gray-800">Manuella Maria</h4>
+                                                    <div class="flex text-yellow-400">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+                                                            viewBox="0 0 20 20" fill="currentColor">
+                                                            <path
+                                                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                        </svg>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+                                                            viewBox="0 0 20 20" fill="currentColor">
+                                                            <path
+                                                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                        </svg>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+                                                            viewBox="0 0 20 20" fill="currentColor">
+                                                            <path
+                                                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                        </svg>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+                                                            viewBox="0 0 20 20" fill="currentColor">
+                                                            <path
+                                                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                        </svg>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+                                                            viewBox="0 0 20 20" fill="currentColor">
+                                                            <path
+                                                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                        </svg>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+                                                            viewBox="0 0 20 20" fill="currentColor">
+                                                            <path
+                                                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                        </svg>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+                                                            viewBox="0 0 20 20" fill="currentColor">
+                                                            <path
+                                                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                        </svg>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+                                                            viewBox="0 0 20 20" fill="currentColor">
+                                                            <path
+                                                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                        </svg>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <p class="text-gray-600">"A dobradinha é sensacional! Tempero na medida
+                                                certa e atendimento muito atencioso. Vale muito a pena!"</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Botões de navegação -->
+                            <button id="prevBtn"
+                                class="absolute left-0 top-1/2 -translate-y-1/2 bg-white p-2 rounded-full shadow-md hover:bg-gray-100 focus:outline-none">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 19l-7-7 7-7" />
+                                </svg>
+                            </button>
+                            <button id="nextBtn"
+                                class="absolute right-0 top-1/2 -translate-y-1/2 bg-white p-2 rounded-full shadow-md hover:bg-gray-100 focus:outline-none">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+
+                            <!-- Indicadores -->
+                            <div class="flex justify-center mt-4 space-x-2">
+                                <button class="h-2 w-2 rounded-full bg-caramelo" data-slide="0"></button>
+                                <button class="h-2 w-2 rounded-full bg-gray-300" data-slide="1"></button>
+                                <button class="h-2 w-2 rounded-full bg-gray-300" data-slide="2"></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <script>
+                        // Carrossel de Feedback
+                        document.addEventListener('DOMContentLoaded', function () {
+                            const slides = document.getElementById('feedbackSlides');
+                            const prevBtn = document.getElementById('prevBtn');
+                            const nextBtn = document.getElementById('nextBtn');
+                            const indicators = document.querySelectorAll('[data-slide]');
+                            let currentSlide = 0;
+                            const totalSlides = 3;
+
+                            function updateSlidePosition() {
+                                slides.style.transform = `translateX(-${currentSlide * 100}%)`;
+
+                                // Atualiza indicadores
+                                indicators.forEach((indicator, index) => {
+                                    if (index === currentSlide) {
+                                        indicator.classList.remove('bg-gray-300');
+                                        indicator.classList.add('bg-caramelo');
+                                    } else {
+                                        indicator.classList.remove('bg-caramelo');
+                                        indicator.classList.add('bg-gray-300');
+                                    }
+                                });
+                            }
+
+                            function nextSlide() {
+                                currentSlide = (currentSlide + 1) % totalSlides;
+                                updateSlidePosition();
+                            }
+
+                            function prevSlide() {
+                                currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+                                updateSlidePosition();
+                            }
+
+                            // Event Listeners
+                            nextBtn.addEventListener('click', nextSlide);
+                            prevBtn.addEventListener('click', prevSlide);
+
+                            // Indicadores
+                            indicators.forEach((indicator, index) => {
+                                indicator.addEventListener('click', () => {
+                                    currentSlide = index;
+                                    updateSlidePosition();
+                                });
+                            });
+
+                            // Auto-play
+                            setInterval(nextSlide, 5000);
+                        });
+                    </script>
+                </div>
+            </div>
+        </section>
+
+        <!-- Admin Panel -->
+        <section id="adminPanel" class="admin-panel py-16 bg-gray-100">
+            <div class="container mx-auto px-4">
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-marrom">Painel Administrativo</h2>
+                        <button id="logoutBtn"
+                            class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-md transition-colors hidden">
+                            Sair
+                        </button>
+                    </div>
+
+                    <!-- Login Form -->
+                    <div id="loginForm" class="max-w-md mx-auto">
+                        <h3 class="text-xl font-semibold mb-4 text-marrom">Login Administrativo</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label for="adminEmail" class="block text-gray-700 mb-1">Email</label>
+                                <input type="email" id="adminEmail"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-caramelo">
+                            </div>
+                            <div>
+                                <label for="adminPassword" class="block text-gray-700 mb-1">Senha</label>
+                                <input type="password" id="adminPassword"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-caramelo">
+                            </div>
+                            <button id="loginBtn"
+                                class="bg-caramelo hover:bg-amber-600 text-white font-medium py-2 px-6 rounded-md transition-colors w-full">
+                                Entrar
+                            </button>
+                            <p id="loginError" class="text-red-500 text-sm hidden"></p>
+                        </div>
+                    </div>
+
+                    <!-- Product Management -->
+                    <div id="productManagement" class="hidden">
+                        <div class="mb-8">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-xl font-semibold text-marrom">Adicionar Novo Item</h3>
+                                <label class="flex items-center space-x-2">
+                                    <input type="checkbox" id="toggleClosed"
+                                        class="form-checkbox h-5 w-5 text-vermelho">
+                                    <span class="text-marrom font-medium">Restaurante Fechado</span>
+                                </label>
+                            </div>
+                            <form id="addProductForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="productName" class="block text-gray-700 mb-1">Nome do Produto</label>
+                                    <input type="text" id="productName"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-caramelo">
+                                </div>
+                                <div>
+                                    <label for="productCategory" class="block text-gray-700 mb-1">Categoria</label>
+                                    <select id="productCategory"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-caramelo">
+                                        <option value="comidas">Comidas</option>
+                                        <option value="acompanhamentos">Acompanhamentos</option>
+                                        <option value="bebidas">Bebidas</option>
+                                        <option value="sobremesas">Sobremesas</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="productPrice" class="block text-gray-700 mb-1">Preço (R$)</label>
+                                    <input type="number" id="productPrice" step="0.01"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-caramelo">
+                                </div>
+                                <div>
+                                    <label for="productImage" class="block text-gray-700 mb-1">URL da Imagem do
+                                        Produto</label>
+                                    <input type="url" id="productImage"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-caramelo"
+                                        placeholder="https://exemplo.com/imagem.jpg">
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label for="productDescription" class="block text-gray-700 mb-1">Descrição</label>
+                                    <textarea id="productDescription" rows="3"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-caramelo"></textarea>
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="flex items-center space-x-2">
+                                        <input type="checkbox" id="productAvailability" checked
+                                            class="form-checkbox h-4 w-4 text-caramelo rounded focus:ring-caramelo">
+                                        <span class="text-gray-700">Produto disponível para venda</span>
+                                    </label>
+                                </div>
+                                <div class="md:col-span-2 flex justify-end">
+                                    <button type="submit"
+                                        class="bg-vermelho hover:bg-red-800 text-white font-medium py-2 px-6 rounded-md transition-colors">
+                                        Adicionar Item
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div>
+                            <h3 class="text-xl font-semibold mb-4 text-marrom">Gerenciar Itens</h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full bg-white border border-gray-200">
+                                    <thead>
+                                        <tr>
+                                            <th class="py-3 px-4 border-b text-left">Nome</th>
+                                            <th class="py-3 px-4 border-b text-left">Categoria</th>
+                                            <th class="py-3 px-4 border-b text-left">Preço</th>
+                                            <th class="py-3 px-4 border-b text-left">Disponível</th>
+                                            <th class="py-3 px-4 border-b text-left">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="productTableBody">
+                                        <!-- Products will be loaded here -->
+                                        <tr>
+                                            <td colspan="5" class="py-4 px-4 text-center text-gray-500">Carregando
+                                                produtos...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Edit Product Modal -->
+        <div id="editModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-semibold text-marrom">Editar Item</h3>
+                    <button id="closeEditModal" class="text-gray-500 hover:text-gray-700" title="Fechar modal de edição"
+                        aria-label="Fechar"> <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg> </button>
+                </div>
+                <form id="editProductForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="hidden" id="editProductId">
+                    <div>
+                        <label for="editProductName" class="block text-gray-700 mb-1">Nome do Produto</label>
+                        <input type="text" id="editProductName"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-caramelo">
+                    </div>
+                    <div>
+                        <label for="editProductCategory" class="block text-gray-700 mb-1">Categoria</label>
+                        <select id="editProductCategory"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-caramelo">
+                            <option value="comidas">Comidas</option>
+                            <option value="acompanhamentos">Acompanhamentos</option>
+                            <option value="bebidas">Bebidas</option>
+                            <option value="sobremesas">Sobremesas</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="editProductPrice" class="block text-gray-700 mb-1">Preço (R$)</label>
+                        <input type="number" id="editProductPrice" step="0.01"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-caramelo">
+                    </div>
+                    <div>
+                        <label for="editProductImage" class="block text-gray-700 mb-1">URL da Imagem do Produto</label>
+                        <input type="url" id="editProductImage"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-caramelo"
+                            placeholder="https://exemplo.com/imagem.jpg">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label for="editProductDescription" class="block text-gray-700 mb-1">Descrição</label>
+                        <textarea id="editProductDescription" rows="3"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-caramelo"></textarea>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" id="editProductAvailability"
+                                class="form-checkbox h-4 w-4 text-caramelo rounded focus:ring-caramelo">
+                            <span class="text-gray-700">Produto disponível para venda</span>
+                        </label>
+                    </div>
+                    <div class="md:col-span-2 flex justify-end space-x-3">
+                        <button type="button" id="cancelEditBtn"
+                            class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-6 rounded-md transition-colors">
+                            Cancelar
+                        </button>
+                        <button type="submit"
+                            class="bg-caramelo hover:bg-amber-600 text-white font-medium py-2 px-6 rounded-md transition-colors">
+                            Salvar Alterações
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+                <h3 class="text-xl font-semibold text-marrom mb-4">Confirmar Exclusão</h3>
+                <p class="text-gray-700 mb-6">Tem certeza que deseja excluir este item? Esta ação não pode ser desfeita.
+                </p>
+                <input type="hidden" id="deleteProductId">
+                <div class="flex justify-end space-x-3">
+                    <button id="cancelDeleteBtn"
+                        class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-6 rounded-md transition-colors">
+                        Cancelar
+                    </button>
+                    <button id="confirmDeleteBtn"
+                        class="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-6 rounded-md transition-colors">
+                        Excluir
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Notification -->
+        <div id="toast"
+            class="fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-md shadow-lg transform transition-transform duration-300 translate-y-20 opacity-0 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586l-4.293-4.293a1 1 0 111.414-1.414L10 8.586l4.293 4.293a1 1 0 01-1.414 1.414L10 10.586z"
+                    clip-rule="evenodd" />
+            </svg>
+            <span id="toastMessage">Operação realizada com sucesso!</span>
+        </div>
+    </main>
+
+    <!-- Cart Modal -->
+    <div id="cartModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-end z-50 hidden">
+        <div class="bg-white h-full w-full md:w-[500px] shadow-lg flex flex-col" id="cartSlider">
+            <!-- Cabeçalho do Carrinho -->
+            <div class="bg-marrom text-white p-6 shadow-md">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        <h3 class="text-xl font-semibold">Seu Carrinho</h3>
+                    </div>
+                    <button id="closeCartModal" class="text-white hover:text-caramelo transition-colors"
+                        title="Fechar carrinho" aria-label="Fechar">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Área de Rolagem dos Itens -->
+            <div class="flex-1 overflow-y-auto bg-gray-50">
+                <div id="cartItems" class="p-6 space-y-4">
+                    <!-- Cart items will be loaded here -->
+                </div>
+
+                <form id="orderForm" class="p-6 space-y-6">
+                    <div class="space-y-4">
+                        <div>
+                            <label for="customerName" class="block text-gray-700 mb-2 font-medium">Nome
+                                Completo*</label>
+                            <input type="text" id="customerName" required
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-caramelo focus:border-transparent transition-all">
+                        </div>
+                        <div>
+                            <label for="customerPhone" class="block text-gray-700 mb-2 font-medium">Telefone*</label>
+                            <input type="tel" id="customerPhone" required
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-caramelo focus:border-transparent transition-all">
+                        </div>
+                        <div class="space-y-4">
+                            <div>
+                                <label for="customerCep" class="block text-gray-700 mb-2 font-medium">CEP*</label>
+                                <div class="flex gap-2">
+                                    <div class="flex-1">
+                                        <input type="text" id="customerCep" required maxlength="10"
+                                            placeholder="XX.XXX-XXX"
+                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-caramelo focus:border-transparent transition-all">
+                                    </div>
+                                    <button type="button" id="searchCepBtn"
+                                        class="bg-caramelo hover:bg-amber-600 text-white px-6 py-3 rounded-lg transition-colors flex items-center justify-center min-w-[100px] flex-shrink-0">
+                                        <span class="hidden" id="searchCepBtnLoader">
+                                            <div class="loader w-5 h-5 border-2"></div>
+                                        </span>
+                                        <span id="searchCepBtnText">Buscar</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="customerNumber" class="block text-gray-700 mb-2 font-medium">Número*</label>
+                                <input type="text" id="customerNumber" required
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-caramelo focus:border-transparent transition-all">
+                            </div>
+                        </div>
+                        <div>
+                            <label for="customerStreet" class="block text-gray-700 mb-2 font-medium">Rua</label>
+                            <input type="text" id="customerStreet" readonly
+                                class="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 text-gray-600">
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="customerNeighborhood"
+                                    class="block text-gray-700 mb-2 font-medium">Bairro</label>
+                                <input type="text" id="customerNeighborhood" readonly
+                                    class="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 text-gray-600">
+                            </div>
+                            <div>
+                                <label for="customerCity" class="block text-gray-700 mb-2 font-medium">Cidade</label>
+                                <input type="text" id="customerCity" readonly
+                                    class="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 text-gray-600">
+                            </div>
+                        </div>
+                        <input type="hidden" id="deliveryAddress">
+                        <div>
+                            <label for="orderNotes" class="block text-gray-700 mb-2 font-medium">Observações</label>
+                            <textarea id="orderNotes" rows="3"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-caramelo focus:border-transparent transition-all resize-none"></textarea>
+                        </div>
+                        <div>
+                            <label for="paymentMethod" class="block text-gray-700 mb-2 font-medium">Forma de
+                                Pagamento*</label>
+                            <select id="paymentMethod" required
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-caramelo focus:border-transparent transition-all appearance-none bg-white">
+                                <option value="" disabled selected>Selecione uma opção</option>
+                                <option value="Pix">Pix</option>
+                                <option value="Dinheiro">Dinheiro</option>
+                                <option value="Cartão de Crédito">Cartão de Crédito </option>
+                                <option value="Cartão de Débito">Cartão de Débito </option>
+                            </select>
+                        </div>
+
+                        <!-- Campo de Troco - Inicialmente escondido -->
+                        <div id="changeField" class="hidden">
+                            <label for="changeAmount" class="block text-gray-700 mb-2 font-medium">Troco para
+                                quanto?</label>
+                            <div class="relative">
+                                <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500">R$</span>
+                                <input type="number" id="changeAmount" step="0.01" min="0"
+                                    class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-caramelo focus:border-transparent transition-all"
+                                    placeholder="0,00">
+                            </div>
+                        </div>
+
+                        <!-- Aviso de Taxa de Cartão - Inicialmente escondido -->
+                        <div id="cardFeeWarning"
+                            class="hidden bg-amber-50 border border-amber-200 rounded-lg p-4 text-amber-800">
+                            <div class="flex items-start">
+                                <svg class="h-5 w-5 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <p class="text-sm">Uma taxa adicional será aplicada para pagamento com cartão.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Script para controlar a exibição dos campos adicionais -->
+                    <script>
+                        document.getElementById('paymentMethod').addEventListener('change', function (e) {
+                            const changeField = document.getElementById('changeField');
+                            const cardFeeWarning = document.getElementById('cardFeeWarning');
+                            const method = e.target.value;
+
+                            // Esconde ambos inicialmente
+                            changeField.classList.add('hidden');
+                            cardFeeWarning.classList.add('hidden');
+
+                            // Mostra o campo apropriado baseado no método selecionado
+                            if (method === 'Dinheiro') {
+                                changeField.classList.remove('hidden');
+                            } else if (method === 'Cartão de Crédito' || method === 'Cartão de Débito') {
+                                cardFeeWarning.classList.remove('hidden');
+                            }
+
+                            // Atualiza os totais para refletir a taxa do cartão
+                            updateTotals();
+                        });
+
+                        // Remove a validação antiga do valor do troco
+                        document.getElementById('changeAmount').addEventListener('input', function (e) {
+                            const value = parseFloat(e.target.value) || 0;
+                            if (value < 0) {
+                                e.target.value = 0;
+                            }
+                        });
+                    </script>
+
+                    <!-- Resumo do Pedido -->
+                    <div class="mt-8 pt-6 border-t border-gray-200">
+                        <h4 class="text-lg font-semibold text-marrom mb-4">Resumo do Pedido</h4>
+                        <div class="bg-white rounded-lg p-4 shadow-sm space-y-3">
+                            <div class="flex justify-between items-center text-gray-600">
+                                <span>Subtotal:</span>
+                                <span id="subtotal" class="font-medium">R$ 0,00</span>
+                            </div>
+                            <div class="flex justify-between items-center text-gray-600">
+                                <div class="flex items-center">
+                                    <span>Taxa de Entrega</span>
+                                    <span id="distance" class="ml-2 text-sm text-gray-500">(0 km)</span>
+                                </div>
+                                <span id="deliveryFee" class="font-medium">R$ 0,00</span>
+                            </div>
+                            <div id="paymentFeeContainer"
+                                class="flex justify-between items-center text-gray-600 hidden">
+                                <span>Taxa de Pagamento:</span>
+                                <span id="paymentFee" class="font-medium">R$ 0,00</span>
+                            </div>
+                            <div
+                                class="flex justify-between items-center text-xl font-semibold text-marrom pt-3 border-t border-gray-200">
+                                <span>Total:</span>
+                                <span id="cartTotal">R$ 0,00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end space-x-3 pt-4">
+                        <button type="button" id="clearCartBtn"
+                            class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-3 px-6 rounded-lg transition-colors flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20"
+                                fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            Limpar
+                        </button>
+                        <button type="submit" id="submitOrderBtn"
+                            class="bg-vermelho hover:bg-red-800 text-white font-medium py-3 px-6 rounded-lg transition-colors flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20"
+                                fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            Finalizar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-marrom text-white py-8">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between">
+                <div class="mb-6 md:mb-0">
+                    <h3 class="text-xl font-bold mb-3">Feijoada da Dayse</h3>
+                    <p class="text-gray-300 max-w-xs">Sabor que conquista. A melhor feijoada da região, feita com
+                        ingredientes selecionados e muito amor.</p>
+                </div>
+                <div class="mb-6 md:mb-0">
+                    <h4 class="text-lg font-semibold mb-3">Links Rápidos</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#inicio" class="text-gray-300 hover:text-caramelo transition-colors">Início</a>
+                        </li>
+                        <li><a href="#cardapio" class="text-gray-300 hover:text-caramelo transition-colors">Cardápio</a>
+                        </li>
+                        <li><a href="#sobre" class="text-gray-300 hover:text-caramelo transition-colors">Sobre</a></li>
+                        <li><a href="#contato" class="text-gray-300 hover:text-caramelo transition-colors">Contato</a>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-3">Redes Sociais</h4>
+                    <div class="flex space-x-4">
+                        <path
+                            d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z" />
+                        </svg> </a> <a href="https://www.instagram.com/feijoada.da.dayse/" target="_blank"
+                            rel="noopener noreferrer" title="Siga-nos no Instagram" ...
+                            class="bg-caramelo hover:bg-amber-600 h-10 w-10 rounded-full flex items-center justify-center transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="currentColor"
+                                viewBox="0 0 24 24" aria-hidden="true">
+                                <path
+                                    d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                            </svg> </a> <a
+                            href="https://wa.me/5581987484019?text=Ol%C3%A1!%20Gostaria%20de%20mais%20informa%C3%A7%C3%B5es%2C%20por%20favor."
+                            target="_blank" rel="noopener noreferrer" title="Fale conosco no WhatsApp"
+                            aria-label="WhatsApp"
+                            class="bg-caramelo hover:bg-amber-600 h-10 w-10 rounded-full flex items-center justify-center transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="currentColor"
+                                viewBox="0 0 24 24" aria-hidden="true">
+                                <path
+                                    d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
+                            </svg> </a>
+                    </div>
+                </div>
+                <footer class="bg-marrom text-white py-4">
+                    <div class="container mx-auto px-4">
+                        <div class="flex justify-center items-center gap-6">
+                            <span class="font-medium">Aceitamos:</span>
+                            <img src="https://logodownload.org/wp-content/uploads/2020/02/pix-bc-logo.png" alt="PIX"
+                                class="h-6">
+                            <img src="https://logodownload.org/wp-content/uploads/2014/07/mastercard-logo-1.png"
+                                alt="Mastercard" class="h-6">
+                            <img src="https://logodownload.org/wp-content/uploads/2016/10/visa-logo-1.png" alt="Visa"
+                                class="h-6">
+                            <img src="https://logodownload.org/wp-content/uploads/2017/04/elo-logo-0.png" alt="Elo"
+                                class="h-6">
+                        </div>
+                    </div>
+                </footer>
+</body>
+
+</html>
+<div class="border-t border-gray-700 mt-8 pt-6 text-center text-gray-400 text-sm">
+    <p>&copy; 2025 Feijoada da Dayse. Todos os direitos reservados.</p>
+    <p>Site criado por <a href="https://www.instagram.com/cecwebdigital/" target="_blank" rel="noopener noreferrer"
+            class="text-caramelo hover:underline">C&amp;C</a>.</p>
+</div>
+
+</footer>
+
+<!-- Botão Flutuante do Carrinho -->
+<button id="floatingCartBtn"
+    class="fixed bottom-6 right-6 bg-vermelho hover:bg-red-800 text-white rounded-full p-4 shadow-lg flex items-center justify-center transition-all transform hover:scale-105 z-[60]">
+    <div class="relative">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+        <span id="floatingCartItemCount"
+            class="absolute -top-2 -right-2 bg-caramelo text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">0</span>
+    </div>
+</button>
+
+<!-- AVISO DE RESTAURANTE FECHADO -->
+<div id="closedBanner" class="hidden bg-red-600 text-white text-center py-4 text-lg font-bold">Restaurante fechado no
+    momento. Não estamos aceitando pedidos.</div>
+
+
+</body>
+
+</html>
