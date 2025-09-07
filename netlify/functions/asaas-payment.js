@@ -19,10 +19,12 @@ exports.handler = async (event, context) => {
 
   try {
     const { method, endpoint, data } = JSON.parse(event.body);
+    console.log('📥 Requisição recebida:', { method, endpoint, data });
     
     // Configurar URL base do Asaas
     const baseUrl = 'https://www.asaas.com/api/v3';
     const url = `${baseUrl}${endpoint}`;
+    console.log('🔗 URL do Asaas:', url);
     
     // Configurar headers para Asaas
     const asaasHeaders = {

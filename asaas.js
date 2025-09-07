@@ -168,10 +168,8 @@ export class AsaasService {
         dueDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 1 dia
         description: `Pedido ${paymentData.external_reference} - TFI IMPORTS`,
         externalReference: paymentData.external_reference,
-        callback: {
-          successUrl: `${window.location.origin}/#checkout-success`,
-          autoRedirect: true
-        }
+        pixAddressKey: 'teste@teste.com', // Chave PIX para teste
+        pixAddressKeyType: 'EMAIL'
       };
 
       const response = await fetch('/.netlify/functions/asaas-payment', {
@@ -193,13 +191,16 @@ export class AsaasService {
       }
       console.log('✅ PIX criado:', result);
       
+      console.log('🔍 Dados completos do Asaas:', result.data);
+      
       return {
         success: true,
         paymentId: result.data.id,
         status: result.data.status,
-        qrCode: result.data.pixTransaction?.qrCode,
-        pixCopyPaste: result.data.pixTransaction?.payload,
-        pixKey: result.data.pixTransaction?.pixKey
+        qrCode: result.data.pixTransaction?.qrCode || result.data.qrCode,
+        pixCopyPaste: result.data.pixTransaction?.payload || result.data.pixCopyPaste || result.data.pixTransaction?.pixKey,
+        pixKey: result.data.pixTransaction?.pixKey || result.data.pixKey,
+        invoiceUrl: result.data.invoiceUrl
       };
 
     } catch (error) {
