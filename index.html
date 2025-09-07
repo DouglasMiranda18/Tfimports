@@ -2322,8 +2322,8 @@
           console.log('✅ Pagamento PIX criado com sucesso');
           currentPaymentId = paymentResult.paymentId;
           
-          // Mostrar modal de confirmação
-          showConfirmacaoModal(orderData, paymentResult);
+          // Mostrar modal PIX com QR Code para pagamento
+          showPixModal(paymentResult);
           
           // Salvar pedido no Firebase com status pendente
           const orderRef = await db.collection('pedidos').add({
@@ -2444,29 +2444,40 @@
     }
 
     function showPixModal(paymentResult) {
+      console.log('🔄 Exibindo modal PIX:', paymentResult);
       const modal = qs('#pixModal');
-      if (!modal) return;
+      if (!modal) {
+        console.error('❌ Modal PIX não encontrada');
+        return;
+      }
 
-      // Gerar QR Code (simulado - em produção usar biblioteca real)
+      // Gerar QR Code
       const qrCodeDiv = qs('#pixQrCode');
       if (qrCodeDiv && paymentResult.qrCode) {
         qrCodeDiv.innerHTML = `
           <div class="text-center p-4">
-            <div class="text-6xl mb-2">📱</div>
-            <div class="text-sm text-gray-600">QR Code PIX</div>
-            <div class="text-xs text-gray-500 mt-2">${paymentResult.qrCode}</div>
+            <div class="bg-white p-4 rounded-lg mb-4">
+              <div class="text-6xl mb-2">📱</div>
+              <div class="text-sm text-gray-600 mb-2">QR Code PIX</div>
+              <div class="text-xs text-gray-500 break-all">${paymentResult.qrCode}</div>
+            </div>
+            <div class="text-xs text-slate-400">
+              Escaneie o QR Code com seu app de pagamento
+            </div>
           </div>
         `;
       }
 
       // Preencher código PIX
       const pixCodeInput = qs('#pixCode');
-      if (pixCodeInput && paymentResult.pixCode) {
-        pixCodeInput.value = paymentResult.pixCode;
+      if (pixCodeInput && paymentResult.pixCopyPaste) {
+        pixCodeInput.value = paymentResult.pixCopyPaste;
       }
 
       // Mostrar modal
       modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      console.log('✅ Modal PIX exibida com sucesso');
       
       // Iniciar verificação automática
       startPixVerification();
@@ -2500,14 +2511,26 @@
             
             toast('Pagamento aprovado! Pedido confirmado.');
             
-            // Limpar carrinho
-            state.carrinho = [];
-            saveCart();
+            // Preparar dados do pedido para modal de confirmação
+            const orderData = {
+              items: state.carrinho.map(item => ({
+                id: item.id,
+                nome: item.nome,
+                preco: item.preco,
+                quantidade: item.qtd,
+                cor: item.cor,
+                tamanho: item.tam
+              })),
+              user_id: state.user?.uid,
+              user_email: state.user?.email,
+              user_name: state.user?.displayName || 'Usuário',
+              user_phone: qs('#telefone')?.value || 'N/A'
+            };
             
-            // Fechar modal após 2 segundos
+            // Fechar modal PIX e mostrar modal de confirmação
             setTimeout(() => {
               closePixModal();
-              navigate('#home');
+              showConfirmacaoModal(orderData, { success: true, paymentId: currentPaymentId });
             }, 2000);
           }
         } catch (error) {
@@ -2520,6 +2543,7 @@
       const modal = qs('#pixModal');
       if (modal) {
         modal.classList.add('hidden');
+        modal.classList.remove('flex');
       }
       
       if (pixVerificationInterval) {
