@@ -900,6 +900,85 @@
     </div>
   </div>
 
+  <!-- Modal de Confirmação de Compra -->
+  <div id="confirmacaoModal" class="fixed inset-0 hidden items-center justify-center modal-mask z-50 p-4">
+    <div class="glass rounded-2xl p-6 max-w-lg w-full mx-auto">
+      <div class="text-center">
+        <!-- Ícone de sucesso -->
+        <div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+          <span class="text-2xl">✅</span>
+        </div>
+        
+        <h3 class="text-2xl font-bold text-green-400 mb-2">Compra Realizada!</h3>
+        <p class="text-slate-300 mb-6">Seu pedido foi processado com sucesso</p>
+        
+        <!-- Detalhes do pedido -->
+        <div class="bg-slate-800/50 rounded-xl p-4 mb-6 text-left">
+          <h4 class="font-bold text-lg mb-3 text-center">Detalhes do Pedido</h4>
+          
+          <!-- Produtos -->
+          <div id="confirmacaoProdutos" class="mb-4">
+            <!-- Produtos serão inseridos aqui via JavaScript -->
+          </div>
+          
+          <!-- Dados do cliente -->
+          <div class="border-t border-slate-600 pt-3">
+            <h5 class="font-bold mb-2">Dados do Cliente:</h5>
+            <div id="confirmacaoCliente" class="text-sm text-slate-300">
+              <!-- Dados serão inseridos aqui via JavaScript -->
+            </div>
+          </div>
+          
+          <!-- Frete -->
+          <div class="border-t border-slate-600 pt-3 mt-3">
+            <h5 class="font-bold mb-2">Frete:</h5>
+            <div id="confirmacaoFrete" class="text-sm text-slate-300">
+              <!-- Frete será inserido aqui via JavaScript -->
+            </div>
+          </div>
+          
+          <!-- Total -->
+          <div class="border-t border-slate-600 pt-3 mt-3">
+            <div class="flex justify-between items-center">
+              <span class="font-bold text-lg">Total:</span>
+              <span id="confirmacaoTotal" class="font-bold text-xl text-green-400">
+                <!-- Total será inserido aqui via JavaScript -->
+              </span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Tempo de entrega -->
+        <div class="bg-blue-500/20 border border-blue-500/30 rounded-xl p-4 mb-6">
+          <div class="flex items-center justify-center gap-2 mb-2">
+            <span class="text-2xl">🚚</span>
+            <h5 class="font-bold text-blue-400">Previsão de Entrega</h5>
+          </div>
+          <p id="confirmacaoEntrega" class="text-sm text-slate-300">
+            <!-- Tempo de entrega será inserido aqui via JavaScript -->
+          </p>
+        </div>
+        
+        <!-- Informações adicionais -->
+        <div class="text-xs text-slate-400 mb-6">
+          <p>• Você receberá um email de confirmação em breve</p>
+          <p>• O código de rastreamento será enviado quando o pedido for postado</p>
+          <p>• Em caso de dúvidas, entre em contato conosco</p>
+        </div>
+        
+        <!-- Botões -->
+        <div class="flex gap-3">
+          <button id="btnContinuarComprando" class="btn cta-gradient px-6 py-3 rounded-lg font-bold flex-1">
+            Continuar Comprando
+          </button>
+          <button id="btnFecharConfirmacao" class="btn pill px-6 py-3 rounded-lg">
+            Fechar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Login Modal -->
   <div id="loginModal" class="fixed inset-0 hidden items-center justify-center modal-mask z-50 p-4">
     <div class="glass rounded-2xl p-4 sm:p-6 max-w-md w-full mx-auto">
@@ -2243,6 +2322,9 @@
           console.log('✅ Pagamento PIX criado com sucesso');
           currentPaymentId = paymentResult.paymentId;
           
+          // Mostrar modal de confirmação
+          showConfirmacaoModal(orderData, paymentResult);
+          
           // Salvar pedido no Firebase com status pendente
           const orderRef = await db.collection('pedidos').add({
             ...orderData,
@@ -2323,6 +2405,9 @@
         if (paymentResult.success) {
           console.log('✅ Pagamento com cartão criado com sucesso');
           currentPaymentId = paymentResult.paymentId;
+          
+          // Mostrar modal de confirmação
+          showConfirmacaoModal(orderData, paymentResult);
           
           // Salvar pedido no Firebase
           const orderRef = await db.collection('pedidos').add({
@@ -3965,6 +4050,121 @@
           window.location.hash = '#loja';
         }
       }
+    }
+
+    // Funções para Modal de Confirmação
+    function showConfirmacaoModal(orderData, paymentResult) {
+      try {
+        // Preencher produtos
+        const produtosContainer = qs('#confirmacaoProdutos');
+        if (produtosContainer) {
+          produtosContainer.innerHTML = orderData.items.map(item => `
+            <div class="flex justify-between items-center py-2 border-b border-slate-600 last:border-b-0">
+              <div>
+                <div class="font-medium">${item.nome}</div>
+                <div class="text-xs text-slate-400">${item.cor} - ${item.tamanho} | Qtd: ${item.quantidade}</div>
+              </div>
+              <div class="font-bold">R$ ${(item.preco * item.quantidade).toFixed(2)}</div>
+            </div>
+          `).join('');
+        }
+
+        // Preencher dados do cliente
+        const clienteContainer = qs('#confirmacaoCliente');
+        if (clienteContainer) {
+          clienteContainer.innerHTML = `
+            <div><strong>Nome:</strong> ${qs('#nome')?.value || 'N/A'}</div>
+            <div><strong>Email:</strong> ${qs('#email')?.value || 'N/A'}</div>
+            <div><strong>Telefone:</strong> ${qs('#telefone')?.value || 'N/A'}</div>
+            <div><strong>CPF:</strong> ${qs('#cpf')?.value || 'N/A'}</div>
+            <div><strong>Endereço:</strong> ${qs('#logradouro')?.value || 'N/A'}, ${qs('#numero')?.value || 'N/A'}</div>
+            <div><strong>Cidade:</strong> ${qs('#cidade')?.value || 'N/A'} - ${qs('#uf')?.value || 'N/A'}</div>
+            <div><strong>CEP:</strong> ${qs('#cep')?.value || 'N/A'}</div>
+          `;
+        }
+
+        // Preencher frete
+        const freteContainer = qs('#confirmacaoFrete');
+        if (freteContainer && state.freteSelecionado) {
+          freteContainer.innerHTML = `
+            <div><strong>Serviço:</strong> ${state.freteSelecionado.nome}</div>
+            <div><strong>Preço:</strong> R$ ${state.freteSelecionado.preco.toFixed(2)}</div>
+            <div><strong>Prazo:</strong> ${state.freteSelecionado.prazo} dias úteis</div>
+          `;
+        }
+
+        // Preencher total
+        const totalContainer = qs('#confirmacaoTotal');
+        if (totalContainer) {
+          const total = orderData.items.reduce((sum, item) => sum + (item.preco * item.quantidade), 0) + (state.freteSelecionado?.preco || 0);
+          totalContainer.textContent = `R$ ${total.toFixed(2)}`;
+        }
+
+        // Preencher previsão de entrega
+        const entregaContainer = qs('#confirmacaoEntrega');
+        if (entregaContainer && state.freteSelecionado) {
+          const hoje = new Date();
+          const prazoEntrega = new Date(hoje.getTime() + (state.freteSelecionado.prazo + 1) * 24 * 60 * 60 * 1000);
+          const dataFormatada = prazoEntrega.toLocaleDateString('pt-BR');
+          
+          entregaContainer.innerHTML = `
+            <div class="text-center">
+              <div class="text-lg font-bold text-blue-400">${dataFormatada}</div>
+              <div class="text-sm">${state.freteSelecionado.prazo} dias úteis após a postagem</div>
+            </div>
+          `;
+        }
+
+        // Mostrar modal
+        const modal = qs('#confirmacaoModal');
+        if (modal) {
+          modal.classList.remove('hidden');
+          modal.classList.add('flex');
+        }
+
+        // Limpar carrinho após confirmação
+        state.carrinho = [];
+        state.freteSelecionado = null;
+        updateCartUI();
+        updateShippingUI();
+
+        console.log('✅ Modal de confirmação exibida com sucesso');
+
+      } catch (error) {
+        console.error('❌ Erro ao mostrar modal de confirmação:', error);
+      }
+    }
+
+    function closeConfirmacaoModal() {
+      const modal = qs('#confirmacaoModal');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+
+    // Event listeners para modal de confirmação
+    const btnFecharConfirmacao = qs('#btnFecharConfirmacao');
+    if (btnFecharConfirmacao) {
+      btnFecharConfirmacao.addEventListener('click', closeConfirmacaoModal);
+    }
+
+    const btnContinuarComprando = qs('#btnContinuarComprando');
+    if (btnContinuarComprando) {
+      btnContinuarComprando.addEventListener('click', () => {
+        closeConfirmacaoModal();
+        navigateToPage('home');
+      });
+    }
+
+    // Fechar modal clicando fora
+    const confirmacaoModal = qs('#confirmacaoModal');
+    if (confirmacaoModal) {
+      confirmacaoModal.addEventListener('click', (e) => {
+        if (e.target === confirmacaoModal) {
+          closeConfirmacaoModal();
+        }
+      });
     }
   </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9721b30b149bf202',t:'MTc1NTY5MDkwMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
