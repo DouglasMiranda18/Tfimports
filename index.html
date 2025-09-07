@@ -2417,30 +2417,41 @@
           console.log('✅ Pagamento com cartão criado com sucesso');
           currentPaymentId = paymentResult.paymentId;
           
-          // Mostrar modal de confirmação
-          showConfirmacaoModal(orderData, paymentResult);
+          // Preparar dados do pedido para salvar
+          const orderToSave = {
+            ...orderData,
+            paymentId: paymentResult.paymentId,
+            paymentMethod: 'card',
+            status: paymentResult.status === 'CONFIRMED' ? 'confirmed' : 'pending',
+            external_reference: paymentData.external_reference,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          };
           
           // Salvar pedido no Firebase
-          const orderRef = await db.collection('pedidos').add({
-            ...orderData,
-            status: paymentResult.status,
-            payment_id: paymentResult.paymentId,
-            payment_method: 'card',
-            external_reference: paymentData.external_reference,
-            created_at: firebase.firestore.FieldValue.serverTimestamp()
-          });
-          
-          console.log('✅ Pedido salvo no Firebase:', orderRef.id);
+          try {
+            await saveOrderToFirebase(orderToSave);
+            console.log('✅ Pedido salvo no Firebase');
+          } catch (error) {
+            console.error('❌ Erro ao salvar pedido:', error);
+          }
           
           if (paymentResult.status === 'CONFIRMED') {
+            console.log('✅ Pagamento confirmado imediatamente');
             toast('Pagamento aprovado! Pedido confirmado.');
+            
+            // Mostrar modal de confirmação
+            showConfirmacaoModal(orderToSave, paymentResult);
+            
             // Limpar carrinho
             state.carrinho = [];
-            saveCart();
-            // Redirecionar para página de sucesso
-            navigate('#home');
+            updateCartUI();
           } else {
-            toast('Pagamento processado. Aguardando confirmação.');
+            console.log('⏳ Pagamento pendente, aguardando confirmação');
+            toast('Pagamento processado. Aguardando confirmação...');
+            
+            // Iniciar verificação automática do status
+            startCardVerification(paymentResult.paymentId, orderToSave);
           }
           
         } else {
@@ -2672,6 +2683,82 @@
         console.error('❌ Erro ao salvar pedido no Firebase:', error);
         throw error;
       }
+    }
+
+    // Função para verificação automática de pagamento por cartão
+    function startCardVerification(paymentId, orderData) {
+      console.log('🔄 Iniciando verificação automática do cartão:', paymentId);
+      
+      let verificationAttempts = 0;
+      const maxAttempts = 20; // 20 tentativas (1 minuto)
+      
+      const verificationInterval = setInterval(async () => {
+        verificationAttempts++;
+        
+        if (verificationAttempts > maxAttempts) {
+          clearInterval(verificationInterval);
+          console.log('⏰ Timeout da verificação do cartão');
+          toast('Tempo limite atingido. Verifique o status do pagamento.');
+          return;
+        }
+        
+        try {
+          console.log(`🔍 Verificando status do cartão (tentativa ${verificationAttempts}/${maxAttempts}):`, paymentId);
+          
+          const statusResult = await asaasService.getPaymentStatus(paymentId);
+          console.log('📊 Status do cartão:', statusResult);
+          
+          if (statusResult.success) {
+            const status = statusResult.status;
+            
+            if (status === 'CONFIRMED' || status === 'RECEIVED_IN_CASH') {
+              // Pagamento confirmado!
+              console.log('✅ Pagamento por cartão confirmado!');
+              clearInterval(verificationInterval);
+              
+              // Atualizar status do pedido
+              orderData.status = 'confirmed';
+              orderData.confirmedAt = new Date().toISOString();
+              
+              // Atualizar no Firebase
+              try {
+                await db.collection('orders').doc(orderData.id).update({
+                  status: 'confirmed',
+                  confirmedAt: orderData.confirmedAt,
+                  updatedAt: new Date().toISOString()
+                });
+                console.log('✅ Status do pedido atualizado no Firebase');
+              } catch (error) {
+                console.error('❌ Erro ao atualizar pedido:', error);
+              }
+              
+              toast('Pagamento confirmado! Pedido aprovado.');
+              
+              // Mostrar modal de confirmação
+              showConfirmacaoModal(orderData, { success: true, paymentId: paymentId });
+              
+            } else if (status === 'PENDING') {
+              // Ainda aguardando
+              console.log('⏳ Pagamento ainda pendente...');
+              
+            } else if (status === 'OVERDUE' || status === 'CANCELLED') {
+              // Pagamento cancelado/vencido
+              console.log('❌ Pagamento cancelado/vencido');
+              clearInterval(verificationInterval);
+              toast('Pagamento cancelado ou vencido.');
+              
+            } else {
+              // Outros status
+              console.log(`📊 Status: ${status}`);
+            }
+          } else {
+            console.error('❌ Erro ao verificar status:', statusResult.error);
+          }
+          
+        } catch (error) {
+          console.error('❌ Erro na verificação do cartão:', error);
+        }
+      }, 3000); // Verificar a cada 3 segundos
     }
 
     function closePixModal() {
