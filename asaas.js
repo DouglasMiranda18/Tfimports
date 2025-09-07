@@ -167,9 +167,7 @@ export class AsaasService {
         value: totalValue.toFixed(2),
         dueDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 1 dia
         description: `Pedido ${paymentData.external_reference} - TFI IMPORTS`,
-        externalReference: paymentData.external_reference,
-        pixAddressKey: 'teste@teste.com', // Chave PIX para teste
-        pixAddressKeyType: 'EMAIL'
+        externalReference: paymentData.external_reference
       };
 
       const response = await fetch('/.netlify/functions/asaas-payment', {
@@ -193,14 +191,19 @@ export class AsaasService {
       
       console.log('🔍 Dados completos do Asaas:', result.data);
       
+      // O Asaas retorna os dados do PIX em campos específicos
+      const pixData = result.data.pixTransaction || {};
+      
       return {
         success: true,
         paymentId: result.data.id,
         status: result.data.status,
-        qrCode: result.data.pixTransaction?.qrCode || result.data.qrCode,
-        pixCopyPaste: result.data.pixTransaction?.payload || result.data.pixCopyPaste || result.data.pixTransaction?.pixKey,
-        pixKey: result.data.pixTransaction?.pixKey || result.data.pixKey,
-        invoiceUrl: result.data.invoiceUrl
+        qrCode: pixData.qrCode || result.data.qrCode,
+        pixCopyPaste: pixData.payload || result.data.pixCopyPaste,
+        pixKey: pixData.pixKey || result.data.pixKey,
+        invoiceUrl: result.data.invoiceUrl,
+        // Dados brutos para debug
+        rawData: result.data
       };
 
     } catch (error) {

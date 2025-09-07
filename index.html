@@ -2456,41 +2456,31 @@
       // Gerar QR Code
       const qrCodeDiv = qs('#pixQrCode');
       if (qrCodeDiv) {
-        if (paymentResult.qrCode) {
-          qrCodeDiv.innerHTML = `
-            <div class="text-center p-4">
-              <div class="bg-white p-4 rounded-lg mb-4">
-                <div class="text-6xl mb-2">📱</div>
-                <div class="text-sm text-gray-600 mb-2">QR Code PIX</div>
-                <div class="text-xs text-gray-500 break-all">${paymentResult.qrCode}</div>
-              </div>
-              <div class="text-xs text-slate-400">
-                Escaneie o QR Code com seu app de pagamento
-              </div>
+        // Sempre mostrar QR Code real ou dados disponíveis
+        const qrCodeText = paymentResult.qrCode || paymentResult.rawData?.pixTransaction?.qrCode || 'QR Code não disponível';
+        const pixKey = paymentResult.pixKey || paymentResult.rawData?.pixTransaction?.pixKey || 'Chave PIX não disponível';
+        
+        qrCodeDiv.innerHTML = `
+          <div class="text-center p-4">
+            <div class="bg-white p-4 rounded-lg mb-4">
+              <div class="text-6xl mb-2">📱</div>
+              <div class="text-sm text-gray-600 mb-2">QR Code PIX</div>
+              <div class="text-xs text-gray-500 break-all mb-2">${qrCodeText}</div>
+              <div class="text-xs text-gray-400">Chave: ${pixKey}</div>
             </div>
-          `;
-        } else {
-          qrCodeDiv.innerHTML = `
-            <div class="text-center p-4">
-              <div class="bg-white p-4 rounded-lg mb-4">
-                <div class="text-6xl mb-2">⏳</div>
-                <div class="text-sm text-gray-600 mb-2">Gerando QR Code...</div>
-                <div class="text-xs text-gray-500">Aguarde alguns segundos</div>
-              </div>
+            <div class="text-xs text-slate-400">
+              Escaneie o QR Code com seu app de pagamento
             </div>
-          `;
-        }
+          </div>
+        `;
       }
 
       // Preencher código PIX
       const pixCodeInput = qs('#pixCode');
       if (pixCodeInput) {
-        if (paymentResult.pixCopyPaste) {
-          pixCodeInput.value = paymentResult.pixCopyPaste;
-        } else {
-          pixCodeInput.value = 'Gerando código PIX...';
-          pixCodeInput.disabled = true;
-        }
+        const pixCode = paymentResult.pixCopyPaste || paymentResult.rawData?.pixTransaction?.payload || 'Código PIX não disponível';
+        pixCodeInput.value = pixCode;
+        pixCodeInput.disabled = false;
       }
 
       // Mostrar modal
