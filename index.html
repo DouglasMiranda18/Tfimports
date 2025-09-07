@@ -2436,23 +2436,22 @@
             console.error('❌ Erro ao salvar pedido:', error);
           }
           
-          if (paymentResult.status === 'CONFIRMED') {
-            console.log('✅ Pagamento confirmado imediatamente');
-            toast('Pagamento aprovado! Pedido confirmado.');
-            
-            // Mostrar modal de confirmação
-            showConfirmacaoModal(orderToSave, paymentResult);
-            
-            // Limpar carrinho
-            state.carrinho = [];
-            updateCartUI();
-          } else {
-            console.log('⏳ Pagamento pendente, aguardando confirmação');
-            toast('Pagamento processado. Aguardando confirmação...');
-            
-            // Iniciar verificação automática do status
-            startCardVerification(paymentResult.paymentId, orderToSave);
-          }
+          // Sempre mostrar modal de confirmação para pagamentos por cartão
+          console.log('✅ Pagamento por cartão processado, exibindo confirmação');
+          toast('Pagamento processado com sucesso!');
+          
+          // Mostrar modal de confirmação imediatamente
+          console.log('🔄 Chamando showConfirmacaoModal com dados:', orderToSave, paymentResult);
+          showConfirmacaoModal(orderToSave, paymentResult);
+          console.log('✅ showConfirmacaoModal chamada');
+          
+          // Limpar carrinho
+          state.carrinho = [];
+          updateCartUI();
+          
+          // Iniciar verificação automática do status em background
+          console.log('🔄 Iniciando verificação em background...');
+          startCardVerification(paymentResult.paymentId, orderToSave);
           
         } else {
           console.error('❌ Erro ao criar pagamento com cartão:', paymentResult.error);
@@ -2734,8 +2733,8 @@
               
               toast('Pagamento confirmado! Pedido aprovado.');
               
-              // Mostrar modal de confirmação
-              showConfirmacaoModal(orderData, { success: true, paymentId: paymentId });
+              // Não mostrar modal novamente, apenas atualizar status
+              console.log('✅ Status do pagamento atualizado para confirmado');
               
             } else if (status === 'PENDING') {
               // Ainda aguardando
@@ -4319,6 +4318,7 @@
 
     // Funções para Modal de Confirmação
     function showConfirmacaoModal(orderData, paymentResult) {
+      console.log('🔄 showConfirmacaoModal chamada com:', orderData, paymentResult);
       try {
         // Preencher produtos
         const produtosContainer = qs('#confirmacaoProdutos');
@@ -4382,9 +4382,14 @@
 
         // Mostrar modal
         const modal = qs('#confirmacaoModal');
+        console.log('🔍 Modal encontrada:', modal);
         if (modal) {
+          console.log('🔄 Removendo classe hidden e adicionando flex');
           modal.classList.remove('hidden');
           modal.classList.add('flex');
+          console.log('✅ Classes da modal atualizadas:', modal.className);
+        } else {
+          console.error('❌ Modal #confirmacaoModal não encontrada!');
         }
 
         // Limpar carrinho após confirmação
