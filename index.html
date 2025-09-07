@@ -1751,19 +1751,30 @@
       qs('#resTotal').textContent = fmt(subtotal + frete);
     }
         // Formatação automática do CEP
-    qs('#cep').addEventListener('input', (e) => {
-      const cep = e.target.value.replace(/\D/g, '');
-      if (cep.length <= 8) {
-        e.target.value = melhorEnvioService.formatCEP(cep);
-      }
-      
-      // Limpar status quando usuário digita
-      qs('#cepStatus').textContent = '';
-      qs('#btnCalcFrete').disabled = true;
-    });
+    const cepInput = qs('#cep');
+    if (cepInput) {
+      cepInput.addEventListener('input', (e) => {
+        const cep = e.target.value.replace(/\D/g, '');
+        if (cep.length <= 8) {
+          e.target.value = melhorEnvioService.formatCEP(cep);
+        }
+        
+        // Limpar status quando usuário digita
+        const cepStatus = qs('#cepStatus');
+        if (cepStatus) {
+          cepStatus.textContent = '';
+        }
+        const btnCalcFrete = qs('#btnCalcFrete');
+        if (btnCalcFrete) {
+          btnCalcFrete.disabled = true;
+        }
+      });
+    }
 
     // Buscar CEP
-    qs('#btnBuscarCep').addEventListener('click', async () => {
+    const btnBuscarCep = qs('#btnBuscarCep');
+    if (btnBuscarCep) {
+      btnBuscarCep.addEventListener('click', async () => {
       const cepInput = qs('#cep');
       const cep = cepInput.value.replace(/\D/g, '');
       const statusDiv = qs('#cepStatus');
@@ -1810,19 +1821,31 @@
         statusDiv.textContent = 'Erro ao buscar CEP. Tente novamente.';
         statusDiv.className = 'text-xs mt-1 text-red-400';
       } finally {
-        qs('#btnBuscarCep').disabled = false;
+        const btnBuscarCep = qs('#btnBuscarCep');
+        if (btnBuscarCep) {
+          btnBuscarCep.disabled = false;
+        }
       }
-    });
+      });
+    }
 
     // Buscar CEP ao pressionar Enter
-    qs('#cep').addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        qs('#btnBuscarCep').click();
-      }
-    });
+    const cepInput2 = qs('#cep');
+    if (cepInput2) {
+      cepInput2.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          const btnBuscarCep = qs('#btnBuscarCep');
+          if (btnBuscarCep) {
+            btnBuscarCep.click();
+          }
+        }
+      });
+    }
 
     // Validar endereço completo antes de calcular frete
-    qs('#btnCalcFrete').addEventListener('click', async () => {
+    const btnCalcFrete = qs('#btnCalcFrete');
+    if (btnCalcFrete) {
+      btnCalcFrete.addEventListener('click', async () => {
       const op = qs('#freteOpcoes'); 
       op.innerHTML='<div class="hint text-center py-4">Calculando frete...</div>';
       
@@ -1908,7 +1931,8 @@
         console.error('Erro ao calcular frete:', error);
         op.innerHTML = '<div class="hint text-center py-4">Erro ao calcular frete. Tente novamente.</div>';
       }
-    });
+      });
+    }
 
     // Pagamento
     // Event listeners para pagamento
@@ -1995,13 +2019,19 @@
       });
     }
 
-    qs('#btnFinalizar').addEventListener('click', async () => {
-      await processPayment();
-    });
+    const btnFinalizar = qs('#btnFinalizar');
+    if (btnFinalizar) {
+      btnFinalizar.addEventListener('click', async () => {
+        await processPayment();
+      });
+    }
     
-    qs('#btnPagar').addEventListener('click', async () => {
-      await processPayment();
-    });
+    const btnPagar = qs('#btnPagar');
+    if (btnPagar) {
+      btnPagar.addEventListener('click', async () => {
+        await processPayment();
+      });
+    }
 
     // Funções de pagamento
     function selectPaymentMethod(method) {
@@ -3456,10 +3486,25 @@
     }
     
     // Event listeners
-    qs('#btnLogin').addEventListener('click', openLoginModal);
-    qs('#btnAdminLogin').addEventListener('click', openLoginModal);
-    qs('#closeLogin').addEventListener('click', closeLoginModal);
-    qs('#closeTipoPecaModal').addEventListener('click', closeTipoPecaModal);
+    const btnLogin = qs('#btnLogin');
+    if (btnLogin) {
+      btnLogin.addEventListener('click', openLoginModal);
+    }
+    
+    const btnAdminLogin = qs('#btnAdminLogin');
+    if (btnAdminLogin) {
+      btnAdminLogin.addEventListener('click', openLoginModal);
+    }
+    
+    const closeLogin = qs('#closeLogin');
+    if (closeLogin) {
+      closeLogin.addEventListener('click', closeLoginModal);
+    }
+    
+    const closeTipoPecaModal = qs('#closeTipoPecaModal');
+    if (closeTipoPecaModal) {
+      closeTipoPecaModal.addEventListener('click', closeTipoPecaModal);
+    }
     
     // Event listeners do modal de tipo de peça
     qs('#tipoPecaModal').addEventListener('click', (e) => {
@@ -3482,38 +3527,77 @@
         addToCart(currentProdutoIdForModal);
       }
     });
-    qs('#btnEmailLogin').addEventListener('click', signInEmail);
-    qs('#btnEmailRegister').addEventListener('click', signUpEmail);
-    qs('#btnGoogleLogin').addEventListener('click', signInGoogle);
-    qs('#btnShowRegister').addEventListener('click', showRegisterForm);
-    qs('#btnShowLogin').addEventListener('click', showLoginForm);
-    qs('#btnLogout').addEventListener('click', signOut);
-    qs('#btnLogoutUser').addEventListener('click', signOut);
+    const btnEmailLogin = qs('#btnEmailLogin');
+    if (btnEmailLogin) {
+      btnEmailLogin.addEventListener('click', signInEmail);
+    }
+    
+    const btnEmailRegister = qs('#btnEmailRegister');
+    if (btnEmailRegister) {
+      btnEmailRegister.addEventListener('click', signUpEmail);
+    }
+    
+    const btnGoogleLogin = qs('#btnGoogleLogin');
+    if (btnGoogleLogin) {
+      btnGoogleLogin.addEventListener('click', signInGoogle);
+    }
+    
+    const btnShowRegister = qs('#btnShowRegister');
+    if (btnShowRegister) {
+      btnShowRegister.addEventListener('click', showRegisterForm);
+    }
+    
+    const btnShowLogin = qs('#btnShowLogin');
+    if (btnShowLogin) {
+      btnShowLogin.addEventListener('click', showLoginForm);
+    }
+    
+    const btnLogout = qs('#btnLogout');
+    if (btnLogout) {
+      btnLogout.addEventListener('click', signOut);
+    }
+    
+    const btnLogoutUser = qs('#btnLogoutUser');
+    if (btnLogoutUser) {
+      btnLogoutUser.addEventListener('click', signOut);
+    }
     
     // Fechar modal ao clicar fora
-    qs('#loginModal').addEventListener('click', (e) => {
-      if (e.target === qs('#loginModal')) {
-        closeLoginModal();
-      }
-    });
+    const loginModal = qs('#loginModal');
+    if (loginModal) {
+      loginModal.addEventListener('click', (e) => {
+        if (e.target === loginModal) {
+          closeLoginModal();
+        }
+      });
+    }
     
     // Enter para login
-    qs('#loginPassword').addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        signInEmail();
-      }
-    });
+    const loginPassword = qs('#loginPassword');
+    if (loginPassword) {
+      loginPassword.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          signInEmail();
+        }
+      });
+    }
     
-    qs('#registerPassword').addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        signUpEmail();
-      }
-    });
+    const registerPassword = qs('#registerPassword');
+    if (registerPassword) {
+      registerPassword.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          signUpEmail();
+        }
+      });
+    }
     
     // onAuthStateChanged agora está dentro de initializeFirebase()
 
     // Mini util: year
-    qs('#year').textContent = new Date().getFullYear();
+    const yearElement = qs('#year');
+    if (yearElement) {
+      yearElement.textContent = new Date().getFullYear();
+    }
 
     // Inicialização
     async function init() {
