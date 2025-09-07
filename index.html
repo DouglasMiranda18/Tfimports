@@ -901,81 +901,7 @@
         "Camiseta dry fit","Camisa peruana","Camisa polo","Regata USA","Meias","Bermuda high"
       ],
       produtos: [
-        {
-          id: "p1",
-          nome: "Camiseta Black Premium",
-          categoria: "Camisetas",
-          preco: 199.9,
-          promo: 159.9,
-          cores: ["preto","branco"],
-          tamanhos: ["P","M","G","GG"],
-          novas: true,
-          destaque: true,
-          descricao: "Camiseta premium em algodão egípcio. Toque macio e caimento perfeito.",
-          composicao: "100% algodão egípcio",
-          estilo: "Casual sofisticado",
-          imagens: ["svg"]
-        },
-        {
-          id: "p2",
-          nome: "Bermuda de Linho Azul",
-          categoria: "Bermudas de linho",
-          preco: 249.9,
-          promo: null,
-          cores: ["azul","areia"],
-          tamanhos: ["P","M","G"],
-          novas: true,
-          destaque: true,
-          descricao: "Leve, refrescante e elegante. Ideal para clima quente.",
-          composicao: "55% linho, 45% algodão",
-          estilo: "Summer classy",
-          imagens: ["svg"]
-        },
-        {
-          id: "p3",
-          nome: "Cueca Premium Comfort",
-          categoria: "Cueca premium",
-          preco: 69.9,
-          promo: 59.9,
-          cores: ["preto","cinza"],
-          tamanhos: ["M","G","GG"],
-          novas: false,
-          destaque: true,
-          descricao: "Suporte e maciez com respirabilidade para o dia todo.",
-          composicao: "Modal com elastano",
-          estilo: "Conforto ativo",
-          imagens: ["svg"]
-        },
-        {
-          id: "p4",
-          nome: "Camisa Polo TFI",
-          categoria: "Camisa polo",
-          preco: 229.9,
-          promo: 199.9,
-          cores: ["preto","azul-marinho","branco"],
-          tamanhos: ["P","M","G","GG"],
-          novas: false,
-          destaque: false,
-          descricao: "Textura premium e acabamento impecável.",
-          composicao: "Algodão Pima",
-          estilo: "Smart casual",
-          imagens: ["svg"]
-        },
-        {
-          id: "p5",
-          nome: "Regata USA Cut",
-          categoria: "Regata USA",
-          preco: 119.9,
-          promo: 99.9,
-          cores: ["preto","verde"],
-          tamanhos: ["P","M","G"],
-          novas: true,
-          destaque: false,
-          descricao: "Corte atlético com visual urbano.",
-          composicao: "Poliéster com elastano",
-          estilo: "Athleisure",
-          imagens: ["svg"]
-        }
+        // Produtos fake removidos - apenas produtos reais do Firestore serão exibidos
       ],
       carrinho: [],
       freteSelecionado: null
@@ -2313,13 +2239,17 @@
           // Adicionar ao estado local
         feedbacks.unshift({ 
           nome: sanitizedName, 
-          nota: currentRating, 
+          nota: currentRating,
           texto: sanitizedText, 
           data: 'agora' 
         });
           
         qs('#feedbackText').value='';
         renderFeedbacks();
+        
+        // Atualizar contador de feedbacks
+        await updateFeedbackCount();
+        
         toast('Obrigado pelo feedback!');
           
         } catch (error) {
@@ -3234,8 +3164,33 @@
         
         console.log(`${firestoreFeedbacks.length} feedbacks carregados do Firestore`);
         
+        // Atualizar contador de feedbacks
+        await updateFeedbackCount();
+        
       } catch (error) {
         console.error('Erro ao carregar feedbacks do Firestore:', error);
+      }
+    }
+    
+    // Atualizar contador de feedbacks
+    async function updateFeedbackCount() {
+      try {
+        if (!db) return;
+        
+        // Contar total de feedbacks no Firestore
+        const snapshot = await db.collection('feedbacks').get();
+        const totalFeedbacks = snapshot.size;
+        
+        // Atualizar o texto na interface
+        const feedbackCountElement = document.querySelector('.flex.items-center.gap-2 span:last-child');
+        if (feedbackCountElement) {
+          feedbackCountElement.textContent = `+${totalFeedbacks} avaliações`;
+        }
+        
+        console.log(`Contador de feedbacks atualizado: ${totalFeedbacks}`);
+        
+      } catch (error) {
+        console.error('Erro ao atualizar contador de feedbacks:', error);
       }
     }
     init();
