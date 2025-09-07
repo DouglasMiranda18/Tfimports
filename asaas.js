@@ -189,22 +189,55 @@ export class AsaasService {
       }
       console.log('✅ PIX criado:', result);
       
-      console.log('🔍 Dados completos do Asaas:', result.data);
+      // Agora buscar o QR Code do PIX
+      const paymentId = result.data.id;
+      console.log('🔍 Buscando QR Code para pagamento:', paymentId);
       
-      // O Asaas retorna os dados do PIX em campos específicos
-      const pixData = result.data.pixTransaction || {};
-      
-      return {
-        success: true,
-        paymentId: result.data.id,
-        status: result.data.status,
-        qrCode: pixData.qrCode || result.data.qrCode,
-        pixCopyPaste: pixData.payload || result.data.pixCopyPaste,
-        pixKey: pixData.pixKey || result.data.pixKey,
-        invoiceUrl: result.data.invoiceUrl,
-        // Dados brutos para debug
-        rawData: result.data
-      };
+      try {
+        const qrResponse = await fetch('/.netlify/functions/asaas-payment', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            method: 'GET',
+            endpoint: `/payments/${paymentId}/pixQrCode`
+          })
+        });
+
+        const qrResult = await qrResponse.json();
+        console.log('🔍 QR Code response:', qrResult);
+
+        if (qrResult.success) {
+          return {
+            success: true,
+            paymentId: paymentId,
+            status: result.data.status,
+            qrCode: qrResult.data.encodedImage,
+            pixCopyPaste: qrResult.data.payload,
+            pixKey: qrResult.data.pixKey,
+            invoiceUrl: result.data.invoiceUrl,
+            expirationDate: qrResult.data.expirationDate,
+            rawData: { payment: result.data, qrCode: qrResult.data }
+          };
+        } else {
+          throw new Error(`Erro ao buscar QR Code: ${qrResult.error}`);
+        }
+      } catch (qrError) {
+        console.error('❌ Erro ao buscar QR Code:', qrError);
+        // Retornar dados básicos mesmo sem QR Code
+        return {
+          success: true,
+          paymentId: paymentId,
+          status: result.data.status,
+          qrCode: null,
+          pixCopyPaste: null,
+          pixKey: null,
+          invoiceUrl: result.data.invoiceUrl,
+          rawData: result.data,
+          error: qrError.message
+        };
+      }
 
     } catch (error) {
       console.error('❌ Erro ao criar PIX:', error);
