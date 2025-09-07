@@ -7,7 +7,7 @@ export class AsaasService {
     this.baseUrl = this.config.baseUrl;
   }
 
-  // Criar cliente no Asaas
+  // Criar cliente no Asaas via Netlify Function
   async createCustomer(customerData) {
     try {
       console.log('👤 Criando cliente no Asaas:', customerData);
@@ -29,21 +29,26 @@ export class AsaasService {
         externalReference: customerData.id || `cliente-${Date.now()}`
       };
 
-      const response = await fetch(`${this.baseUrl}${endpoints.asaas.customers}`, {
+      const response = await fetch('/.netlify/functions/asaas-payment', {
         method: 'POST',
-        headers: getHeaders('asaas'),
-        body: JSON.stringify(customer)
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          method: 'POST',
+          endpoint: '/customers',
+          data: customer
+        })
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`Erro ao criar cliente: ${errorData.errors?.[0]?.description || response.statusText}`);
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(`Erro ao criar cliente: ${result.error}`);
       }
 
-      const result = await response.json();
-      console.log('✅ Cliente criado:', result);
-      
-      return result;
+      console.log('✅ Cliente criado:', result.data);
+      return result.data;
 
     } catch (error) {
       console.error('❌ Erro ao criar cliente:', error);
@@ -115,11 +120,11 @@ export class AsaasService {
       
       return {
         success: true,
-        paymentId: result.id,
-        status: result.status,
-        paymentUrl: result.invoiceUrl,
-        qrCode: result.pixTransaction?.qrCode,
-        pixCopyPaste: result.pixTransaction?.payload
+        paymentId: result.data.id,
+        status: result.data.status,
+        paymentUrl: result.data.invoiceUrl,
+        qrCode: result.data.pixTransaction?.qrCode,
+        pixCopyPaste: result.data.pixTransaction?.payload
       };
 
     } catch (error) {
@@ -163,18 +168,23 @@ export class AsaasService {
         }
       };
 
-      const response = await fetch(`${this.baseUrl}${endpoints.asaas.payments}`, {
+      const response = await fetch('/.netlify/functions/asaas-payment', {
         method: 'POST',
-        headers: getHeaders('asaas'),
-        body: JSON.stringify(payment)
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          method: 'POST',
+          endpoint: '/payments',
+          data: payment
+        })
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`Erro ao criar PIX: ${errorData.errors?.[0]?.description || response.statusText}`);
-      }
-
       const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(`Erro ao criar PIX: ${result.error}`);
+      }
       console.log('✅ PIX criado:', result);
       
       return {
@@ -255,25 +265,31 @@ export class AsaasService {
         }
       };
 
-      const response = await fetch(`${this.baseUrl}${endpoints.asaas.payments}`, {
+      const response = await fetch('/.netlify/functions/asaas-payment', {
         method: 'POST',
-        headers: getHeaders('asaas'),
-        body: JSON.stringify(payment)
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          method: 'POST',
+          endpoint: '/payments',
+          data: payment
+        })
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`Erro ao criar pagamento: ${errorData.errors?.[0]?.description || response.statusText}`);
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(`Erro ao criar pagamento: ${result.error}`);
       }
 
-      const result = await response.json();
-      console.log('✅ Pagamento com cartão criado:', result);
+      console.log('✅ Pagamento com cartão criado:', result.data);
       
       return {
         success: true,
-        paymentId: result.id,
-        status: result.status,
-        paymentUrl: result.invoiceUrl
+        paymentId: result.data.id,
+        status: result.data.status,
+        paymentUrl: result.data.invoiceUrl
       };
 
     } catch (error) {
