@@ -3592,54 +3592,6 @@
     }
     init();
 
-    // Função para mostrar modal do PIX
-    function showPixModal(paymentResult) {
-      const modal = document.createElement('div');
-      modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-      modal.innerHTML = `
-        <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-          <h3 class="text-xl font-bold mb-4 text-center">Pagamento PIX</h3>
-          
-          ${paymentResult.qrCode ? `
-            <div class="text-center mb-4">
-              <img src="${paymentResult.qrCode}" alt="QR Code PIX" class="mx-auto mb-4" style="max-width: 200px;">
-              <p class="text-sm text-gray-600">Escaneie o QR Code com seu app de pagamento</p>
-            </div>
-          ` : ''}
-          
-          ${paymentResult.pixCopyPaste ? `
-            <div class="mb-4">
-              <label class="block text-sm font-medium mb-2">Código PIX (Copiar e Colar):</label>
-              <textarea readonly class="w-full p-2 border rounded text-xs" rows="4">${paymentResult.pixCopyPaste}</textarea>
-              <button onclick="navigator.clipboard.writeText('${paymentResult.pixCopyPaste}')" 
-                      class="mt-2 bg-blue-500 text-white px-4 py-2 rounded text-sm">
-                Copiar Código
-              </button>
-            </div>
-          ` : ''}
-          
-          <div class="text-center">
-            <p class="text-sm text-gray-600 mb-4">
-              Após o pagamento, envie o comprovante para:<br>
-              <strong>WhatsApp: (84) 99999-9999</strong>
-            </p>
-            
-            <div class="flex gap-2">
-              <button onclick="this.closest('.fixed').remove()" 
-                      class="flex-1 bg-gray-500 text-white px-4 py-2 rounded">
-                Fechar
-              </button>
-              <button onclick="window.open('https://wa.me/5584999999999?text=Comprovante%20de%20pagamento%20PIX', '_blank')" 
-                      class="flex-1 bg-green-500 text-white px-4 py-2 rounded">
-                WhatsApp
-              </button>
-            </div>
-          </div>
-        </div>
-      `;
-      
-      document.body.appendChild(modal);
-    }
 
     // Função de teste para verificar API do Asaas
     window.testAsaas = async function() {
