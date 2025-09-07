@@ -217,5 +217,75 @@ export class AsaasService {
   }
 }
 
+  // Criar pagamento com cartão
+  async createCardPayment(paymentData) {
+    try {
+      console.log('💳 Criando pagamento com cartão no Asaas:', paymentData);
+      
+      // Primeiro, criar ou buscar cliente
+      let customer;
+      try {
+        customer = await this.createCustomer(paymentData.customer);
+      } catch (error) {
+        console.log('⚠️ Erro ao criar cliente, usando cliente padrão...');
+        // Usar cliente padrão se não conseguir criar
+        customer = { id: 'cliente-padrao' };
+      }
+
+      const payment = {
+        customer: customer.id,
+        billingType: 'CREDIT_CARD',
+        value: paymentData.items.reduce((total, item) => total + (item.preco * item.quantidade), 0),
+        dueDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 1 dia
+        description: `Pedido TFI - ${paymentData.items.map(item => item.nome).join(', ')}`,
+        externalReference: paymentData.external_reference,
+        creditCard: {
+          holderName: paymentData.card.nome,
+          number: paymentData.card.numero,
+          expiryMonth: paymentData.card.validade.split('/')[0],
+          expiryYear: `20${paymentData.card.validade.split('/')[1]}`,
+          ccv: paymentData.card.cvv
+        },
+        creditCardHolderInfo: {
+          name: paymentData.card.nome,
+          email: paymentData.customer.email,
+          cpfCnpj: paymentData.customer.cpf,
+          postalCode: paymentData.customer.cep,
+          addressNumber: paymentData.customer.numero,
+          phone: paymentData.customer.telefone
+        }
+      };
+
+      const response = await fetch(`${this.baseUrl}${endpoints.asaas.payments}`, {
+        method: 'POST',
+        headers: getHeaders('asaas'),
+        body: JSON.stringify(payment)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`Erro ao criar pagamento: ${errorData.errors?.[0]?.description || response.statusText}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Pagamento com cartão criado:', result);
+      
+      return {
+        success: true,
+        paymentId: result.id,
+        status: result.status,
+        paymentUrl: result.invoiceUrl
+      };
+
+    } catch (error) {
+      console.error('❌ Erro ao criar pagamento com cartão:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  }
+}
+
 // Instância do serviço
 export const asaasService = new AsaasService();

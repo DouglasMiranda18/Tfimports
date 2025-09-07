@@ -14,7 +14,7 @@
     script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://www.gstatic.com https://apis.google.com;
     style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com;
     img-src 'self' data: https:;
-    connect-src 'self' https://*.firebaseapp.com https://*.googleapis.com https://firestore.googleapis.com https://viacep.com.br https://www.melhorenvio.com.br https://api.asaas.com;
+    connect-src 'self' https://*.firebaseapp.com https://*.googleapis.com https://firestore.googleapis.com https://viacep.com.br https://www.melhorenvio.com.br https://api.asaas.com https://www.asaas.com;
     font-src 'self' data:;
     object-src 'none';
     base-uri 'self';
@@ -2209,9 +2209,17 @@
             preco: item.preco
           })),
           customer: {
-            nome: orderData.user_name,
-            email: orderData.user_email,
-            telefone: orderData.user_phone
+            nome: qs('#nome').value,
+            email: qs('#email').value,
+            telefone: qs('#telefone').value,
+            cpf: qs('#cpf').value,
+            cep: qs('#cep').value,
+            endereco: qs('#logradouro').value,
+            numero: qs('#numero').value,
+            complemento: qs('#complemento').value,
+            bairro: qs('#bairro').value,
+            cidade: qs('#cidade').value,
+            estado: qs('#uf').value
           },
           external_reference: `TFI-${Date.now()}`,
           user_id: orderData.user_id
@@ -2281,9 +2289,17 @@
             preco: item.preco
           })),
           customer: {
-            nome: orderData.user_name,
-            email: orderData.user_email,
-            telefone: orderData.user_phone
+            nome: qs('#nome').value,
+            email: qs('#email').value,
+            telefone: qs('#telefone').value,
+            cpf: qs('#cpf').value,
+            cep: qs('#cep').value,
+            endereco: qs('#logradouro').value,
+            numero: qs('#numero').value,
+            complemento: qs('#complemento').value,
+            bairro: qs('#bairro').value,
+            cidade: qs('#cidade').value,
+            estado: qs('#uf').value
           },
           card: cardData,
           external_reference: `TFI-${Date.now()}`,
