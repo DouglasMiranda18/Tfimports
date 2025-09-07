@@ -2209,17 +2209,17 @@
             preco: item.preco
           })),
           customer: {
-            nome: qs('#nome').value,
-            email: qs('#email').value,
-            telefone: qs('#telefone').value,
-            cpf: qs('#cpf').value,
-            cep: qs('#cep').value,
-            endereco: qs('#logradouro').value,
-            numero: qs('#numero').value,
-            complemento: qs('#complemento').value,
-            bairro: qs('#bairro').value,
-            cidade: qs('#cidade').value,
-            estado: qs('#uf').value
+            nome: qs('#nome')?.value || 'Cliente Teste',
+            email: qs('#email')?.value || 'teste@teste.com',
+            telefone: qs('#telefone')?.value || '11999999999',
+            cpf: qs('#cpf')?.value || '12345678901',
+            cep: qs('#cep')?.value || '01234567',
+            endereco: qs('#logradouro')?.value || 'Rua Teste',
+            numero: qs('#numero')?.value || '123',
+            complemento: qs('#complemento')?.value || '',
+            bairro: qs('#bairro')?.value || 'Centro',
+            cidade: qs('#cidade')?.value || 'São Paulo',
+            estado: qs('#uf')?.value || 'SP'
           },
           external_reference: `TFI-${Date.now()}`,
           user_id: orderData.user_id
@@ -2289,17 +2289,17 @@
             preco: item.preco
           })),
           customer: {
-            nome: qs('#nome').value,
-            email: qs('#email').value,
-            telefone: qs('#telefone').value,
-            cpf: qs('#cpf').value,
-            cep: qs('#cep').value,
-            endereco: qs('#logradouro').value,
-            numero: qs('#numero').value,
-            complemento: qs('#complemento').value,
-            bairro: qs('#bairro').value,
-            cidade: qs('#cidade').value,
-            estado: qs('#uf').value
+            nome: qs('#nome')?.value || 'Cliente Teste',
+            email: qs('#email')?.value || 'teste@teste.com',
+            telefone: qs('#telefone')?.value || '11999999999',
+            cpf: qs('#cpf')?.value || '12345678901',
+            cep: qs('#cep')?.value || '01234567',
+            endereco: qs('#logradouro')?.value || 'Rua Teste',
+            numero: qs('#numero')?.value || '123',
+            complemento: qs('#complemento')?.value || '',
+            bairro: qs('#bairro')?.value || 'Centro',
+            cidade: qs('#cidade')?.value || 'São Paulo',
+            estado: qs('#uf')?.value || 'SP'
           },
           card: cardData,
           external_reference: `TFI-${Date.now()}`,
