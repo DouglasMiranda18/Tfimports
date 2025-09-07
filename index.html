@@ -23,7 +23,6 @@
   
   <!-- Outros headers de segurança -->
   <meta http-equiv="X-Content-Type-Options" content="nosniff" />
-  <meta http-equiv="X-Frame-Options" content="DENY" />
   <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
   <script src="https://cdn.tailwindcss.com"></script>
@@ -1107,13 +1106,21 @@
     window.addEventListener('popstate', applyRoute);
 
     // Header behaviors
-    qs('#btnMenu').addEventListener('click', () => {
-      qs('#mobileNav').classList.toggle('hidden');
-    });
+    const btnMenu = qs('#btnMenu');
+    if (btnMenu) {
+      btnMenu.addEventListener('click', () => {
+        const mobileNav = qs('#mobileNav');
+        if (mobileNav) {
+          mobileNav.classList.toggle('hidden');
+        }
+      });
+    }
 
     // Render categorias chips/footer
     function renderChips() {
       const chips = qs('#categoryChips');
+      if (!chips) return;
+      
       chips.innerHTML = '';
       state.categorias.forEach(cat => {
         const a = document.createElement('a');
@@ -1122,19 +1129,24 @@
         a.className = 'pill px-4 py-2 rounded-full hover:text-emerald-300';
         a.textContent = cat;
         a.addEventListener('click', () => {
-          qs('#filterCategoria').value = cat;
+          const filterCategoria = qs('#filterCategoria');
+          if (filterCategoria) {
+            filterCategoria.value = cat;
+          }
           filterAndRenderCatalog();
         });
         chips.appendChild(a);
       });
       const footerCats = qs('#footerCats');
-      footerCats.innerHTML = '';
-      state.categorias.slice(0,6).forEach(cat => {
-        const span = document.createElement('span');
-        span.className = 'pill px-3 py-1 rounded-full text-sm';
-        span.textContent = cat;
-        footerCats.appendChild(span);
-      });
+      if (footerCats) {
+        footerCats.innerHTML = '';
+        state.categorias.slice(0,6).forEach(cat => {
+          const span = document.createElement('span');
+          span.className = 'pill px-3 py-1 rounded-full text-sm';
+          span.textContent = cat;
+          footerCats.appendChild(span);
+        });
+      }
     }
 
     // Produto card com imagem ou placeholder
@@ -1280,13 +1292,17 @@
     // Loja: filtros
     function initFilters() {
       const sel = qs('#filterCategoria');
-      state.categorias.forEach(c => {
-        const opt = document.createElement('option');
-        opt.value = c; opt.textContent = c;
-        sel.appendChild(opt);
-      });
+      if (sel) {
+        state.categorias.forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c; opt.textContent = c;
+          sel.appendChild(opt);
+        });
+      }
+      
       const sizes = ["PP","P","M","G","GG","XG"];
       const wrapT = qs('#filterTamanho');
+      if (!wrapT) return;
       sizes.forEach(t => {
         const b = document.createElement('button');
         b.className = 'btn px-3 py-1 rounded-full pill text-sm';
@@ -1309,23 +1325,39 @@
         });
         wrapC.appendChild(b);
       });
-      qs('#btnLimparFiltros').addEventListener('click', () => {
-        qs('#filterCategoria').value = '';
-        qsa('#filterTamanho button, #filterCor button').forEach(b => b.classList.remove('badge'));
-        filterAndRenderCatalog();
-      });
-      qs('#ordenacao').addEventListener('change', filterAndRenderCatalog);
+      const btnLimparFiltros = qs('#btnLimparFiltros');
+      if (btnLimparFiltros) {
+        btnLimparFiltros.addEventListener('click', () => {
+          const filterCategoria = qs('#filterCategoria');
+          if (filterCategoria) {
+            filterCategoria.value = '';
+          }
+          qsa('#filterTamanho button, #filterCor button').forEach(b => b.classList.remove('badge'));
+          filterAndRenderCatalog();
+        });
+      }
+      
+      const ordenacao = qs('#ordenacao');
+      if (ordenacao) {
+        ordenacao.addEventListener('change', filterAndRenderCatalog);
+      }
     }
     function filterAndRenderCatalog() {
       const grid = qs('#catalogoGrid');
-      const cat = qs('#filterCategoria').value;
+      if (!grid) return;
+      
+      const filterCategoria = qs('#filterCategoria');
+      const cat = filterCategoria ? filterCategoria.value : '';
+      
       const sizesSel = qsa('#filterTamanho button.badge').map(b => b.textContent.trim());
       const coresSel = qsa('#filterCor button.badge').map(b => b.textContent.trim());
       let arr = [...state.produtos];
       if (cat) arr = arr.filter(p => p.categoria === cat);
       if (sizesSel.length) arr = arr.filter(p => p.tamanhos.some(t => sizesSel.includes(t)));
       if (coresSel.length) arr = arr.filter(p => p.cores.some(c => coresSel.includes(c)));
-      const ord = qs('#ordenacao').value;
+      
+      const ordenacao = qs('#ordenacao');
+      const ord = ordenacao ? ordenacao.value : '';
       if (ord === 'menor-preco') arr.sort((a,b)=>(a.promo ?? a.preco) - (b.promo ?? b.preco));
       if (ord === 'maior-preco') arr.sort((a,b)=>(b.promo ?? b.preco) - (a.promo ?? a.preco));
       if (ord === 'novidades') arr.sort((a,b)=> (b.novas?-1:1));
@@ -3485,25 +3517,44 @@
 
     // Inicialização
     async function init() {
-      // Verificar dados locais do usuário primeiro (fallback)
-      checkLocalUserData();
-      
-      // Carregar configuração do Firebase primeiro
-      await initializeFirebase();
-      
-      // Carregar dados do Firestore
-      await loadProductsFromFirestore();
-      await loadFeedbacksFromFirestore();
-      
-      loadLocalProducts();
-      loadCart();
-      loadFavoritos();
-      renderChips();
-      renderDestaques();
-      initFilters();
-      filterAndRenderCatalog();
-      renderNovidades();
-      renderFeedbacks();
+      try {
+        console.log('🚀 Iniciando aplicação...');
+        
+        // Verificar dados locais do usuário primeiro (fallback)
+        checkLocalUserData();
+        
+        // Carregar configuração do Firebase primeiro
+        await initializeFirebase();
+        
+        // Carregar dados do Firestore
+        console.log('📦 Carregando dados do Firestore...');
+        await loadProductsFromFirestore();
+        await loadFeedbacksFromFirestore();
+        
+        loadLocalProducts();
+        loadCart();
+        loadFavoritos();
+        renderChips();
+        renderDestaques();
+        initFilters();
+        filterAndRenderCatalog();
+        renderNovidades();
+        renderFeedbacks();
+        
+        console.log('✅ Aplicação inicializada com sucesso');
+      } catch (error) {
+        console.error('❌ Erro na inicialização:', error);
+        // Continuar mesmo com erro para não quebrar a aplicação
+        loadLocalProducts();
+        loadCart();
+        loadFavoritos();
+        renderChips();
+        renderDestaques();
+        initFilters();
+        filterAndRenderCatalog();
+        renderNovidades();
+        renderFeedbacks();
+      }
       initRating();
       renderChat();
       adminFillCategorias();
