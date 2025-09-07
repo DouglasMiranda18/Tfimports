@@ -505,6 +505,29 @@
           </div>
           <div id="freteOpcoes" class="mt-4 grid sm:grid-cols-2 gap-3"></div>
 
+          <!-- Dados Pessoais -->
+          <h3 class="font-bold mt-6 mb-3">Dados Pessoais</h3>
+          <div class="glass rounded-xl p-6 mb-4">
+            <div class="grid md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-slate-300 mb-2">Nome Completo *</label>
+                <input id="nome" type="text" class="w-full bg-transparent pill px-3 py-3 rounded-lg text-sm" placeholder="Seu nome completo" />
+              </div>
+              <div>
+                <label class="block text-sm text-slate-300 mb-2">Email *</label>
+                <input id="email" type="email" class="w-full bg-transparent pill px-3 py-3 rounded-lg text-sm" placeholder="seu@email.com" />
+              </div>
+              <div>
+                <label class="block text-sm text-slate-300 mb-2">Telefone *</label>
+                <input id="telefone" type="tel" class="w-full bg-transparent pill px-3 py-3 rounded-lg text-sm" placeholder="(84) 99999-9999" />
+              </div>
+              <div>
+                <label class="block text-sm text-slate-300 mb-2">CPF *</label>
+                <input id="cpf" type="text" class="w-full bg-transparent pill px-3 py-3 rounded-lg text-sm" placeholder="000.000.000-00" maxlength="14" />
+              </div>
+            </div>
+          </div>
+
           <h3 class="font-bold mt-6 mb-3">Pagamento</h3>
           
           <!-- Seleção de método de pagamento -->
@@ -1886,6 +1909,21 @@
         if (result.success && result.options.length > 0) {
           op.innerHTML = '';
           
+          // Adicionar opção de frete de teste
+          const testeOption = document.createElement('label');
+          testeOption.className = 'glass rounded-xl p-3 flex items-center justify-between cursor-pointer hover:ring-2 hover:ring-emerald-400/40 border-2 border-yellow-400';
+          testeOption.innerHTML = `
+            <div>
+              <div class="font-bold text-yellow-400">🚀 FRETE TESTE</div>
+              <div class="hint text-sm">Para testes • 1 dia útil</div>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="font-extrabold text-yellow-400">R$ 1,00</div>
+              <input type="radio" name="frete" value="teste" data-company="teste">
+            </div>
+          `;
+          op.appendChild(testeOption);
+          
           result.options.forEach(option => {
         const d = document.createElement('label');
             d.className = 'glass rounded-xl p-3 flex items-center justify-between cursor-pointer hover:ring-2 hover:ring-emerald-400/40';
@@ -1906,15 +1944,28 @@
             const r = e.target.closest('input[type=radio]'); 
             if (!r) return;
             
-            const selectedOption = result.options.find(opt => opt.id === r.value);
-            state.freteSelecionado = {
-              id: selectedOption.id,
-              nome: selectedOption.name,
-              empresa: selectedOption.company,
-              preco: selectedOption.price,
-              prazo: `${selectedOption.delivery_time} dias úteis`,
-              company_id: selectedOption.company_id
-            };
+            if (r.value === 'teste') {
+              // Opção de frete de teste
+              state.freteSelecionado = {
+                id: 'teste',
+                nome: 'FRETE TESTE',
+                empresa: 'Teste',
+                preco: 1.00,
+                prazo: '1 dia útil',
+                company_id: 'teste'
+              };
+            } else {
+              // Opção de frete real
+              const selectedOption = result.options.find(opt => opt.id === r.value);
+              state.freteSelecionado = {
+                id: selectedOption.id,
+                nome: selectedOption.name,
+                empresa: selectedOption.company,
+                preco: selectedOption.price,
+                prazo: `${selectedOption.delivery_time} dias úteis`,
+                company_id: selectedOption.company_id
+              };
+            }
             
             // Salvar endereço completo no estado
             state.enderecoCompleto = addressData;
@@ -2016,6 +2067,33 @@
     if (cvvCartao) {
       cvvCartao.addEventListener('input', (e) => {
         e.target.value = e.target.value.replace(/\D/g, '');
+      });
+    }
+    
+    // Formatação de telefone
+    const telefone = qs('#telefone');
+    if (telefone) {
+      telefone.addEventListener('input', (e) => {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length <= 11) {
+          value = value.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+          if (value.length < 14) {
+            value = value.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+          }
+        }
+        e.target.value = value;
+      });
+    }
+    
+    // Formatação de CPF
+    const cpf = qs('#cpf');
+    if (cpf) {
+      cpf.addEventListener('input', (e) => {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length <= 11) {
+          value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+        }
+        e.target.value = value;
       });
     }
 
