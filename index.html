@@ -957,43 +957,6 @@
       window.location.hash = hash;
     }
     
-    // Função específica para voltar à loja (deve estar no escopo global)
-    function voltarParaLoja() {
-      try {
-        console.log('Voltando para a loja...');
-        
-        // Esconder painel atual
-        const currentPanel = document.querySelector('.panel:not(.hidden)');
-        if (currentPanel) {
-          currentPanel.classList.add('hidden');
-        }
-        
-        // Mostrar painel da loja
-        const lojaPanel = document.getElementById('loja');
-        if (lojaPanel) {
-          lojaPanel.classList.remove('hidden');
-        }
-        
-        // Atualizar hash
-        window.location.hash = '#loja';
-        
-        // Atualizar navegação ativa
-        qsa('[data-route]').forEach(a => a.classList.toggle('nav-active', a.getAttribute('href') === '#loja'));
-        
-        // Scroll para o topo
-        window.scrollTo(0, 0);
-        
-        console.log('Navegação para loja concluída');
-      } catch (error) {
-        console.error('Erro ao voltar para loja:', error);
-        // Fallback: usar navigate padrão
-        if (typeof navigate === 'function') {
-          navigate('#loja');
-        } else {
-          window.location.hash = '#loja';
-        }
-      }
-    }
     
     function applyRoute() {
       const hash = window.location.hash || "#home";
@@ -3390,6 +3353,48 @@
       
       return true;
     };
+  </script>
+
+  <!-- Função global para voltar à loja -->
+  <script>
+    // Função específica para voltar à loja (deve estar no escopo global)
+    function voltarParaLoja() {
+      try {
+        console.log('Voltando para a loja...');
+        
+        // Esconder painel atual
+        const currentPanel = document.querySelector('.panel:not(.hidden)');
+        if (currentPanel) {
+          currentPanel.classList.add('hidden');
+        }
+        
+        // Mostrar painel da loja
+        const lojaPanel = document.getElementById('loja');
+        if (lojaPanel) {
+          lojaPanel.classList.remove('hidden');
+        }
+        
+        // Atualizar hash
+        window.location.hash = '#loja';
+        
+        // Atualizar navegação ativa
+        const qsa = s => Array.from(document.querySelectorAll(s));
+        qsa('[data-route]').forEach(a => a.classList.toggle('nav-active', a.getAttribute('href') === '#loja'));
+        
+        // Scroll para o topo
+        window.scrollTo(0, 0);
+        
+        console.log('Navegação para loja concluída');
+      } catch (error) {
+        console.error('Erro ao voltar para loja:', error);
+        // Fallback: usar navigate padrão
+        if (typeof navigate === 'function') {
+          navigate('#loja');
+        } else {
+          window.location.hash = '#loja';
+        }
+      }
+    }
   </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9721b30b149bf202',t:'MTc1NTY5MDkwMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
