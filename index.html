@@ -1095,6 +1095,11 @@
     import { OrderManager } from './order-manager.js';
     import { validateConfig } from './api-config.js';
     
+    // Utilidades - definidas primeiro para evitar erros
+    const fmt = v => v.toLocaleString('pt-BR',{style:'currency', currency:'BRL'});
+    const qs = s => document.querySelector(s);
+    const qsa = s => Array.from(document.querySelectorAll(s));
+    
     // Estado global (local)
     const state = {
       user: null,
@@ -1120,10 +1125,7 @@
     let currentPaymentId = null;
     let pixVerificationInterval = null;
 
-    // Utilidades
-    const fmt = v => v.toLocaleString('pt-BR',{style:'currency', currency:'BRL'});
-    const qs = s => document.querySelector(s);
-    const qsa = s => Array.from(document.querySelectorAll(s));
+    // Utilidades já definidas acima
     
     // Verificar se usuário é admin
     function isAdmin() {
@@ -2810,8 +2812,8 @@
       try {
         if (!db || !state.user) return;
         
-        const snapshot = await db.collection('pedidos')
-          .where('userId', '==', state.user.uid)
+        const snapshot = await db.collection('orders')
+          .where('user_id', '==', state.user.uid)
           .get();
         
         const orders = [];
@@ -2821,15 +2823,19 @@
         
         // Calcular estatísticas
         const totalOrders = orders.length;
-        const totalSpent = orders.reduce((sum, order) => sum + (order.total || 0), 0);
+        const totalSpent = orders.reduce((sum, order) => {
+          // Calcular total dos itens
+          const itemsTotal = order.items?.reduce((itemSum, item) => itemSum + (item.preco * item.quantidade), 0) || 0;
+          return sum + itemsTotal;
+        }, 0);
         const lastOrder = orders.length > 0 ? 
-          orders.sort((a, b) => (b.criadoEm?.seconds || 0) - (a.criadoEm?.seconds || 0))[0] : null;
+          orders.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))[0] : null;
         
         // Atualizar interface
         qs('#totalOrders').textContent = totalOrders;
         qs('#totalSpent').textContent = fmt(totalSpent);
         qs('#lastOrder').textContent = lastOrder ? 
-          new Date(lastOrder.criadoEm.seconds * 1000).toLocaleDateString('pt-BR') : 
+          new Date(lastOrder.createdAt).toLocaleDateString('pt-BR') : 
           'Nenhum pedido';
         
       } catch (error) {
@@ -2847,9 +2853,9 @@
         
         console.log('🔍 Carregando pedidos do usuário:', state.user.uid);
         
+        // Consulta simplificada para evitar necessidade de índice composto
         const snapshot = await db.collection('orders')
           .where('user_id', '==', state.user.uid)
-          .orderBy('createdAt', 'desc')
           .limit(10)
           .get();
         
@@ -2861,8 +2867,19 @@
           return;
         }
         
+        // Ordenar manualmente por data de criação (mais recente primeiro)
+        const orders = [];
         snapshot.forEach(doc => {
-          const order = doc.data();
+          orders.push({ id: doc.id, ...doc.data() });
+        });
+        
+        orders.sort((a, b) => {
+          const dateA = new Date(a.createdAt || 0);
+          const dateB = new Date(b.createdAt || 0);
+          return dateB - dateA; // Mais recente primeiro
+        });
+        
+        orders.forEach(order => {
           console.log('📦 Pedido encontrado:', order);
           
           const orderDate = order.createdAt ? 
@@ -2877,7 +2894,7 @@
           orderEl.innerHTML = `
             <div class="flex items-start justify-between mb-3">
               <div>
-                <div class="font-bold text-lg">Pedido #${doc.id.slice(-6)}</div>
+                <div class="font-bold text-lg">Pedido #${order.id.slice(-6)}</div>
                 <div class="text-sm text-slate-300">${orderDate}</div>
               </div>
               <div class="text-right">
