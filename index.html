@@ -14,7 +14,7 @@
     script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://www.gstatic.com https://apis.google.com;
     style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com;
     img-src 'self' data: https:;
-    connect-src 'self' https://*.firebaseapp.com https://*.googleapis.com https://firestore.googleapis.com https://viacep.com.br https://www.melhorenvio.com.br https://api.mercadopago.com;
+    connect-src 'self' https://*.firebaseapp.com https://*.googleapis.com https://firestore.googleapis.com https://viacep.com.br https://www.melhorenvio.com.br https://api.asaas.com;
     font-src 'self' data:;
     object-src 'none';
     base-uri 'self';
@@ -51,6 +51,23 @@
       box-shadow: 0 6px 20px rgba(0,0,0,.25);
     }
     .btn:hover { transform: translateY(-1px); box-shadow: 0 10px 28px rgba(0,0,0,.32); }
+    
+    /* Estilos para pagamento */
+    .payment-method-btn {
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+    }
+    .payment-method-btn:hover {
+      border-color: rgba(29, 209, 161, 0.5);
+      transform: translateY(-2px);
+    }
+    .payment-method-btn.selected {
+      border-color: #1dd1a1;
+      background: rgba(29, 209, 161, 0.1);
+    }
+    .payment-form {
+      transition: all 0.3s ease;
+    }
     .pulse {
       animation: pulse 2.5s ease-in-out infinite;
     }
@@ -490,32 +507,63 @@
           <div id="freteOpcoes" class="mt-4 grid sm:grid-cols-2 gap-3"></div>
 
           <h3 class="font-bold mt-6 mb-3">Pagamento</h3>
-          <div class="glass rounded-xl p-6 text-center">
-            <div class="mb-4">
-              <div class="text-2xl mb-2">💳</div>
-              <h4 class="font-bold text-lg mb-2">Finalizar Pagamento</h4>
-              <p class="text-slate-300 text-sm">
-                Escolha sua forma de pagamento preferida no Mercado Pago
+          
+          <!-- Seleção de método de pagamento -->
+          <div class="glass rounded-xl p-6 mb-4">
+            <h4 class="font-bold text-lg mb-4">Escolha a forma de pagamento</h4>
+            
+            <div class="grid grid-cols-2 gap-3 mb-4">
+              <button id="btnPix" class="payment-method-btn btn pill px-4 py-3 rounded-lg text-center" data-method="pix">
+                <div class="text-2xl mb-2">📱</div>
+                <div class="font-bold">PIX</div>
+                <div class="text-xs text-slate-400">Aprovação instantânea</div>
+              </button>
+              
+              <button id="btnCartao" class="payment-method-btn btn pill px-4 py-3 rounded-lg text-center" data-method="card">
+                <div class="text-2xl mb-2">💳</div>
+                <div class="font-bold">Cartão</div>
+                <div class="text-xs text-slate-400">Crédito ou Débito</div>
+              </button>
+            </div>
+          </div>
+          
+          <!-- Formulário de pagamento -->
+          <div id="paymentForm" class="glass rounded-xl p-6 hidden">
+            <div id="pixForm" class="payment-form hidden">
+              <h4 class="font-bold text-lg mb-4">Pagamento via PIX</h4>
+              <p class="text-slate-300 text-sm mb-4">
+                O PIX será gerado automaticamente após confirmar o pedido
               </p>
-              </div>
-            
-            <div class="grid grid-cols-3 gap-2 mb-4 text-xs text-slate-400">
-              <div class="flex items-center gap-1">
-                <span>📱</span>
-                <span>PIX</span>
-            </div>
-              <div class="flex items-center gap-1">
-                <span>💳</span>
-                <span>Cartão</span>
-            </div>
-              <div class="flex items-center gap-1">
-                <span>📄</span>
-                <span>Boleto</span>
-              </div>
             </div>
             
-            <button id="btnPagar" class="btn cta-gradient w-full px-6 py-3 rounded-lg font-bold text-lg">
-              🛒 Finalizar Compra
+            <div id="cardForm" class="payment-form hidden">
+              <h4 class="font-bold text-lg mb-4">Pagamento com Cartão</h4>
+              
+              <div class="grid grid-cols-2 gap-3 mb-4">
+                <div>
+                  <label class="block text-sm text-slate-300 mb-2">Número do Cartão</label>
+                  <input id="numeroCartao" type="text" class="w-full bg-transparent pill px-3 py-3 rounded-lg text-sm" placeholder="0000 0000 0000 0000" maxlength="19" />
+                </div>
+                <div>
+                  <label class="block text-sm text-slate-300 mb-2">Validade</label>
+                  <input id="validadeCartao" type="text" class="w-full bg-transparent pill px-3 py-3 rounded-lg text-sm" placeholder="MM/AA" maxlength="5" />
+                </div>
+              </div>
+              
+              <div class="grid grid-cols-2 gap-3 mb-4">
+                <div>
+                  <label class="block text-sm text-slate-300 mb-2">Nome no Cartão</label>
+                  <input id="nomeCartao" type="text" class="w-full bg-transparent pill px-3 py-3 rounded-lg text-sm" placeholder="Nome como no cartão" />
+                </div>
+                <div>
+                  <label class="block text-sm text-slate-300 mb-2">CVV</label>
+                  <input id="cvvCartao" type="text" class="w-full bg-transparent pill px-3 py-3 rounded-lg text-sm" placeholder="123" maxlength="4" />
+                </div>
+              </div>
+            </div>
+            
+            <button id="btnFinalizar" class="btn cta-gradient w-full px-4 py-3 rounded-lg font-bold">
+              Finalizar Pedido
             </button>
           </div>
         </div>
@@ -780,6 +828,56 @@
     </div>
   </div>
 
+  <!-- Modal PIX -->
+  <div id="pixModal" class="fixed inset-0 hidden items-center justify-center modal-mask z-50 p-4">
+    <div class="glass rounded-2xl p-6 max-w-md w-full mx-auto">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-xl font-bold">Pagamento via PIX</h3>
+        <button id="btnFecharPix" class="text-slate-400 hover:text-white">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      
+      <div class="text-center">
+        <div class="mb-4">
+          <div class="text-4xl mb-2">📱</div>
+          <h4 class="font-bold text-lg">Escaneie o QR Code</h4>
+          <p class="text-slate-300 text-sm">Use seu app bancário para pagar</p>
+        </div>
+        
+        <div id="pixQrCode" class="bg-white p-4 rounded-lg mb-4 inline-block">
+          <!-- QR Code será inserido aqui -->
+        </div>
+        
+        <div class="mb-4">
+          <label class="block text-sm text-slate-300 mb-2">Ou copie o código PIX:</label>
+          <div class="flex gap-2">
+            <input id="pixCode" type="text" class="flex-1 bg-transparent pill px-3 py-2 rounded-lg text-sm" readonly />
+            <button id="btnCopiarPix" class="btn pill px-3 py-2 rounded-lg text-sm">Copiar</button>
+          </div>
+        </div>
+        
+        <div id="pixStatus" class="mb-4">
+          <div class="flex items-center justify-center gap-2 text-blue-400">
+            <div class="w-3 h-3 bg-blue-400 rounded-full animate-pulse"></div>
+            <span class="text-sm">Aguardando pagamento...</span>
+          </div>
+        </div>
+        
+        <div class="flex gap-3">
+          <button id="btnVerificarPix" class="btn cta-gradient px-4 py-2 rounded-lg font-bold">
+            Verificar Pagamento
+          </button>
+          <button id="btnFecharPix2" class="btn pill px-4 py-2 rounded-lg">
+            Fechar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Login Modal -->
   <div id="loginModal" class="fixed inset-0 hidden items-center justify-center modal-mask z-50 p-4">
     <div class="glass rounded-2xl p-4 sm:p-6 max-w-md w-full mx-auto">
@@ -906,6 +1004,11 @@
       carrinho: [],
       freteSelecionado: null
     };
+
+    // Variáveis globais para pagamento
+    let selectedPaymentMethod = null;
+    let currentPaymentId = null;
+    let pixVerificationInterval = null;
 
     // Utilidades
     const fmt = v => v.toLocaleString('pt-BR',{style:'currency', currency:'BRL'});
@@ -1776,74 +1879,413 @@
     });
 
     // Pagamento
+    // Event listeners para pagamento
+    const btnPix = qs('#btnPix');
+    if (btnPix) {
+      btnPix.addEventListener('click', () => selectPaymentMethod('pix'));
+    }
+    
+    const btnCartao = qs('#btnCartao');
+    if (btnCartao) {
+      btnCartao.addEventListener('click', () => selectPaymentMethod('card'));
+    }
+    
+    const btnFecharPix = qs('#btnFecharPix');
+    if (btnFecharPix) {
+      btnFecharPix.addEventListener('click', closePixModal);
+    }
+    
+    const btnFecharPix2 = qs('#btnFecharPix2');
+    if (btnFecharPix2) {
+      btnFecharPix2.addEventListener('click', closePixModal);
+    }
+    
+    const btnVerificarPix = qs('#btnVerificarPix');
+    if (btnVerificarPix) {
+      btnVerificarPix.addEventListener('click', async () => {
+        if (!currentPaymentId) return;
+        
+        try {
+          const status = await asaasService.getPaymentStatus(currentPaymentId);
+          if (status === 'CONFIRMED') {
+            toast('Pagamento aprovado!');
+            closePixModal();
+            navigate('#home');
+          } else {
+            toast('Pagamento ainda não foi confirmado');
+          }
+        } catch (error) {
+          console.error('Erro ao verificar PIX:', error);
+          toast('Erro ao verificar pagamento');
+        }
+      });
+    }
+    
+    const btnCopiarPix = qs('#btnCopiarPix');
+    if (btnCopiarPix) {
+      btnCopiarPix.addEventListener('click', () => {
+        const pixCode = qs('#pixCode');
+        if (pixCode && pixCode.value) {
+          navigator.clipboard.writeText(pixCode.value).then(() => {
+            toast('Código PIX copiado!');
+          }).catch(() => {
+            toast('Erro ao copiar código PIX');
+          });
+        }
+      });
+    }
+    
+    // Formatação de inputs
+    const numeroCartao = qs('#numeroCartao');
+    if (numeroCartao) {
+      numeroCartao.addEventListener('input', (e) => {
+        let value = e.target.value.replace(/\D/g, '');
+        value = value.replace(/(\d{4})(?=\d)/g, '$1 ');
+        e.target.value = value;
+      });
+    }
+    
+    const validadeCartao = qs('#validadeCartao');
+    if (validadeCartao) {
+      validadeCartao.addEventListener('input', (e) => {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length >= 2) {
+          value = value.substring(0, 2) + '/' + value.substring(2, 4);
+        }
+        e.target.value = value;
+      });
+    }
+    
+    const cvvCartao = qs('#cvvCartao');
+    if (cvvCartao) {
+      cvvCartao.addEventListener('input', (e) => {
+        e.target.value = e.target.value.replace(/\D/g, '');
+      });
+    }
+
+    qs('#btnFinalizar').addEventListener('click', async () => {
+      await processPayment();
+    });
+    
     qs('#btnPagar').addEventListener('click', async () => {
       await processPayment();
     });
-    qs('#btnFinalizar').addEventListener('click', async () => {
-      if (!state.carrinho.length) { toast('Adicione produtos antes de finalizar.'); return; }
+
+    // Funções de pagamento
+    function selectPaymentMethod(method) {
+      selectedPaymentMethod = method;
       
-      // Verificar se usuário está logado
-      if (!state.user) {
-        toast('Faça login para finalizar o pedido.');
-        openLoginModal();
-        return;
+      // Remover seleção anterior
+      qsa('.payment-method-btn').forEach(btn => btn.classList.remove('selected'));
+      
+      // Adicionar seleção atual
+      const selectedBtn = qs(`[data-method="${method}"]`);
+      if (selectedBtn) {
+        selectedBtn.classList.add('selected');
       }
       
+      // Mostrar formulário de pagamento
+      const paymentForm = qs('#paymentForm');
+      if (paymentForm) {
+        paymentForm.classList.remove('hidden');
+      }
+      
+      // Mostrar formulário específico
+      qsa('.payment-form').forEach(form => form.classList.add('hidden'));
+      const specificForm = qs(`#${method}Form`);
+      if (specificForm) {
+        specificForm.classList.remove('hidden');
+      }
+      
+      console.log('Método de pagamento selecionado:', method);
+    }
+
+    function validateCheckoutData() {
+      const requiredFields = [
+        { id: 'nome', name: 'Nome' },
+        { id: 'email', name: 'Email' },
+        { id: 'telefone', name: 'Telefone' },
+        { id: 'cep', name: 'CEP' },
+        { id: 'logradouro', name: 'Logradouro' },
+        { id: 'numero', name: 'Número' },
+        { id: 'bairro', name: 'Bairro' },
+        { id: 'cidade', name: 'Cidade' },
+        { id: 'uf', name: 'UF' }
+      ];
+
+      const errors = [];
+      
+      requiredFields.forEach(field => {
+        const element = qs(`#${field.id}`);
+        if (!element || !element.value.trim()) {
+          errors.push(field.name);
+        }
+      });
+
+      if (errors.length > 0) {
+        toast(`Preencha os campos obrigatórios: ${errors.join(', ')}`);
+        return false;
+      }
+
+      if (!selectedPaymentMethod) {
+        toast('Selecione uma forma de pagamento');
+        return false;
+      }
+
+      if (selectedPaymentMethod === 'card') {
+        const cardFields = [
+          { id: 'numeroCartao', name: 'Número do cartão' },
+          { id: 'validadeCartao', name: 'Validade' },
+          { id: 'nomeCartao', name: 'Nome no cartão' },
+          { id: 'cvvCartao', name: 'CVV' }
+        ];
+
+        cardFields.forEach(field => {
+          const element = qs(`#${field.id}`);
+          if (!element || !element.value.trim()) {
+            errors.push(field.name);
+          }
+        });
+
+        if (errors.length > 0) {
+          toast(`Preencha os dados do cartão: ${errors.join(', ')}`);
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    async function processPixPayment(orderData) {
       try {
-        // Calcular totais
-        const subtotal = state.carrinho.reduce((s,i)=>s+i.preco*i.qtd,0);
-        const frete = state.freteSelecionado?.preco || 0;
-        const total = subtotal + frete;
+        console.log('🔄 Processando pagamento PIX...');
         
-        // Salvar pedido no Firestore
-        const pedidoData = {
-          itens: state.carrinho.map(item => ({
+        const paymentData = {
+          items: orderData.items.map(item => ({
             id: item.id,
             nome: item.nome,
-            preco: item.preco,
-            cor: item.cor,
-            tamanho: item.tam,
-            quantidade: item.qtd
+            descricao: `${item.cor} - ${item.tamanho}`,
+            quantidade: item.quantidade,
+            preco: item.preco
           })),
-          subtotal: subtotal,
-          frete: frete,
-          total: total,
-          status: 'pendente',
-          criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
-          userId: state.user.uid,
-          email: state.user.email,
-          nomeUsuario: state.user.displayName || 'Usuário',
-          endereco: {
-            cep: qs('#cep').value || '',
-            cidade: qs('#cidade').value || '',
-            uf: qs('#uf').value || ''
+          customer: {
+            nome: orderData.user_name,
+            email: orderData.user_email,
+            telefone: orderData.user_phone
           },
-          freteSelecionado: state.freteSelecionado ? {
-            nome: state.freteSelecionado.nome,
-            prazo: state.freteSelecionado.prazo,
-            preco: state.freteSelecionado.preco
-          } : null
+          external_reference: `TFI-${Date.now()}`,
+          user_id: orderData.user_id
         };
+
+        console.log('📦 Dados para pagamento PIX:', paymentData);
         
-        const docRef = await db.collection('pedidos').add(pedidoData);
+        // Verificar se o serviço está disponível
+        if (typeof asaasService === 'undefined') {
+          console.error('❌ AsaasService não está disponível');
+          toast('Erro: Serviço de pagamento não disponível');
+          return;
+        }
         
-        // Limpar carrinho após sucesso
-        state.carrinho = []; 
-        saveCart(); 
-        renderCheckoutResumo(); 
-        updateCartCount();
+        console.log('✅ AsaasService disponível, criando pagamento PIX...');
+        const paymentResult = await asaasService.createPixPayment(paymentData);
         
-        // Redirecionar para Minha Conta para ver o pedido
-        toast(`Pedido #${docRef.id.slice(-6)} finalizado com sucesso!`);
-        setTimeout(() => {
-          navigate('#minha-conta');
-        }, 1500);
+        console.log('🔄 Resultado da criação do pagamento PIX:', paymentResult);
+        
+        if (paymentResult.success) {
+          console.log('✅ Pagamento PIX criado com sucesso');
+          currentPaymentId = paymentResult.paymentId;
+          
+          // Salvar pedido no Firebase com status pendente
+          const orderRef = await db.collection('pedidos').add({
+            ...orderData,
+            status: 'pending_payment',
+            payment_id: paymentResult.paymentId,
+            payment_method: 'pix',
+            external_reference: paymentData.external_reference,
+            created_at: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          
+          console.log('✅ Pedido salvo no Firebase:', orderRef.id);
+          
+          // Mostrar modal PIX
+          showPixModal(paymentResult);
+          
+        } else {
+          console.error('❌ Erro ao criar pagamento PIX:', paymentResult.error);
+          toast(`Erro ao criar pagamento PIX: ${paymentResult.error}`);
+        }
         
       } catch (error) {
-        console.error('Erro ao finalizar pedido:', error);
-        toast('Erro ao finalizar pedido. Tente novamente.');
+        console.error('❌ Erro no processamento PIX:', error);
+        toast('Erro ao processar pagamento PIX. Tente novamente.');
       }
-    });
+    }
+
+    async function processCardPayment(orderData) {
+      try {
+        console.log('🔄 Processando pagamento com cartão...');
+        
+        const cardData = {
+          numero: qs('#numeroCartao').value.replace(/\D/g, ''),
+          validade: qs('#validadeCartao').value,
+          nome: qs('#nomeCartao').value,
+          cvv: qs('#cvvCartao').value
+        };
+
+        const paymentData = {
+          items: orderData.items.map(item => ({
+            id: item.id,
+            nome: item.nome,
+            descricao: `${item.cor} - ${item.tamanho}`,
+            quantidade: item.quantidade,
+            preco: item.preco
+          })),
+          customer: {
+            nome: orderData.user_name,
+            email: orderData.user_email,
+            telefone: orderData.user_phone
+          },
+          card: cardData,
+          external_reference: `TFI-${Date.now()}`,
+          user_id: orderData.user_id
+        };
+
+        console.log('📦 Dados para pagamento com cartão:', paymentData);
+        
+        // Verificar se o serviço está disponível
+        if (typeof asaasService === 'undefined') {
+          console.error('❌ AsaasService não está disponível');
+          toast('Erro: Serviço de pagamento não disponível');
+          return;
+        }
+        
+        console.log('✅ AsaasService disponível, criando pagamento com cartão...');
+        const paymentResult = await asaasService.createCardPayment(paymentData);
+        
+        console.log('🔄 Resultado da criação do pagamento com cartão:', paymentResult);
+        
+        if (paymentResult.success) {
+          console.log('✅ Pagamento com cartão criado com sucesso');
+          currentPaymentId = paymentResult.paymentId;
+          
+          // Salvar pedido no Firebase
+          const orderRef = await db.collection('pedidos').add({
+            ...orderData,
+            status: paymentResult.status,
+            payment_id: paymentResult.paymentId,
+            payment_method: 'card',
+            external_reference: paymentData.external_reference,
+            created_at: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          
+          console.log('✅ Pedido salvo no Firebase:', orderRef.id);
+          
+          if (paymentResult.status === 'CONFIRMED') {
+            toast('Pagamento aprovado! Pedido confirmado.');
+            // Limpar carrinho
+            state.carrinho = [];
+            saveCart();
+            // Redirecionar para página de sucesso
+            navigate('#home');
+          } else {
+            toast('Pagamento processado. Aguardando confirmação.');
+          }
+          
+        } else {
+          console.error('❌ Erro ao criar pagamento com cartão:', paymentResult.error);
+          toast(`Erro ao processar cartão: ${paymentResult.error}`);
+        }
+        
+      } catch (error) {
+        console.error('❌ Erro no processamento com cartão:', error);
+        toast('Erro ao processar pagamento com cartão. Tente novamente.');
+      }
+    }
+
+    function showPixModal(paymentResult) {
+      const modal = qs('#pixModal');
+      if (!modal) return;
+
+      // Gerar QR Code (simulado - em produção usar biblioteca real)
+      const qrCodeDiv = qs('#pixQrCode');
+      if (qrCodeDiv && paymentResult.qrCode) {
+        qrCodeDiv.innerHTML = `
+          <div class="text-center p-4">
+            <div class="text-6xl mb-2">📱</div>
+            <div class="text-sm text-gray-600">QR Code PIX</div>
+            <div class="text-xs text-gray-500 mt-2">${paymentResult.qrCode}</div>
+          </div>
+        `;
+      }
+
+      // Preencher código PIX
+      const pixCodeInput = qs('#pixCode');
+      if (pixCodeInput && paymentResult.pixCode) {
+        pixCodeInput.value = paymentResult.pixCode;
+      }
+
+      // Mostrar modal
+      modal.classList.remove('hidden');
+      
+      // Iniciar verificação automática
+      startPixVerification();
+    }
+
+    function startPixVerification() {
+      if (pixVerificationInterval) {
+        clearInterval(pixVerificationInterval);
+      }
+
+      pixVerificationInterval = setInterval(async () => {
+        if (!currentPaymentId) return;
+
+        try {
+          const status = await asaasService.getPaymentStatus(currentPaymentId);
+          
+          if (status === 'CONFIRMED') {
+            clearInterval(pixVerificationInterval);
+            pixVerificationInterval = null;
+            
+            // Atualizar status no modal
+            const statusDiv = qs('#pixStatus');
+            if (statusDiv) {
+              statusDiv.innerHTML = `
+                <div class="flex items-center justify-center gap-2 text-green-400">
+                  <div class="w-3 h-3 bg-green-400 rounded-full"></div>
+                  <span class="text-sm">Pagamento aprovado!</span>
+                </div>
+              `;
+            }
+            
+            toast('Pagamento aprovado! Pedido confirmado.');
+            
+            // Limpar carrinho
+            state.carrinho = [];
+            saveCart();
+            
+            // Fechar modal após 2 segundos
+            setTimeout(() => {
+              closePixModal();
+              navigate('#home');
+            }, 2000);
+          }
+        } catch (error) {
+          console.error('Erro ao verificar status do PIX:', error);
+        }
+      }, 3000); // Verificar a cada 3 segundos
+    }
+
+    function closePixModal() {
+      const modal = qs('#pixModal');
+      if (modal) {
+        modal.classList.add('hidden');
+      }
+      
+      if (pixVerificationInterval) {
+        clearInterval(pixVerificationInterval);
+        pixVerificationInterval = null;
+      }
+    }
 
     // Processar pagamento
     async function processPayment() {
@@ -1860,6 +2302,11 @@
       
       if (!state.freteSelecionado) {
         toast('Selecione uma opção de frete.');
+        return;
+      }
+      
+      // Validar dados do checkout
+      if (!validateCheckoutData()) {
         return;
       }
       
@@ -1883,6 +2330,7 @@
           user_id: state.user.uid,
           user_email: state.user.email,
           user_name: state.user.displayName || 'Usuário',
+          user_phone: qs('#telefone').value,
           items: state.carrinho.map(item => ({
             id: item.id,
             nome: item.nome,
@@ -1909,77 +2357,19 @@
             numero: qs('#numero').value,
             complemento: qs('#complemento').value
           },
-          payment_method: 'mercado_pago',
+          payment_method: 'asaas',
           payment_data: {}
         };
         
         console.log('📦 Dados do pedido preparados:', orderData);
         
-        // Criar preferência no Mercado Pago
-        const paymentData = {
-          items: orderData.items.map(item => ({
-            id: item.id,
-            nome: item.nome,
-            descricao: `${item.cor} - ${item.tamanho}`,
-            quantidade: item.quantidade,
-            preco: item.preco
-          })),
-          payer: {
-            nome: orderData.user_name,
-            email: orderData.user_email,
-            telefone: null
-          },
-          external_reference: `TFI-${Date.now()}`,
-          user_id: orderData.user_id
-        };
-        
-        console.log('🛒 Dados para pagamento:', paymentData);
-        console.log('🛒 Criando pagamento Asaas...');
-        
-        // Verificar se o serviço está disponível
-        if (typeof asaasService === 'undefined') {
-          console.error('❌ AsaasService não está disponível');
-          toast('Erro: Serviço de pagamento não disponível');
-          return;
-        }
-        
-        console.log('✅ AsaasService disponível, criando pagamento...');
-        const paymentResult = await asaasService.createPixPayment(paymentData);
-        
-        console.log('🔄 Resultado da criação do pagamento:', paymentResult);
-        
-        if (paymentResult.success) {
-          console.log('✅ Pagamento criado com sucesso, salvando pedido...');
-          
-          // Salvar pedido no Firebase com status pendente
-          const orderRef = await db.collection('pedidos').add({
-            ...orderData,
-            status: 'pending_payment',
-            payment_id: paymentResult.paymentId,
-            external_reference: paymentData.external_reference,
-            created_at: firebase.firestore.FieldValue.serverTimestamp()
-          });
-          
-          console.log('✅ Pedido salvo no Firebase:', orderRef.id);
-          
-          // Mostrar QR Code PIX ou redirecionar
-          if (paymentResult.qrCode) {
-            console.log('📱 QR Code PIX gerado:', paymentResult.qrCode);
-            
-            // Mostrar modal com QR Code PIX
-            showPixModal(paymentResult);
-          } else if (paymentResult.paymentUrl) {
-            console.log('🚀 URL de pagamento:', paymentResult.paymentUrl);
-            
-            // Confirmar redirecionamento
-            if (confirm('Redirecionar para o Asaas para finalizar o pagamento?')) {
-              window.location.href = paymentResult.paymentUrl;
-            }
-          }
-          
+        // Processar pagamento baseado no método selecionado
+        if (selectedPaymentMethod === 'pix') {
+          await processPixPayment(orderData);
+        } else if (selectedPaymentMethod === 'card') {
+          await processCardPayment(orderData);
         } else {
-          console.error('❌ Erro ao criar pagamento:', paymentResult.error);
-          toast(`Erro ao criar pagamento: ${paymentResult.error}`);
+          toast('Método de pagamento não selecionado');
         }
         
       } catch (error) {
@@ -3275,14 +3665,14 @@
         
         console.log('✅ Configuração válida');
         
-        // Testar conexão com a API
-        const testUrl = 'https://api.mercadopago.com/v1/payment_methods?country_id=BR';
+        // Testar conexão com a API do Asaas
+        const testUrl = 'https://api.asaas.com/v3/customers';
         console.log('🌐 Testando conexão com:', testUrl);
         
         const response = await fetch(testUrl, {
           method: 'GET',
           headers: {
-            'Authorization': `Bearer ${apiConfig.mercadoPago.accessToken}`,
+            'access_token': apiConfig.asaas.apiKey,
             'Content-Type': 'application/json'
           }
         });
