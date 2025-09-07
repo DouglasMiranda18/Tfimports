@@ -214,17 +214,24 @@ export class AsaasService {
   // Verificar status do pagamento
   async getPaymentStatus(paymentId) {
     try {
-      const response = await fetch(`${this.baseUrl}${endpoints.asaas.payments}/${paymentId}`, {
-        method: 'GET',
-        headers: getHeaders('asaas')
+      const response = await fetch('/.netlify/functions/asaas-payment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          method: 'GET',
+          endpoint: `/payments/${paymentId}`
+        })
       });
 
-      if (!response.ok) {
-        throw new Error(`Erro ao consultar pagamento: ${response.statusText}`);
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(`Erro ao consultar pagamento: ${result.error}`);
       }
 
-      const result = await response.json();
-      return result;
+      return result.data.status;
 
     } catch (error) {
       console.error('❌ Erro ao consultar pagamento:', error);
