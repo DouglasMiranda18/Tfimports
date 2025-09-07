@@ -195,11 +195,11 @@ export class AsaasService {
       
       return {
         success: true,
-        paymentId: result.id,
-        status: result.status,
-        qrCode: result.pixTransaction?.qrCode,
-        pixCopyPaste: result.pixTransaction?.payload,
-        pixKey: result.pixTransaction?.pixKey
+        paymentId: result.data.id,
+        status: result.data.status,
+        qrCode: result.data.pixTransaction?.qrCode,
+        pixCopyPaste: result.data.pixTransaction?.payload,
+        pixKey: result.data.pixTransaction?.pixKey
       };
 
     } catch (error) {

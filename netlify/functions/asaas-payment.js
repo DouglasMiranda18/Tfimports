@@ -38,6 +38,7 @@ exports.handler = async (event, context) => {
     });
 
     const result = await response.json();
+    console.log('📦 Resposta do Asaas:', JSON.stringify(result, null, 2));
 
     if (!response.ok) {
       return {

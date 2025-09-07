@@ -2445,6 +2445,8 @@
 
     function showPixModal(paymentResult) {
       console.log('🔄 Exibindo modal PIX:', paymentResult);
+      console.log('🔍 QR Code:', paymentResult.qrCode);
+      console.log('🔍 PIX Copy Paste:', paymentResult.pixCopyPaste);
       const modal = qs('#pixModal');
       if (!modal) {
         console.error('❌ Modal PIX não encontrada');
@@ -2453,25 +2455,42 @@
 
       // Gerar QR Code
       const qrCodeDiv = qs('#pixQrCode');
-      if (qrCodeDiv && paymentResult.qrCode) {
-        qrCodeDiv.innerHTML = `
-          <div class="text-center p-4">
-            <div class="bg-white p-4 rounded-lg mb-4">
-              <div class="text-6xl mb-2">📱</div>
-              <div class="text-sm text-gray-600 mb-2">QR Code PIX</div>
-              <div class="text-xs text-gray-500 break-all">${paymentResult.qrCode}</div>
+      if (qrCodeDiv) {
+        if (paymentResult.qrCode) {
+          qrCodeDiv.innerHTML = `
+            <div class="text-center p-4">
+              <div class="bg-white p-4 rounded-lg mb-4">
+                <div class="text-6xl mb-2">📱</div>
+                <div class="text-sm text-gray-600 mb-2">QR Code PIX</div>
+                <div class="text-xs text-gray-500 break-all">${paymentResult.qrCode}</div>
+              </div>
+              <div class="text-xs text-slate-400">
+                Escaneie o QR Code com seu app de pagamento
+              </div>
             </div>
-            <div class="text-xs text-slate-400">
-              Escaneie o QR Code com seu app de pagamento
+          `;
+        } else {
+          qrCodeDiv.innerHTML = `
+            <div class="text-center p-4">
+              <div class="bg-white p-4 rounded-lg mb-4">
+                <div class="text-6xl mb-2">⏳</div>
+                <div class="text-sm text-gray-600 mb-2">Gerando QR Code...</div>
+                <div class="text-xs text-gray-500">Aguarde alguns segundos</div>
+              </div>
             </div>
-          </div>
-        `;
+          `;
+        }
       }
 
       // Preencher código PIX
       const pixCodeInput = qs('#pixCode');
-      if (pixCodeInput && paymentResult.pixCopyPaste) {
-        pixCodeInput.value = paymentResult.pixCopyPaste;
+      if (pixCodeInput) {
+        if (paymentResult.pixCopyPaste) {
+          pixCodeInput.value = paymentResult.pixCopyPaste;
+        } else {
+          pixCodeInput.value = 'Gerando código PIX...';
+          pixCodeInput.disabled = true;
+        }
       }
 
       // Mostrar modal
