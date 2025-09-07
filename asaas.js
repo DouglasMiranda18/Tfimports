@@ -215,7 +215,6 @@ export class AsaasService {
       throw error;
     }
   }
-}
 
   // Criar pagamento com cartão
   async createCardPayment(paymentData) {
