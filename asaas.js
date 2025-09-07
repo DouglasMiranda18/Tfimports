@@ -144,10 +144,16 @@ export class AsaasService {
       // Primeiro, criar ou buscar cliente
       let customer;
       try {
-        customer = await this.createCustomer(paymentData.cliente);
+        customer = await this.createCustomer(paymentData.customer);
       } catch (error) {
         console.log('⚠️ Erro ao criar cliente, usando cliente padrão...');
-        customer = { id: 'cliente-padrao' };
+        // Criar cliente padrão com dados válidos
+        customer = {
+          id: `cliente-${Date.now()}`,
+          name: paymentData.customer?.nome || 'Cliente Teste',
+          email: paymentData.customer?.email || 'teste@teste.com',
+          cpfCnpj: paymentData.customer?.cpf || '12345678901'
+        };
       }
 
       // Calcular valor total
@@ -160,10 +166,10 @@ export class AsaasService {
         billingType: 'PIX',
         value: totalValue.toFixed(2),
         dueDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 1 dia
-        description: `Pedido ${paymentData.pedidoId} - TFI IMPORTS`,
-        externalReference: paymentData.pedidoId,
+        description: `Pedido ${paymentData.external_reference} - TFI IMPORTS`,
+        externalReference: paymentData.external_reference,
         callback: {
-          successUrl: `${paymentData.baseUrl}/#checkout-success`,
+          successUrl: `${window.location.origin}/#checkout-success`,
           autoRedirect: true
         }
       };
