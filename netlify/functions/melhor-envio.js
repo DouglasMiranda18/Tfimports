@@ -192,6 +192,35 @@ exports.handler = async (event, context) => {
           })
         };
 
+      case 'create_label':
+        // Criar etiqueta de envio
+        console.log('🏷️ Criando etiqueta de envio...');
+        
+        response = await fetch(`${MELHOR_ENVIO_BASE_URL}/api/v2/me/cart`, {
+          method: 'POST',
+          headers: melhorEnvioHeaders,
+          body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('❌ Erro ao criar etiqueta:', response.status, errorText);
+          throw new Error(`Erro ao criar etiqueta: ${response.status} - ${errorText}`);
+        }
+
+        result = await response.json();
+        console.log('✅ Etiqueta criada:', result);
+
+        return {
+          statusCode: 200,
+          headers,
+          body: JSON.stringify({
+            success: true,
+            data: result,
+            action: 'create_label'
+          })
+        };
+
       default:
         return {
           statusCode: 400,

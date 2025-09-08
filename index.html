@@ -2674,6 +2674,63 @@
         
         console.log('✅ Pedido salvo no Firebase com ID:', orderId);
         
+        // Criar etiqueta de envio se frete foi selecionado
+        if (state.freteSelecionado && state.freteSelecionado.id !== 'teste') {
+          try {
+            console.log('🏷️ Criando etiqueta de envio...');
+            
+            const shippingData = {
+              service_id: state.freteSelecionado.id,
+              cliente: {
+                nome: orderData.user_name,
+                telefone: orderData.user_phone,
+                email: orderData.user_email,
+                documento: orderData.user_document
+              },
+              endereco: {
+                logradouro: orderData.shipping_address.street,
+                complemento: orderData.shipping_address.complement,
+                numero: orderData.shipping_address.number,
+                bairro: orderData.shipping_address.district,
+                cidade: orderData.shipping_address.city,
+                uf: orderData.shipping_address.state,
+                cep: orderData.shipping_address.zipcode
+              },
+              produtos: orderData.items.map(item => ({
+                nome: item.name,
+                quantidade: item.quantity,
+                preco: item.price
+              })),
+              peso_total: orderData.items.reduce((total, item) => total + (0.3 * item.quantity), 0)
+            };
+            
+            const labelResult = await melhorEnvioService.createShippingLabel(shippingData);
+            
+            if (labelResult.success) {
+              console.log('✅ Etiqueta criada:', labelResult);
+              
+              // Atualizar pedido com dados da etiqueta
+              await db.collection('orders').doc(orderId).update({
+                'shipping_label': {
+                  order_id: labelResult.order_id,
+                  protocol: labelResult.protocol,
+                  tracking_code: labelResult.tracking_code,
+                  status: 'created',
+                  created_at: new Date(),
+                  fallback: labelResult.fallback || false
+                },
+                updated_at: new Date()
+              });
+              
+              console.log('✅ Pedido atualizado com dados da etiqueta');
+            } else {
+              console.error('❌ Erro ao criar etiqueta:', labelResult.error);
+            }
+          } catch (error) {
+            console.error('❌ Erro ao criar etiqueta de envio:', error);
+          }
+        }
+        
         // Limpar carrinho após salvar
         state.carrinho = [];
         saveCart();
