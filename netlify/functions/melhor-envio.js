@@ -27,6 +27,9 @@ exports.handler = async (event, context) => {
     const MELHOR_ENVIO_TOKEN = process.env.VITE_MELHOR_ENVIO_TOKEN || 'TOKEN_TEMPORARIO_MELHOR_ENVIO_12345';
     const MELHOR_ENVIO_BASE_URL = 'https://www.melhorenvio.com.br';
     
+    console.log('🔑 Token do Melhor Envio:', MELHOR_ENVIO_TOKEN ? MELHOR_ENVIO_TOKEN.substring(0, 10) + '...' : 'NÃO CONFIGURADO');
+    console.log('🌐 Base URL:', MELHOR_ENVIO_BASE_URL);
+    
     const melhorEnvioHeaders = {
       'Authorization': `Bearer ${MELHOR_ENVIO_TOKEN}`,
       'Content-Type': 'application/json',

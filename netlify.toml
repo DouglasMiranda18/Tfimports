@@ -2,6 +2,29 @@
   publish = "dist"
   command = "npm run build"
   functions = "netlify/functions"
+  
+[build.environment]
+  # Firebase Configuration
+  VITE_FIREBASE_API_KEY = "AIzaSyBvQ8Q2Q2Q2Q2Q2Q2Q2Q2Q2Q2Q2Q2Q2Q2Q"
+  VITE_FIREBASE_AUTH_DOMAIN = "tfimports-27898.firebaseapp.com"
+  VITE_FIREBASE_PROJECT_ID = "tfimports-27898"
+  VITE_FIREBASE_STORAGE_BUCKET = "tfimports-27898.appspot.com"
+  VITE_FIREBASE_MESSAGING_SENDER_ID = "123456789012"
+  VITE_FIREBASE_APP_ID = "1:123456789012:web:abcdef1234567890"
+  VITE_FIREBASE_MEASUREMENT_ID = "G-ABCDEF1234"
+  
+  # Asaas Configuration
+  VITE_ASAAS_API_KEY = "$aact_hmlg_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6OjIyNDljZDdlLTY0OTEtNDdmZC05ZGVkLTMzNDNhNmQ4NWRhNDo6JGFhY2hfMGM1YWE5MGYtMjYxZi00ZTM4LTg4MTAtN2I5N2JiZGIxMmUx"
+  VITE_ASAAS_ENVIRONMENT = "sandbox"
+  VITE_ASAAS_WEBHOOK_TOKEN = "tfimports_webhook_secret_2024"
+  
+  # Melhor Envio Configuration
+  VITE_MELHOR_ENVIO_TOKEN = "2OYosOhoDN6DGfqeJt4yMg8Q3TalcU2rTrQ86IID"
+  MELHOR_ENVIO_WEBHOOK_SECRET = "tfimports_melhor_envio_webhook_2024"
+  
+  # Outras configurações
+  VITE_APP_ENV = "production"
+  VITE_API_URL = "https://tfimports01.com.br"
 
 [[headers]]
   for = "/*"
