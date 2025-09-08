@@ -2447,7 +2447,8 @@
           
           // Limpar carrinho
           state.carrinho = [];
-          updateCartUI();
+          saveCart();
+          updateCartCount();
           
           // Iniciar verificação automática do status em background
           console.log('🔄 Iniciando verificação em background...');
@@ -2675,7 +2676,8 @@
         
         // Limpar carrinho após salvar
         state.carrinho = [];
-        updateCartDisplay();
+        saveCart();
+        updateCartCount();
         
         return orderWithId;
       } catch (error) {
@@ -4388,6 +4390,15 @@
           modal.classList.remove('hidden');
           modal.classList.add('flex');
           console.log('✅ Classes da modal atualizadas:', modal.className);
+          
+          // Forçar exibição com timeout para garantir que seja visível
+          setTimeout(() => {
+            if (modal.classList.contains('hidden')) {
+              console.log('🔄 Forçando exibição da modal...');
+              modal.classList.remove('hidden');
+              modal.classList.add('flex');
+            }
+          }, 100);
         } else {
           console.error('❌ Modal #confirmacaoModal não encontrada!');
         }
@@ -4395,8 +4406,8 @@
         // Limpar carrinho após confirmação
         state.carrinho = [];
         state.freteSelecionado = null;
-        updateCartUI();
-        updateShippingUI();
+        saveCart();
+        updateCartCount();
 
         console.log('✅ Modal de confirmação exibida com sucesso');
 
