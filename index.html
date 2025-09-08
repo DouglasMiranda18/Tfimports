@@ -1216,12 +1216,12 @@
       if (id === 'checkout') renderCheckoutResumo();
       if (id === 'minha-conta') renderMinhaConta();
     }
-    // Event listeners para navegação
-    window.addEventListener('hashchange', applyRoute);
-    window.addEventListener('load', applyRoute);
-
-    // Garantir que a função applyRoute seja chamada quando necessário
-    window.addEventListener('popstate', applyRoute);
+    // Event listeners para navegação - aguardar DOM estar pronto
+    document.addEventListener('DOMContentLoaded', () => {
+      window.addEventListener('hashchange', applyRoute);
+      window.addEventListener('popstate', applyRoute);
+      applyRoute(); // Aplicar rota inicial
+    });
 
     // Função para inicializar todos os event listeners
     function initEventListeners() {
@@ -1242,35 +1242,215 @@
     
     // Função para outros event listeners
     function initOtherEventListeners() {
-      // Formatação automática do CEP
-      const cepInput = qs('#cep');
-      if (cepInput) {
-        cepInput.addEventListener('input', (e) => {
-          let value = e.target.value.replace(/\D/g, '');
-          if (value.length >= 5) {
-            value = value.replace(/(\d{5})(\d{3})/, '$1-$2');
-          }
-          e.target.value = value;
+      // Buscar CEP
+      const btnBuscarCep = qs('#btnBuscarCep');
+      if (btnBuscarCep) {
+        btnBuscarCep.addEventListener('click', async () => {
+          const cepInput = qs('#cep');
+          const cep = cepInput.value.replace(/\D/g, '');
+          const statusDiv = qs('#cepStatus');
           
-          // Limpar status quando usuário digita
-          const cepStatus = qs('#cepStatus');
-          if (cepStatus) {
-            cepStatus.textContent = '';
+          if (cep.length !== 8) {
+            statusDiv.textContent = 'CEP deve ter 8 dígitos';
+            statusDiv.className = 'text-xs mt-1 text-red-400';
+            return;
           }
-          const btnCalcFrete = qs('#btnCalcFrete');
-          if (btnCalcFrete) {
-            btnCalcFrete.disabled = true;
+          
+          statusDiv.textContent = 'Buscando CEP...';
+          statusDiv.className = 'text-xs mt-1 text-blue-400';
+          qs('#btnBuscarCep').disabled = true;
+          
+          try {
+            const result = await melhorEnvioService.validateCEP(cep);
+            
+            if (result.success) {
+              // Preencher campos automaticamente
+              qs('#logradouro').value = result.logradouro;
+              qs('#bairro').value = result.bairro;
+              qs('#cidade').value = result.cidade;
+              qs('#uf').value = result.uf;
+              
+              // Formatar CEP
+              cepInput.value = result.cep;
+              
+              statusDiv.textContent = 'CEP encontrado! Preencha o número e complemento.';
+              statusDiv.className = 'text-xs mt-1 text-green-400';
+              
+              // Habilitar botão de calcular frete
+              qs('#btnCalcFrete').disabled = false;
+              
+              // Focar no campo número
+              qs('#numero').focus();
+              
+            } else {
+              statusDiv.textContent = result.error;
+              statusDiv.className = 'text-xs mt-1 text-red-400';
+            }
+            
+          } catch (error) {
+            console.error('Erro ao buscar CEP:', error);
+            statusDiv.textContent = 'Erro ao buscar CEP. Tente novamente.';
+            statusDiv.className = 'text-xs mt-1 text-red-400';
+          } finally {
+            const btnBuscarCep = qs('#btnBuscarCep');
+            if (btnBuscarCep) {
+              btnBuscarCep.disabled = false;
+            }
+          }
+        });
+      }
+
+      // Buscar CEP ao pressionar Enter
+      const cepInput2 = qs('#cep');
+      if (cepInput2) {
+        cepInput2.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            const btnBuscarCep = qs('#btnBuscarCep');
+            if (btnBuscarCep) {
+              btnBuscarCep.click();
+            }
+          }
+        });
+      }
+
+      // Validar endereço completo antes de calcular frete
+      const btnCalcFrete = qs('#btnCalcFrete');
+      if (btnCalcFrete) {
+        btnCalcFrete.addEventListener('click', async () => {
+          const op = qs('#freteOpcoes'); 
+          op.innerHTML='<div class="hint text-center py-4">Calculando frete...</div>';
+          
+          // Coletar dados do endereço
+          const addressData = {
+            cep: qs('#cep').value.replace(/\D/g, ''),
+            logradouro: qs('#logradouro').value,
+            bairro: qs('#bairro').value,
+            cidade: qs('#cidade').value,
+            uf: qs('#uf').value,
+            numero: qs('#numero').value,
+            complemento: qs('#complemento').value
+          };
+          
+          // Validar endereço
+          const validation = melhorEnvioService.validateAddress(addressData);
+          if (!validation.isValid) {
+            op.innerHTML = `<div class="hint text-center py-4">Erro: ${validation.errors.join(', ')}</div>`;
+            return;
+          }
+          
+          try {
+            // Calcular frete com Melhor Envio
+            const shippingData = {
+              cepDestino: addressData.cep,
+              produtos: state.carrinho.map(item => ({
+                id: item.id,
+                nome: item.nome,
+                preco: item.preco,
+                quantidade: item.qtd,
+                peso: 0.3 // Peso padrão em kg
+              })),
+              pesoTotal: state.carrinho.reduce((total, item) => total + (0.3 * item.qtd), 0)
+            };
+            
+            const result = await melhorEnvioService.calculateShipping(shippingData);
+            
+            if (result.success && result.options.length > 0) {
+              op.innerHTML = '';
+              
+              result.options.forEach(option => {
+                const d = document.createElement('label');
+                d.className = 'glass rounded-xl p-3 flex items-center justify-between cursor-pointer hover:ring-2 hover:ring-emerald-400/40';
+                d.innerHTML = `
+                  <div>
+                    <div class="font-bold">${option.name}</div>
+                    <div class="hint text-sm">${option.company} • ${option.delivery_time} dias úteis</div>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <div class="font-extrabold">${fmt(option.price)}</div>
+                    <input type="radio" name="frete" value="${option.id}" data-company="${option.company_id}">
+                  </div>
+                `;
+                op.appendChild(d);
+              });
+              
+              op.onclick = (e) => {
+                const r = e.target.closest('input[type=radio]'); 
+                if (!r) return;
+                
+                // Opção de frete real
+                const selectedOption = result.options.find(opt => opt.id === r.value);
+                state.freteSelecionado = {
+                  id: selectedOption.id,
+                  nome: selectedOption.name,
+                  empresa: selectedOption.company,
+                  preco: selectedOption.price,
+                  prazo: `${selectedOption.delivery_time} dias úteis`,
+                  company_id: selectedOption.company_id
+                };
+                
+                // Salvar endereço completo no estado
+                state.enderecoCompleto = addressData;
+                
+                updateTotals();
+                toast('Frete selecionado!');
+              };
+              
+            } else {
+              op.innerHTML = '<div class="hint text-center py-4">Não foi possível calcular o frete para este endereço.</div>';
+            }
+            
+          } catch (error) {
+            console.error('Erro ao calcular frete:', error);
+            op.innerHTML = '<div class="hint text-center py-4">Erro ao calcular frete. Tente novamente.</div>';
+          }
+        });
+      }
+
+      // Event listeners para pagamento
+      const btnPix = qs('#btnPix');
+      if (btnPix) {
+        btnPix.addEventListener('click', () => selectPaymentMethod('pix'));
+      }
+      
+      const btnCartao = qs('#btnCartao');
+      if (btnCartao) {
+        btnCartao.addEventListener('click', () => selectPaymentMethod('card'));
+      }
+      
+      const btnFecharPix = qs('#btnFecharPix');
+      if (btnFecharPix) {
+        btnFecharPix.addEventListener('click', closePixModal);
+      }
+      
+      const btnFecharPix2 = qs('#btnFecharPix2');
+      if (btnFecharPix2) {
+        btnFecharPix2.addEventListener('click', closePixModal);
+      }
+      
+      const btnVerificarPix = qs('#btnVerificarPix');
+      if (btnVerificarPix) {
+        btnVerificarPix.addEventListener('click', async () => {
+          if (currentPaymentId) {
+            try {
+              const status = await asaasService.getPaymentStatus(currentPaymentId);
+              if (status.status === 'CONFIRMED') {
+                toast('Pagamento confirmado!');
+                closePixModal();
+                showConfirmacaoModal();
+              } else {
+                toast('Pagamento ainda não confirmado');
+              }
+            } catch (error) {
+              console.error('Erro ao verificar pagamento:', error);
+              toast('Erro ao verificar pagamento');
+            }
           }
         });
       }
     }
     
     // Inicializar quando DOM estiver pronto
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initEventListeners);
-    } else {
-      initEventListeners();
-    }
+    document.addEventListener('DOMContentLoaded', initEventListeners);
 
     // Render categorias chips/footer
     function renderChips() {
@@ -1927,174 +2107,11 @@
       });
     }
 
-    // Buscar CEP
-    const btnBuscarCep = qs('#btnBuscarCep');
-    if (btnBuscarCep) {
-      btnBuscarCep.addEventListener('click', async () => {
-      const cepInput = qs('#cep');
-      const cep = cepInput.value.replace(/\D/g, '');
-      const statusDiv = qs('#cepStatus');
-      
-      if (cep.length !== 8) {
-        statusDiv.textContent = 'CEP deve ter 8 dígitos';
-        statusDiv.className = 'text-xs mt-1 text-red-400';
-        return;
-      }
-      
-      statusDiv.textContent = 'Buscando CEP...';
-      statusDiv.className = 'text-xs mt-1 text-blue-400';
-      qs('#btnBuscarCep').disabled = true;
-      
-      try {
-        const result = await melhorEnvioService.validateCEP(cep);
-        
-        if (result.success) {
-          // Preencher campos automaticamente
-          qs('#logradouro').value = result.logradouro;
-          qs('#bairro').value = result.bairro;
-          qs('#cidade').value = result.cidade;
-          qs('#uf').value = result.uf;
-          
-          // Formatar CEP
-          cepInput.value = result.cep;
-          
-          statusDiv.textContent = 'CEP encontrado! Preencha o número e complemento.';
-          statusDiv.className = 'text-xs mt-1 text-green-400';
-          
-          // Habilitar botão de calcular frete
-          qs('#btnCalcFrete').disabled = false;
-          
-          // Focar no campo número
-          qs('#numero').focus();
-          
-        } else {
-          statusDiv.textContent = result.error;
-          statusDiv.className = 'text-xs mt-1 text-red-400';
-        }
-        
-      } catch (error) {
-        console.error('Erro ao buscar CEP:', error);
-        statusDiv.textContent = 'Erro ao buscar CEP. Tente novamente.';
-        statusDiv.className = 'text-xs mt-1 text-red-400';
-      } finally {
-        const btnBuscarCep = qs('#btnBuscarCep');
-        if (btnBuscarCep) {
-          btnBuscarCep.disabled = false;
-        }
-      }
-    });
-    }
+    // Este código foi movido para initOtherEventListeners()
 
-    // Buscar CEP ao pressionar Enter
-    const cepInput2 = qs('#cep');
-    if (cepInput2) {
-      cepInput2.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-          const btnBuscarCep = qs('#btnBuscarCep');
-          if (btnBuscarCep) {
-            btnBuscarCep.click();
-          }
-      }
-    });
-    }
+    // Este código foi movido para initOtherEventListeners()
 
-    // Validar endereço completo antes de calcular frete
-    const btnCalcFrete = qs('#btnCalcFrete');
-    if (btnCalcFrete) {
-      btnCalcFrete.addEventListener('click', async () => {
-      const op = qs('#freteOpcoes'); 
-      op.innerHTML='<div class="hint text-center py-4">Calculando frete...</div>';
-      
-      // Coletar dados do endereço
-      const addressData = {
-        cep: qs('#cep').value.replace(/\D/g, ''),
-        logradouro: qs('#logradouro').value,
-        bairro: qs('#bairro').value,
-        cidade: qs('#cidade').value,
-        uf: qs('#uf').value,
-        numero: qs('#numero').value,
-        complemento: qs('#complemento').value
-      };
-      
-      // Validar endereço
-      const validation = melhorEnvioService.validateAddress(addressData);
-      if (!validation.isValid) {
-        op.innerHTML = `<div class="hint text-center py-4">Erro: ${validation.errors.join(', ')}</div>`;
-        return;
-      }
-      
-      try {
-        // Calcular frete com Melhor Envio
-        const shippingData = {
-          cepDestino: addressData.cep,
-          produtos: state.carrinho.map(item => ({
-            id: item.id,
-            nome: item.nome,
-            preco: item.preco,
-            quantidade: item.qtd,
-            peso: 0.3 // Peso padrão em kg
-          })),
-          pesoTotal: state.carrinho.reduce((total, item) => total + (0.3 * item.qtd), 0)
-        };
-        
-        const result = await melhorEnvioService.calculateShipping(shippingData);
-        
-        if (result.success && result.options.length > 0) {
-          op.innerHTML = '';
-          
-          // Não adicionar opção de teste - apenas opções reais do Melhor Envio
-          
-          result.options.forEach(option => {
-        const d = document.createElement('label');
-            d.className = 'glass rounded-xl p-3 flex items-center justify-between cursor-pointer hover:ring-2 hover:ring-emerald-400/40';
-            d.innerHTML = `
-              <div>
-                <div class="font-bold">${option.name}</div>
-                <div class="hint text-sm">${option.company} • ${option.delivery_time} dias úteis</div>
-              </div>
-              <div class="flex items-center gap-3">
-                <div class="font-extrabold">${fmt(option.price)}</div>
-                <input type="radio" name="frete" value="${option.id}" data-company="${option.company_id}">
-              </div>
-            `;
-        op.appendChild(d);
-      });
-          
-      op.onclick = (e) => {
-            const r = e.target.closest('input[type=radio]'); 
-            if (!r) return;
-            
-            // Apenas opções reais do Melhor Envio
-            {
-              // Opção de frete real
-            const selectedOption = result.options.find(opt => opt.id === r.value);
-            state.freteSelecionado = {
-              id: selectedOption.id,
-              nome: selectedOption.name,
-              empresa: selectedOption.company,
-              preco: selectedOption.price,
-              prazo: `${selectedOption.delivery_time} dias úteis`,
-              company_id: selectedOption.company_id
-            };
-            }
-            
-            // Salvar endereço completo no estado
-            state.enderecoCompleto = addressData;
-            
-            updateTotals();
-            toast('Frete selecionado!');
-          };
-          
-        } else {
-          op.innerHTML = '<div class="hint text-center py-4">Não foi possível calcular o frete para este endereço.</div>';
-        }
-        
-      } catch (error) {
-        console.error('Erro ao calcular frete:', error);
-        op.innerHTML = '<div class="hint text-center py-4">Erro ao calcular frete. Tente novamente.</div>';
-      }
-    });
-    }
+    // Este código foi movido para initOtherEventListeners()
 
     // Pagamento
     // Event listeners para pagamento
