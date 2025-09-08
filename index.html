@@ -542,7 +542,7 @@
               </button>
               
               <button id="btnCartao" class="payment-method-btn btn pill px-4 py-3 rounded-lg text-center" data-method="card">
-                <div class="text-2xl mb-2">💳</div>
+              <div class="text-2xl mb-2">💳</div>
                 <div class="font-bold">Cartão</div>
                 <div class="text-xs text-slate-400">Crédito ou Débito</div>
               </button>
@@ -556,7 +556,7 @@
               <p class="text-slate-300 text-sm mb-4">
                 O PIX será gerado automaticamente após confirmar o pedido
               </p>
-            </div>
+              </div>
             
             <div id="cardForm" class="payment-form hidden">
               <h4 class="font-bold text-lg mb-4">Pagamento com Cartão</h4>
@@ -565,11 +565,11 @@
                 <div>
                   <label class="block text-sm text-slate-300 mb-2">Número do Cartão</label>
                   <input id="numeroCartao" type="text" class="w-full bg-transparent pill px-3 py-3 rounded-lg text-sm" placeholder="0000 0000 0000 0000" maxlength="19" />
-                </div>
+            </div>
                 <div>
                   <label class="block text-sm text-slate-300 mb-2">Validade</label>
                   <input id="validadeCartao" type="text" class="w-full bg-transparent pill px-3 py-3 rounded-lg text-sm" placeholder="MM/AA" maxlength="5" />
-                </div>
+            </div>
               </div>
               
               <div class="grid grid-cols-2 gap-3 mb-4">
@@ -984,7 +984,7 @@
             Fechar
           </button>
         </div>
-      </div>
+    </div>
     </div>
   </div>
 
@@ -1219,13 +1219,13 @@
     // Event listeners para navegação
     window.addEventListener('hashchange', applyRoute);
     window.addEventListener('load', applyRoute);
-    
+
     // Garantir que a função applyRoute seja chamada quando necessário
     window.addEventListener('popstate', applyRoute);
 
     // Função para inicializar todos os event listeners
     function initEventListeners() {
-      // Header behaviors
+    // Header behaviors
       const btnMenu = qs('#btnMenu');
       if (btnMenu) {
         btnMenu.addEventListener('click', () => {
@@ -1242,7 +1242,27 @@
     
     // Função para outros event listeners
     function initOtherEventListeners() {
-    // Formatação automática do CEP - movido para initOtherEventListeners
+      // Formatação automática do CEP
+      const cepInput = qs('#cep');
+      if (cepInput) {
+        cepInput.addEventListener('input', (e) => {
+          let value = e.target.value.replace(/\D/g, '');
+          if (value.length >= 5) {
+            value = value.replace(/(\d{5})(\d{3})/, '$1-$2');
+          }
+          e.target.value = value;
+          
+          // Limpar status quando usuário digita
+          const cepStatus = qs('#cepStatus');
+          if (cepStatus) {
+            cepStatus.textContent = '';
+          }
+          const btnCalcFrete = qs('#btnCalcFrete');
+          if (btnCalcFrete) {
+            btnCalcFrete.disabled = true;
+          }
+        });
+      }
     }
     
     // Inicializar quando DOM estiver pronto
@@ -1275,13 +1295,13 @@
       });
       const footerCats = qs('#footerCats');
       if (footerCats) {
-        footerCats.innerHTML = '';
-        state.categorias.slice(0,6).forEach(cat => {
-          const span = document.createElement('span');
-          span.className = 'pill px-3 py-1 rounded-full text-sm';
-          span.textContent = cat;
-          footerCats.appendChild(span);
-        });
+      footerCats.innerHTML = '';
+      state.categorias.slice(0,6).forEach(cat => {
+        const span = document.createElement('span');
+        span.className = 'pill px-3 py-1 rounded-full text-sm';
+        span.textContent = cat;
+        footerCats.appendChild(span);
+      });
       }
     }
 
@@ -1429,11 +1449,11 @@
     function initFilters() {
       const sel = qs('#filterCategoria');
       if (sel) {
-        state.categorias.forEach(c => {
-          const opt = document.createElement('option');
-          opt.value = c; opt.textContent = c;
-          sel.appendChild(opt);
-        });
+      state.categorias.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c; opt.textContent = c;
+        sel.appendChild(opt);
+      });
       }
       
       const sizes = ["PP","P","M","G","GG","XG"];
@@ -1468,9 +1488,9 @@
           if (filterCategoria) {
             filterCategoria.value = '';
           }
-          qsa('#filterTamanho button, #filterCor button').forEach(b => b.classList.remove('badge'));
-          filterAndRenderCatalog();
-        });
+        qsa('#filterTamanho button, #filterCor button').forEach(b => b.classList.remove('badge'));
+        filterAndRenderCatalog();
+      });
       }
       
       const ordenacao = qs('#ordenacao');
@@ -1890,12 +1910,12 @@
     const cepInput = qs('#cep');
     if (cepInput) {
       cepInput.addEventListener('input', (e) => {
-        const cep = e.target.value.replace(/\D/g, '');
-        if (cep.length <= 8) {
-          e.target.value = melhorEnvioService.formatCEP(cep);
-        }
-        
-        // Limpar status quando usuário digita
+      const cep = e.target.value.replace(/\D/g, '');
+      if (cep.length <= 8) {
+        e.target.value = melhorEnvioService.formatCEP(cep);
+      }
+      
+      // Limpar status quando usuário digita
         const cepStatus = qs('#cepStatus');
         if (cepStatus) {
           cepStatus.textContent = '';
@@ -1962,20 +1982,20 @@
           btnBuscarCep.disabled = false;
         }
       }
-      });
+    });
     }
 
     // Buscar CEP ao pressionar Enter
     const cepInput2 = qs('#cep');
     if (cepInput2) {
       cepInput2.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
+      if (e.key === 'Enter') {
           const btnBuscarCep = qs('#btnBuscarCep');
           if (btnBuscarCep) {
             btnBuscarCep.click();
           }
-        }
-      });
+      }
+    });
     }
 
     // Validar endereço completo antes de calcular frete
@@ -2022,20 +2042,7 @@
         if (result.success && result.options.length > 0) {
           op.innerHTML = '';
           
-          // Adicionar opção de frete de teste
-          const testeOption = document.createElement('label');
-          testeOption.className = 'glass rounded-xl p-3 flex items-center justify-between cursor-pointer hover:ring-2 hover:ring-emerald-400/40 border-2 border-yellow-400';
-          testeOption.innerHTML = `
-            <div>
-              <div class="font-bold text-yellow-400">🚀 FRETE TESTE</div>
-              <div class="hint text-sm">Para testes • 1 dia útil</div>
-            </div>
-            <div class="flex items-center gap-3">
-              <div class="font-extrabold text-yellow-400">R$ 1,00</div>
-              <input type="radio" name="frete" value="teste" data-company="teste">
-            </div>
-          `;
-          op.appendChild(testeOption);
+          // Não adicionar opção de teste - apenas opções reais do Melhor Envio
           
           result.options.forEach(option => {
         const d = document.createElement('label');
@@ -2057,27 +2064,18 @@
             const r = e.target.closest('input[type=radio]'); 
             if (!r) return;
             
-            if (r.value === 'teste') {
-              // Opção de frete de teste
-              state.freteSelecionado = {
-                id: 'teste',
-                nome: 'FRETE TESTE',
-                empresa: 'Teste',
-                preco: 1.00,
-                prazo: '1 dia útil',
-                company_id: 'teste'
-              };
-            } else {
+            // Apenas opções reais do Melhor Envio
+            {
               // Opção de frete real
-              const selectedOption = result.options.find(opt => opt.id === r.value);
-              state.freteSelecionado = {
-                id: selectedOption.id,
-                nome: selectedOption.name,
-                empresa: selectedOption.company,
-                preco: selectedOption.price,
-                prazo: `${selectedOption.delivery_time} dias úteis`,
-                company_id: selectedOption.company_id
-              };
+            const selectedOption = result.options.find(opt => opt.id === r.value);
+            state.freteSelecionado = {
+              id: selectedOption.id,
+              nome: selectedOption.name,
+              empresa: selectedOption.company,
+              preco: selectedOption.price,
+              prazo: `${selectedOption.delivery_time} dias úteis`,
+              company_id: selectedOption.company_id
+            };
             }
             
             // Salvar endereço completo no estado
@@ -2095,7 +2093,7 @@
         console.error('Erro ao calcular frete:', error);
         op.innerHTML = '<div class="hint text-center py-4">Erro ao calcular frete. Tente novamente.</div>';
       }
-      });
+    });
     }
 
     // Pagamento
@@ -2213,8 +2211,8 @@
     const btnFinalizar = qs('#btnFinalizar');
     if (btnFinalizar) {
       btnFinalizar.addEventListener('click', async () => {
-        await processPayment();
-      });
+      await processPayment();
+    });
     }
     
     const btnPagar = qs('#btnPagar');
@@ -2344,9 +2342,9 @@
         if (typeof asaasService === 'undefined') {
           console.error('❌ AsaasService não está disponível');
           toast('Erro: Serviço de pagamento não disponível');
-          return;
-        }
-        
+        return;
+      }
+      
         console.log('✅ AsaasService disponível, criando pagamento PIX...');
         const paymentResult = await asaasService.createPixPayment(paymentData);
         
@@ -2587,11 +2585,11 @@
               // Preparar dados do pedido para modal de confirmação
               const orderData = {
                 items: state.carrinho.map(item => ({
-                  id: item.id,
-                  nome: item.nome,
-                  preco: item.preco,
+            id: item.id,
+            nome: item.nome,
+            preco: item.preco,
                   quantidade: item.qtd,
-                  cor: item.cor,
+            cor: item.cor,
                   tamanho: item.tam
                 })),
                 user_id: state.user?.uid,
@@ -2698,7 +2696,7 @@
         console.log('✅ Pedido salvo no Firebase com ID:', orderId);
         
         // Criar etiqueta de envio se frete foi selecionado
-        if (state.freteSelecionado && state.freteSelecionado.id !== 'teste') {
+        if (state.freteSelecionado) {
           try {
             console.log('🏷️ Criando etiqueta de envio...');
             
@@ -2710,7 +2708,7 @@
                 email: orderData.user_email,
                 documento: orderData.user_document
               },
-              endereco: {
+          endereco: {
                 logradouro: orderData.shipping_address.street,
                 complemento: orderData.shipping_address.complement,
                 numero: orderData.shipping_address.number,
@@ -2755,8 +2753,8 @@
         }
         
         // Limpar carrinho após salvar
-        state.carrinho = [];
-        saveCart();
+        state.carrinho = []; 
+        saveCart(); 
         updateCartCount();
         
         return orderWithId;
@@ -3075,9 +3073,9 @@
               <div class="text-sm text-slate-300">
                 <strong>Itens:</strong> ${order.items?.length || 0} produto(s)
               </div>
-              <div class="text-sm text-slate-300">
+                <div class="text-sm text-slate-300">
                 <strong>Método:</strong> ${order.paymentMethod === 'pix' ? 'PIX' : 'Cartão'}
-              </div>
+                </div>
               ${order.user_phone ? `
                 <div class="text-sm text-slate-300">
                   <strong>Contato:</strong> ${order.user_phone}
@@ -3223,7 +3221,7 @@
           // Adicionar ao estado local
         feedbacks.unshift({ 
           nome: sanitizedName, 
-          nota: currentRating,
+          nota: currentRating, 
           texto: sanitizedText, 
           data: 'agora' 
         });
@@ -4092,28 +4090,28 @@
     if (loginModal) {
       loginModal.addEventListener('click', (e) => {
         if (e.target === loginModal) {
-          closeLoginModal();
-        }
-      });
+        closeLoginModal();
+      }
+    });
     }
     
     // Enter para login
     const loginPassword = qs('#loginPassword');
     if (loginPassword) {
       loginPassword.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-          signInEmail();
-        }
-      });
+      if (e.key === 'Enter') {
+        signInEmail();
+      }
+    });
     }
     
     const registerPassword = qs('#registerPassword');
     if (registerPassword) {
       registerPassword.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-          signUpEmail();
-        }
-      });
+      if (e.key === 'Enter') {
+        signUpEmail();
+      }
+    });
     }
     
     // onAuthStateChanged agora está dentro de initializeFirebase()
@@ -4129,26 +4127,26 @@
       try {
         console.log('🚀 Iniciando aplicação...');
         
-        // Verificar dados locais do usuário primeiro (fallback)
-        checkLocalUserData();
-        
-        // Carregar configuração do Firebase primeiro
-        await initializeFirebase();
-        
-        // Carregar dados do Firestore
+      // Verificar dados locais do usuário primeiro (fallback)
+      checkLocalUserData();
+      
+      // Carregar configuração do Firebase primeiro
+      await initializeFirebase();
+      
+      // Carregar dados do Firestore
         console.log('📦 Carregando dados do Firestore...');
-        await loadProductsFromFirestore();
-        await loadFeedbacksFromFirestore();
-        
-        loadLocalProducts();
-        loadCart();
-        loadFavoritos();
-        renderChips();
-        renderDestaques();
-        initFilters();
-        filterAndRenderCatalog();
-        renderNovidades();
-        renderFeedbacks();
+      await loadProductsFromFirestore();
+      await loadFeedbacksFromFirestore();
+      
+      loadLocalProducts();
+      loadCart();
+      loadFavoritos();
+      renderChips();
+      renderDestaques();
+      initFilters();
+      filterAndRenderCatalog();
+      renderNovidades();
+      renderFeedbacks();
         
         console.log('✅ Aplicação inicializada com sucesso');
       } catch (error) {

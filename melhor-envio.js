@@ -90,31 +90,33 @@ export class MelhorEnvioService {
     } catch (error) {
       console.error('Erro ao calcular frete:', error);
       
-      // Se falhar, usar fallback
-      console.log('Usando cálculo de frete alternativo devido a erro');
-      return this.calculateShippingFallback(shippingData);
+      // Se falhar, mostrar erro em vez de fallback
+      return {
+        success: false,
+        error: error.message,
+        options: []
+      };
     }
   }
 
   // Verificar se deve usar fallback
   shouldUseFallback() {
-    // Usar API real se tivermos token válido
+    // SEMPRE usar API real - sem fallback fake
     const hasValidToken = this.config.token && 
                          this.config.token !== 'TOKEN_TEMPORARIO_MELHOR_ENVIO_12345' &&
                          this.config.token !== 'SEU_TOKEN_AQUI' &&
                          this.config.token.trim() !== '';
     
-    // Se não temos token válido, usar fallback
-    if (!hasValidToken) {
-      console.log('🚚 Usando fallback: Token do Melhor Envio não configurado');
-      console.log('💡 Para usar API real, configure VITE_MELHOR_ENVIO_TOKEN no arquivo .env');
-      return true;
+    if (hasValidToken) {
+      console.log('🚚 Usando API real do Melhor Envio');
+      console.log('🔑 Token configurado:', this.config.token.substring(0, 10) + '...');
+      return false;
     }
     
-    // Com token válido, sempre usar API real (mesmo em desenvolvimento)
-    console.log('🚚 Usando API real do Melhor Envio');
-    console.log('🔑 Token configurado:', this.config.token.substring(0, 10) + '...');
-    return false;
+    // Se não temos token válido, mostrar erro em vez de fallback
+    console.error('❌ Token do Melhor Envio não configurado!');
+    console.error('💡 Configure VITE_MELHOR_ENVIO_TOKEN no arquivo .env');
+    throw new Error('Token do Melhor Envio não configurado. Configure VITE_MELHOR_ENVIO_TOKEN.');
   }
 
   // Cálculo de frete alternativo (fallback)
