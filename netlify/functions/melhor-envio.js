@@ -29,6 +29,21 @@ exports.handler = async (event, context) => {
     
     console.log('🔑 Token do Melhor Envio:', MELHOR_ENVIO_TOKEN ? MELHOR_ENVIO_TOKEN.substring(0, 10) + '...' : 'NÃO CONFIGURADO');
     console.log('🌐 Base URL:', MELHOR_ENVIO_BASE_URL);
+    console.log('🔍 Todas as variáveis de ambiente:', Object.keys(process.env).filter(key => key.includes('MELHOR')));
+    
+    // Verificar se o token é válido
+    if (!MELHOR_ENVIO_TOKEN || MELHOR_ENVIO_TOKEN === 'TOKEN_TEMPORARIO_MELHOR_ENVIO_12345') {
+      console.log('⚠️ Token inválido, usando fallback');
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({
+          success: false,
+          error: 'Token do Melhor Envio não configurado',
+          fallback: true
+        })
+      };
+    }
     
     const melhorEnvioHeaders = {
       'Authorization': `Bearer ${MELHOR_ENVIO_TOKEN}`,

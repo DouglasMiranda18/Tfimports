@@ -1100,6 +1100,11 @@
     const qs = s => document.querySelector(s);
     const qsa = s => Array.from(document.querySelectorAll(s));
     
+    // Verificar se as funções estão definidas
+    if (typeof qs !== 'function') {
+      console.error('❌ Função qs não está definida!');
+    }
+    
     // Estado global (local)
     const state = {
       user: null,
@@ -1219,14 +1224,23 @@
     window.addEventListener('popstate', applyRoute);
 
     // Header behaviors
-    const btnMenu = qs('#btnMenu');
-    if (btnMenu) {
-      btnMenu.addEventListener('click', () => {
-        const mobileNav = qs('#mobileNav');
-        if (mobileNav) {
-          mobileNav.classList.toggle('hidden');
-        }
-      });
+    function initHeaderBehaviors() {
+      const btnMenu = qs('#btnMenu');
+      if (btnMenu) {
+        btnMenu.addEventListener('click', () => {
+          const mobileNav = qs('#mobileNav');
+          if (mobileNav) {
+            mobileNav.classList.toggle('hidden');
+          }
+        });
+      }
+    }
+    
+    // Inicializar quando DOM estiver pronto
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initHeaderBehaviors);
+    } else {
+      initHeaderBehaviors();
     }
 
     // Render categorias chips/footer
