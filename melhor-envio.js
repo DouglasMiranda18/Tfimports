@@ -13,8 +13,8 @@ export class MelhorEnvioService {
     try {
       const { cepDestino, produtos, pesoTotal } = shippingData;
       
-      // Verificar se estamos em modo sandbox ou se há problemas de CORS
-      if (this.config.sandbox || this.shouldUseFallback()) {
+      // Verificar se devemos usar fallback
+      if (this.shouldUseFallback()) {
         return this.calculateShippingFallback(shippingData);
       }
       
@@ -44,17 +44,29 @@ export class MelhorEnvioService {
         }
       };
 
-      const response = await fetch(`${this.baseUrl}${endpoints.melhorEnvio.calculate}`, {
+      // Usar Netlify Function para evitar CORS
+      const response = await fetch('/.netlify/functions/melhor-envio', {
         method: 'POST',
-        headers: getHeaders('melhorEnvio'),
-        body: JSON.stringify(packageData)
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          action: 'calculate',
+          data: packageData
+        })
       });
 
       if (!response.ok) {
         throw new Error(`Erro ao calcular frete: ${response.status}`);
       }
 
-      const shippingOptions = await response.json();
+      const result = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Erro desconhecido');
+      }
+
+      const shippingOptions = result.data;
       
       // Processar e formatar opções de frete
       const formattedOptions = shippingOptions.map(option => ({
@@ -79,29 +91,35 @@ export class MelhorEnvioService {
       console.error('Erro ao calcular frete:', error);
       
       // Se falhar, usar fallback
-      if (error.message.includes('CORS') || error.message.includes('Failed to fetch')) {
-        console.log('Usando cálculo de frete alternativo devido a erro de CORS');
-        return this.calculateShippingFallback(shippingData);
-      }
-      
-      return {
-        success: false,
-        error: error.message,
-        options: []
-      };
+      console.log('Usando cálculo de frete alternativo devido a erro');
+      return this.calculateShippingFallback(shippingData);
     }
   }
 
   // Verificar se deve usar fallback
   shouldUseFallback() {
-    // Sempre usar fallback por enquanto, pois a API real tem problemas de CORS
-    return true;
+    // Usar API real se tivermos token válido e não estivermos em desenvolvimento
+    const hasValidToken = this.config.token && 
+                         this.config.token !== 'TOKEN_TEMPORARIO_MELHOR_ENVIO_12345' &&
+                         this.config.token.trim() !== '';
     
-    // Verificar se há problemas de CORS ou se estamos em desenvolvimento
-    // return typeof window !== 'undefined' && 
-    //        (window.location.hostname === 'localhost' || 
-    //         window.location.hostname === '127.0.0.1' ||
-    //         window.location.hostname.includes('netlify.app'));
+    // Se não temos token válido, usar fallback
+    if (!hasValidToken) {
+      console.log('🚚 Usando fallback: Token do Melhor Envio não configurado');
+      return true;
+    }
+    
+    // Se estamos em desenvolvimento local, usar fallback
+    if (typeof window !== 'undefined' && 
+        (window.location.hostname === 'localhost' || 
+         window.location.hostname === '127.0.0.1')) {
+      console.log('🚚 Usando fallback: Ambiente de desenvolvimento');
+      return true;
+    }
+    
+    // Em produção com token válido, usar API real
+    console.log('🚚 Usando API real do Melhor Envio');
+    return false;
   }
 
   // Cálculo de frete alternativo (fallback)
@@ -599,48 +617,40 @@ export class MelhorEnvioService {
         };
       }
 
-      // Buscar CEP na API ViaCEP
-      const response = await fetch(`https://viacep.com.br/ws/${cleanCEP}/json/`, {
-        method: 'GET',
+      // Usar Netlify Function para validar CEP
+      const response = await fetch('/.netlify/functions/melhor-envio', {
+        method: 'POST',
         headers: {
-          'Accept': 'application/json',
           'Content-Type': 'application/json'
-        }
+        },
+        body: JSON.stringify({
+          action: 'validate_cep',
+          data: { cep: cleanCEP }
+        })
       });
       
       if (!response.ok) {
-        throw new Error(`Erro na API ViaCEP: ${response.status}`);
+        throw new Error(`Erro na validação: ${response.status}`);
       }
 
-      const data = await response.json();
+      const result = await response.json();
       
-      // Verificar se CEP foi encontrado
-      if (data.erro) {
+      if (!result.success) {
         return {
           success: false,
-          error: 'CEP não encontrado. Verifique se o CEP está correto.'
-        };
-      }
-
-      // Verificar se os dados estão completos
-      if (!data.localidade || !data.uf || !data.logradouro || !data.bairro) {
-        return {
-          success: false,
-          error: 'Dados do CEP incompletos. Tente novamente.'
+          error: result.error || 'CEP não encontrado'
         };
       }
 
       return {
         success: true,
-        cep: data.cep,
-        logradouro: data.logradouro,
-        bairro: data.bairro,
-        cidade: data.localidade,
-        uf: data.uf,
-        ibge: data.ibge,
-        gia: data.gia,
-        ddd: data.ddd,
-        siafi: data.siafi
+        cep: result.data.cep,
+        logradouro: result.data.logradouro,
+        bairro: result.data.bairro,
+        cidade: result.data.cidade,
+        uf: result.data.uf,
+        ibge: result.data.ibge,
+        ddd: result.data.ddd
       };
 
     } catch (error) {
