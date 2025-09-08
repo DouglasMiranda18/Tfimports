@@ -1223,8 +1223,9 @@
     // Garantir que a função applyRoute seja chamada quando necessário
     window.addEventListener('popstate', applyRoute);
 
-    // Header behaviors
-    function initHeaderBehaviors() {
+    // Função para inicializar todos os event listeners
+    function initEventListeners() {
+      // Header behaviors
       const btnMenu = qs('#btnMenu');
       if (btnMenu) {
         btnMenu.addEventListener('click', () => {
@@ -1234,13 +1235,21 @@
           }
         });
       }
+      
+      // Outros event listeners que usam qs
+      initOtherEventListeners();
+    }
+    
+    // Função para outros event listeners
+    function initOtherEventListeners() {
+    // Formatação automática do CEP - movido para initOtherEventListeners
     }
     
     // Inicializar quando DOM estiver pronto
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initHeaderBehaviors);
+      document.addEventListener('DOMContentLoaded', initEventListeners);
     } else {
-      initHeaderBehaviors();
+      initEventListeners();
     }
 
     // Render categorias chips/footer
