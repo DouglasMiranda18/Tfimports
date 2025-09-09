@@ -18,6 +18,10 @@ exports.handler = async (event, context) => {
   }
 
   try {
+    console.log('🚚 Melhor Envio Function iniciada');
+    console.log('📋 Event body:', event.body);
+    console.log('📋 Event method:', event.httpMethod);
+    
     const { action, data } = JSON.parse(event.body || '{}');
     
     console.log('🚚 Melhor Envio Function - Action:', action);
@@ -41,14 +45,15 @@ exports.handler = async (event, context) => {
     
     // Verificar se o token é válido
     if (!MELHOR_ENVIO_TOKEN || MELHOR_ENVIO_TOKEN === 'TOKEN_TEMPORARIO_MELHOR_ENVIO_12345') {
-      console.log('⚠️ Token inválido, usando fallback');
+      console.log('⚠️ Token inválido, retornando erro');
       return {
-        statusCode: 200,
+        statusCode: 400,
         headers,
         body: JSON.stringify({
           success: false,
           error: 'Token do Melhor Envio não configurado',
-          fallback: true
+          token_received: MELHOR_ENVIO_TOKEN ? 'SIM' : 'NÃO',
+          token_value: MELHOR_ENVIO_TOKEN ? MELHOR_ENVIO_TOKEN.substring(0, 10) + '...' : 'VAZIO'
         })
       };
     }
@@ -62,6 +67,20 @@ exports.handler = async (event, context) => {
 
     let response;
     let result;
+
+    // Teste simples para verificar se a função está funcionando
+    if (action === 'test') {
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({
+          success: true,
+          message: 'Função Melhor Envio funcionando',
+          token_received: MELHOR_ENVIO_TOKEN ? 'SIM' : 'NÃO',
+          token_length: MELHOR_ENVIO_TOKEN ? MELHOR_ENVIO_TOKEN.length : 0
+        })
+      };
+    }
 
     switch (action) {
       case 'calculate':
