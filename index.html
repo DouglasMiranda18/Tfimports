@@ -1085,7 +1085,7 @@
     </div>
   </footer>
 
-  <script type="module">
+  <script type="module" data-timestamp="20241220-001">
     // Importar funções de segurança
     import { checkRateLimit, sanitizeText, validateProduct } from './security.js';
     
@@ -1228,12 +1228,12 @@
     });
 
     // Função para inicializar todos os event listeners
-    function initEventListeners() {
+    window.initEventListeners = function() {
     // Header behaviors
-      const btnMenu = qs('#btnMenu');
+      const btnMenu = window.qs('#btnMenu');
       if (btnMenu) {
         btnMenu.addEventListener('click', () => {
-          const mobileNav = qs('#mobileNav');
+          const mobileNav = window.qs('#mobileNav');
           if (mobileNav) {
             mobileNav.classList.toggle('hidden');
           }
@@ -1241,18 +1241,20 @@
       }
       
       // Outros event listeners que usam qs
-      initOtherEventListeners();
+      if (window.initOtherEventListeners) {
+        window.initOtherEventListeners();
+      }
     }
     
     // Função para outros event listeners
-    function initOtherEventListeners() {
+    window.initOtherEventListeners = function() {
       // Buscar CEP
-      const btnBuscarCep = qs('#btnBuscarCep');
+      const btnBuscarCep = window.qs('#btnBuscarCep');
       if (btnBuscarCep) {
         btnBuscarCep.addEventListener('click', async () => {
-          const cepInput = qs('#cep');
+          const cepInput = window.qs('#cep');
           const cep = cepInput.value.replace(/\D/g, '');
-          const statusDiv = qs('#cepStatus');
+          const statusDiv = window.qs('#cepStatus');
           
           if (cep.length !== 8) {
             statusDiv.textContent = 'CEP deve ter 8 dígitos';
@@ -1456,7 +1458,11 @@
     // Inicializar quando DOM estiver pronto
     document.addEventListener('DOMContentLoaded', () => {
       console.log('🚀 DOM carregado, inicializando event listeners...');
-      initEventListeners();
+      if (window.initEventListeners) {
+        window.initEventListeners();
+      } else {
+        console.error('❌ initEventListeners não está definida!');
+      }
     });
 
     // Render categorias chips/footer
