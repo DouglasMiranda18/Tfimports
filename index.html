@@ -14,7 +14,7 @@
     script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://www.gstatic.com https://apis.google.com;
     style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com;
     img-src 'self' data: https:;
-    connect-src 'self' https://*.firebaseapp.com https://*.googleapis.com https://firestore.googleapis.com https://viacep.com.br https://www.melhorenvio.com.br https://api.asaas.com https://www.asaas.com;
+    connect-src 'self' https://*.firebaseapp.com https://*.googleapis.com https://firestore.googleapis.com https://viacep.com.br https://api.asaas.com https://www.asaas.com;
     font-src 'self' data:;
     object-src 'none';
     base-uri 'self';
@@ -1091,7 +1091,6 @@
     
     // Importar serviços de integração
     import { asaasService } from './asaas.js';
-    import { melhorEnvioService } from './melhor-envio.js';
     import { OrderManager } from './order-manager.js';
     import { validateConfig } from './api-config.js';
     
@@ -1267,19 +1266,9 @@
           qs('#btnBuscarCep').disabled = true;
           
           try {
-            const result = await melhorEnvioService.validateCEP(cep);
-            
-            if (result.success) {
-              // Preencher campos automaticamente
-              qs('#logradouro').value = result.logradouro;
-              qs('#bairro').value = result.bairro;
-              qs('#cidade').value = result.cidade;
-              qs('#uf').value = result.uf;
-              
-              // Formatar CEP
-              cepInput.value = result.cep;
-              
-              statusDiv.textContent = 'CEP encontrado! Preencha o número e complemento.';
+            // Validação simples de CEP (sem Melhor Envio)
+            if (cep.length === 8) {
+              statusDiv.textContent = 'CEP válido! Preencha o número e complemento.';
               statusDiv.className = 'text-xs mt-1 text-green-400';
               
               // Habilitar botão de calcular frete
@@ -1287,15 +1276,14 @@
               
               // Focar no campo número
               qs('#numero').focus();
-              
             } else {
-              statusDiv.textContent = result.error;
+              statusDiv.textContent = 'CEP deve ter 8 dígitos.';
               statusDiv.className = 'text-xs mt-1 text-red-400';
             }
             
           } catch (error) {
-            console.error('Erro ao buscar CEP:', error);
-            statusDiv.textContent = 'Erro ao buscar CEP. Tente novamente.';
+            console.error('Erro ao validar CEP:', error);
+            statusDiv.textContent = 'Erro ao validar CEP. Tente novamente.';
             statusDiv.className = 'text-xs mt-1 text-red-400';
           } finally {
             const btnBuscarCep = qs('#btnBuscarCep');
@@ -1338,7 +1326,8 @@
           };
           
           // Validar endereço
-          const validation = melhorEnvioService.validateAddress(addressData);
+          // Validação simples de endereço (sem Melhor Envio)
+          const validation = { isValid: addressData.cep && addressData.cep.length === 8, errors: [] };
           if (!validation.isValid) {
             op.innerHTML = `<div class="hint text-center py-4">Erro: ${validation.errors.join(', ')}</div>`;
             return;
@@ -1358,7 +1347,15 @@
               pesoTotal: state.carrinho.reduce((total, item) => total + (0.3 * item.qtd), 0)
             };
             
-            const result = await melhorEnvioService.calculateShipping(shippingData);
+            // Opções de frete fixas (sem Melhor Envio)
+            const result = {
+              success: true,
+              options: [
+                { id: 'pac', name: 'PAC', company: 'Correios', price: 15.50, delivery_time: '5-8', company_id: '1' },
+                { id: 'sedex', name: 'SEDEX', company: 'Correios', price: 25.90, delivery_time: '2-4', company_id: '2' },
+                { id: 'expresso', name: 'Expresso', company: 'Transportadora', price: 35.00, delivery_time: '1-2', company_id: '3' }
+              ]
+            };
             
             if (result.success && result.options.length > 0) {
               op.innerHTML = '';
@@ -2105,7 +2102,7 @@
       cepInput.addEventListener('input', (e) => {
       const cep = e.target.value.replace(/\D/g, '');
       if (cep.length <= 8) {
-        e.target.value = melhorEnvioService.formatCEP(cep);
+        e.target.value = cep.replace(/(\d{5})(\d{3})/, '$1-$2');
       }
       
       // Limpar status quando usuário digita
@@ -2755,7 +2752,8 @@
               peso_total: orderData.items.reduce((total, item) => total + (0.3 * item.quantity), 0)
             };
             
-            const labelResult = await melhorEnvioService.createShippingLabel(shippingData);
+            // Simular criação de etiqueta (sem Melhor Envio)
+            const labelResult = { success: true, tracking_code: 'TRK' + Date.now() };
             
             if (labelResult.success) {
               console.log('✅ Etiqueta criada:', labelResult);
@@ -4366,7 +4364,7 @@
       
       // Verificar se os serviços estão disponíveis
       console.log('💳 AsaasService:', typeof asaasService !== 'undefined' ? '✅ Disponível' : '❌ Não disponível');
-      console.log('🚚 MelhorEnvioService:', typeof melhorEnvioService !== 'undefined' ? '✅ Disponível' : '❌ Não disponível');
+      console.log('🚚 MelhorEnvioService: ❌ Removido (não mais utilizado)');
       
       // Verificar configurações específicas
       console.log('💳 Asaas:', {

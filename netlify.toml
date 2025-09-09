@@ -18,9 +18,9 @@
   VITE_ASAAS_ENVIRONMENT = "sandbox"
   VITE_ASAAS_WEBHOOK_TOKEN = "tfimports_webhook_secret_2024"
   
-  # Melhor Envio Configuration
-  VITE_MELHOR_ENVIO_TOKEN = "oj7uVXJfJczTN1kZfDcB9uEoPWfBHXLElI4gTPdT"
-  MELHOR_ENVIO_WEBHOOK_SECRET = "tfimports_melhor_envio_webhook_2024"
+  # Melhor Envio Configuration - REMOVIDO
+  # VITE_MELHOR_ENVIO_TOKEN = "oj7uVXJfJczTN1kZfDcB9uEoPWfBHXLElI4gTPdT"
+  # MELHOR_ENVIO_WEBHOOK_SECRET = "tfimports_melhor_envio_webhook_2024"
   
   # Outras configurações
   VITE_APP_ENV = "production"
@@ -38,7 +38,7 @@
       script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://www.gstatic.com https://apis.google.com;
       style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com;
       img-src 'self' data: https:;
-      connect-src 'self' https://*.firebaseapp.com https://*.googleapis.com https://firestore.googleapis.com https://viacep.com.br https://www.melhorenvio.com.br https://api.asaas.com https://www.asaas.com;
+      connect-src 'self' https://*.firebaseapp.com https://*.googleapis.com https://firestore.googleapis.com https://viacep.com.br https://api.asaas.com https://www.asaas.com;
       font-src 'self' data:;
       object-src 'none';
       base-uri 'self';
