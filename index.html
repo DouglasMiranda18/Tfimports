@@ -1450,7 +1450,10 @@
     }
     
     // Inicializar quando DOM estiver pronto
-    document.addEventListener('DOMContentLoaded', initEventListeners);
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('🚀 DOM carregado, inicializando event listeners...');
+      initEventListeners();
+    });
 
     // Render categorias chips/footer
     function renderChips() {
@@ -4395,7 +4398,6 @@
         window.location.hash = '#loja';
         
         // Atualizar navegação ativa
-        const qsa = s => Array.from(document.querySelectorAll(s));
         qsa('[data-route]').forEach(a => a.classList.toggle('nav-active', a.getAttribute('href') === '#loja'));
         
         // Scroll para o topo
