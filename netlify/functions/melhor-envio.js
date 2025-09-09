@@ -31,7 +31,13 @@ exports.handler = async (event, context) => {
     console.log('🌐 Base URL:', MELHOR_ENVIO_BASE_URL);
     console.log('🔍 Todas as variáveis de ambiente:', Object.keys(process.env).filter(key => key.includes('MELHOR')));
     console.log('🔍 Todas as variáveis VITE:', Object.keys(process.env).filter(key => key.startsWith('VITE_')));
-    console.log('🔍 Process.env completo:', JSON.stringify(process.env, null, 2));
+    
+    // Log específico para debug do token
+    if (MELHOR_ENVIO_TOKEN && MELHOR_ENVIO_TOKEN !== 'TOKEN_TEMPORARIO_MELHOR_ENVIO_12345') {
+      console.log('✅ Token válido encontrado:', MELHOR_ENVIO_TOKEN.substring(0, 15) + '...');
+    } else {
+      console.log('❌ Token inválido ou não configurado');
+    }
     
     // Verificar se o token é válido
     if (!MELHOR_ENVIO_TOKEN || MELHOR_ENVIO_TOKEN === 'TOKEN_TEMPORARIO_MELHOR_ENVIO_12345') {

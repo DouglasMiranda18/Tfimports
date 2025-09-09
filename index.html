@@ -1097,8 +1097,12 @@
     
     // Utilidades - definidas primeiro para evitar erros
     const fmt = v => v.toLocaleString('pt-BR',{style:'currency', currency:'BRL'});
-    const qs = s => document.querySelector(s);
-    const qsa = s => Array.from(document.querySelectorAll(s));
+    
+    // Definir funções no escopo global para evitar erros
+    window.qs = s => document.querySelector(s);
+    window.qsa = s => Array.from(document.querySelectorAll(s));
+    const qs = window.qs;
+    const qsa = window.qsa;
     
     // Verificar se as funções estão definidas
     if (typeof qs !== 'function') {
