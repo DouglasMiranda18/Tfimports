@@ -1,4 +1,4 @@
-// Função Netlify para Super Frete - baseada no código que funcionou
+// Função Netlify para Super Frete - versão ultra simples para debug
 exports.handler = async (event, context) => {
   console.log('🚀 Função Super Frete chamada:', event.httpMethod);
   
@@ -24,8 +24,22 @@ exports.handler = async (event, context) => {
   try {
     console.log('📦 Processando POST');
     
-    const body = JSON.parse(event.body || '{}');
-    console.log('📋 Body recebido:', body);
+    // Parse do body
+    let body;
+    try {
+      body = JSON.parse(event.body || '{}');
+      console.log('📋 Body recebido:', body);
+    } catch (parseError) {
+      console.error('❌ Erro ao fazer parse do JSON:', parseError);
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({
+          success: false,
+          error: 'Body inválido - não é um JSON válido'
+        })
+      };
+    }
     
     const { cepDestino, peso, valor, dimensoes } = body;
     
@@ -59,41 +73,32 @@ exports.handler = async (event, context) => {
 
     console.log('✅ API Key encontrada, testando API...');
 
-    // Dimensões padrão
-    const defaultDimensoes = {
-      height: 2,
-      width: 11,
-      length: 16
-    };
-
-    const dimensoesFinais = dimensoes || defaultDimensoes;
-
-    // Preparar dados EXATAMENTE como no código que funcionou
+    // Dados simples para teste
     const shippingData = {
       from: {
-        postal_code: '01310-100'  // CEP de origem
+        postal_code: '01310-100'
       },
       to: {
-        postal_code: cepDestino   // CEP de destino
+        postal_code: cepDestino
       },
-      services: "1,2,17",  // PAC, SEDEX, Mini Envios
+      services: "1,2,17",
       options: {
         own_hand: false,
         receipt: false,
-        insurance_value: 0,  // Usar 0 como no exemplo
-        use_insurance_value: false  // Usar false como no exemplo
+        insurance_value: 0,
+        use_insurance_value: false
       },
-      package: {  // USAR PACKAGE em vez de products
-        height: dimensoesFinais.height,
-        width: dimensoesFinais.width,
-        length: dimensoesFinais.length,
+      package: {
+        height: 2,
+        width: 11,
+        length: 16,
         weight: peso
       }
     };
     
-    console.log('📦 Dados para API (formato correto):', JSON.stringify(shippingData, null, 2));
+    console.log('📦 Dados para API:', JSON.stringify(shippingData, null, 2));
 
-    // URL exata que funcionou
+    // Testar API
     const url = 'https://api.superfrete.com/api/v0/calculator';
     console.log('🌐 Testando URL:', url);
     
@@ -110,10 +115,9 @@ exports.handler = async (event, context) => {
       });
 
       console.log('📡 Status da API:', apiResponse.status);
-      console.log('📡 Headers da resposta:', Object.fromEntries(apiResponse.headers.entries()));
       
       const responseText = await apiResponse.text();
-      console.log('📡 Resposta bruta da API:', responseText);
+      console.log('📡 Resposta da API:', responseText);
       
       if (apiResponse.ok) {
         let apiData;
@@ -147,7 +151,7 @@ exports.handler = async (event, context) => {
             destination: cepDestino,
             weight: peso,
             value: valor,
-            api_used: 'super_frete_api_correct_format',
+            api_used: 'super_frete_api',
             working_url: url
           };
 
