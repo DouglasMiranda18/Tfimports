@@ -58,7 +58,7 @@ class SuperFreteService {
     return cep;
   }
 
-  // Calcular frete usando Super Frete API
+  // Calcular frete usando função Netlify (contorna CORS)
   async calculateShipping(cepDestino, peso, valor, dimensoes = null) {
     try {
       // Dimensões padrão se não fornecidas
@@ -70,72 +70,33 @@ class SuperFreteService {
 
       const dimensoesFinais = dimensoes || defaultDimensoes;
 
-      // Preparar dados para a API
-      const shippingData = {
-        from: {
-          postal_code: this.cepOrigem
-        },
-        to: {
-          postal_code: cepDestino
-        },
-        products: [{
-          id: '1',
-          width: dimensoesFinais.width,
-          height: dimensoesFinais.height,
-          length: dimensoesFinais.length,
-          weight: peso,
-          insurance_value: valor,
-          quantity: 1
-        }]
-      };
-
-      // Fazer requisição para a API do Super Frete
-      const response = await fetch(`${this.baseUrl}/shipment/calculate`, {
+      // Fazer requisição para a função Netlify
+      const response = await fetch('/.netlify/functions/super-frete', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.apiKey}`,
-          'User-Agent': 'TFImports/1.0'
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify(shippingData)
+        body: JSON.stringify({
+          cepDestino,
+          peso,
+          valor,
+          dimensoes: dimensoesFinais
+        })
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('Erro na API Super Frete:', errorData);
-        
-        // Fallback para cálculo local se a API falhar
+        console.error('Erro na função Netlify:', response.status);
         return this.calculateShippingFallback(cepDestino, peso, valor);
       }
 
       const data = await response.json();
       
-      if (!data || !Array.isArray(data)) {
+      if (!data.success) {
+        console.error('Erro na resposta da função:', data.error);
         return this.calculateShippingFallback(cepDestino, peso, valor);
       }
 
-      // Processar opções de frete
-      const opcoes = data.map(option => ({
-        id: option.id || option.name?.toLowerCase().replace(/\s+/g, ''),
-        name: option.name || 'Frete',
-        company: option.company?.name || 'Transportadora',
-        company_id: option.company?.id || '1',
-        price: parseFloat(option.price) || 0,
-        delivery_time: this.formatDeliveryTime(option.delivery_time),
-        description: option.description || '',
-        service: option.service || 'standard',
-        error: option.error || null
-      })).filter(option => option.price > 0 && !option.error);
-
-      return {
-        success: true,
-        options: opcoes,
-        origin: this.cepOrigem,
-        destination: cepDestino,
-        weight: peso,
-        value: valor,
-        api_used: 'super_frete'
-      };
+      return data;
 
     } catch (error) {
       console.error('Erro ao calcular frete:', error);
@@ -343,41 +304,34 @@ class SuperFreteService {
     };
   }
 
-  // Testar conectividade com a API
+  // Testar conectividade com a função Netlify
   async testConnection() {
     try {
-      const response = await fetch(`${this.baseUrl}/shipment/calculate`, {
+      const response = await fetch('/.netlify/functions/super-frete', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.apiKey}`,
-          'User-Agent': 'TFImports/1.0'
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          from: { postal_code: this.cepOrigem },
-          to: { postal_code: '01310-100' },
-          products: [{
-            id: '1',
-            width: 11,
-            height: 2,
-            length: 16,
-            weight: 0.3,
-            insurance_value: 50,
-            quantity: 1
-          }]
+          cepDestino: '01310-100',
+          peso: 0.3,
+          valor: 50,
+          dimensoes: { width: 11, height: 2, length: 16 }
         })
       });
 
+      const data = await response.json();
+
       return {
-        success: response.ok,
+        success: response.ok && data.success,
         status: response.status,
-        message: response.ok ? 'API funcionando' : 'Erro na API'
+        message: response.ok ? 'Função Netlify funcionando' : 'Erro na função Netlify'
       };
     } catch (error) {
       return {
         success: false,
         status: 0,
-        message: 'Erro de conexão'
+        message: 'Erro de conexão com função Netlify'
       };
     }
   }

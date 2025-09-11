@@ -12,14 +12,20 @@
     "netlify-build": "npm run build"
   },
   "devDependencies": {
-    "vite": "^5.0.0",
     "eslint": "^8.0.0",
-    "terser": "^5.0.0"
+    "terser": "^5.0.0",
+    "vite": "^5.0.0"
   },
   "dependencies": {
-    "firebase": "^10.12.2"
+    "firebase": "^10.12.2",
+    "node-fetch": "^3.3.2"
   },
-  "keywords": ["ecommerce", "moda", "masculina", "premium"],
+  "keywords": [
+    "ecommerce",
+    "moda",
+    "masculina",
+    "premium"
+  ],
   "author": "TFI IMPORTS",
   "license": "MIT"
 }
