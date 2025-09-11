@@ -4524,15 +4524,31 @@
         // Preencher produtos
         const produtosContainer = qs('#confirmacaoProdutos');
         if (produtosContainer) {
-          produtosContainer.innerHTML = orderData.items.map(item => `
-            <div class="flex justify-between items-center py-2 border-b border-slate-600 last:border-b-0">
-              <div>
-                <div class="font-medium">${item.nome}</div>
-                <div class="text-xs text-slate-400">${item.cor} - ${item.tamanho} | Qtd: ${item.quantidade}</div>
+          if (orderData.items && Array.isArray(orderData.items)) {
+            produtosContainer.innerHTML = orderData.items.map(item => `
+              <div class="flex justify-between items-center py-2 border-b border-slate-600 last:border-b-0">
+                <div>
+                  <div class="font-medium">${item.nome}</div>
+                  <div class="text-xs text-slate-400">${item.cor} - ${item.tamanho} | Qtd: ${item.quantidade}</div>
+                </div>
+                <div class="font-bold">R$ ${(item.preco * item.quantidade).toFixed(2)}</div>
               </div>
-              <div class="font-bold">R$ ${(item.preco * item.quantidade).toFixed(2)}</div>
-            </div>
-          `).join('');
+            `).join('');
+          } else if (orderData.orderData && orderData.orderData.items) {
+            // Se orderData está aninhado (caso de erro)
+            produtosContainer.innerHTML = orderData.orderData.items.map(item => `
+              <div class="flex justify-between items-center py-2 border-b border-slate-600 last:border-b-0">
+                <div>
+                  <div class="font-medium">${item.nome}</div>
+                  <div class="text-xs text-slate-400">${item.cor} - ${item.tamanho} | Qtd: ${item.quantidade}</div>
+                </div>
+                <div class="font-bold">R$ ${(item.preco * item.quantidade).toFixed(2)}</div>
+              </div>
+            `).join('');
+          } else {
+            // Fallback para erro de pagamento
+            produtosContainer.innerHTML = '<div class="text-center text-slate-400 py-4">Erro ao carregar produtos</div>';
+          }
         }
 
         // Preencher dados do cliente
@@ -4551,34 +4567,53 @@
 
         // Preencher frete
         const freteContainer = qs('#confirmacaoFrete');
-        if (freteContainer && orderData.shipping) {
-          freteContainer.innerHTML = `
-            <div><strong>Serviço:</strong> ${orderData.shipping.name}</div>
-            <div><strong>Preço:</strong> R$ ${orderData.shipping.price.toFixed(2)}</div>
-            <div><strong>Prazo:</strong> ${orderData.shipping.delivery_time} dias úteis</div>
-          `;
+        if (freteContainer) {
+          const shipping = orderData.shipping || (orderData.orderData && orderData.orderData.shipping);
+          if (shipping) {
+            freteContainer.innerHTML = `
+              <div><strong>Serviço:</strong> ${shipping.name}</div>
+              <div><strong>Preço:</strong> R$ ${shipping.price.toFixed(2)}</div>
+              <div><strong>Prazo:</strong> ${shipping.delivery_time} dias úteis</div>
+            `;
+          } else {
+            freteContainer.innerHTML = '<div class="text-slate-400">Frete não disponível</div>';
+          }
         }
 
         // Preencher total
         const totalContainer = qs('#confirmacaoTotal');
         if (totalContainer) {
-          const total = orderData.total || (orderData.items.reduce((sum, item) => sum + (item.preco * item.quantidade), 0) + (orderData.shipping?.price || 0));
+          let total = 0;
+          
+          if (orderData.total) {
+            total = orderData.total;
+          } else if (orderData.items && Array.isArray(orderData.items)) {
+            total = orderData.items.reduce((sum, item) => sum + (item.preco * item.quantidade), 0) + (orderData.shipping?.price || 0);
+          } else if (orderData.orderData && orderData.orderData.items) {
+            total = orderData.orderData.items.reduce((sum, item) => sum + (item.preco * item.quantidade), 0) + (orderData.orderData.shipping?.price || 0);
+          }
+          
           totalContainer.textContent = `R$ ${total.toFixed(2)}`;
         }
 
         // Preencher previsão de entrega
         const entregaContainer = qs('#confirmacaoEntrega');
-        if (entregaContainer && orderData.shipping) {
-          const hoje = new Date();
-          const prazoEntrega = new Date(hoje.getTime() + (parseInt(orderData.shipping.delivery_time) + 1) * 24 * 60 * 60 * 1000);
-          const dataFormatada = prazoEntrega.toLocaleDateString('pt-BR');
-          
-          entregaContainer.innerHTML = `
-            <div class="text-center">
-              <div class="text-lg font-bold text-blue-400">${dataFormatada}</div>
-              <div class="text-sm">${orderData.shipping.delivery_time} dias úteis após a postagem</div>
-            </div>
-          `;
+        if (entregaContainer) {
+          const shipping = orderData.shipping || (orderData.orderData && orderData.orderData.shipping);
+          if (shipping) {
+            const hoje = new Date();
+            const prazoEntrega = new Date(hoje.getTime() + (parseInt(shipping.delivery_time) + 1) * 24 * 60 * 60 * 1000);
+            const dataFormatada = prazoEntrega.toLocaleDateString('pt-BR');
+            
+            entregaContainer.innerHTML = `
+              <div class="text-center">
+                <div class="text-lg font-bold text-blue-400">${dataFormatada}</div>
+                <div class="text-sm">${shipping.delivery_time} dias úteis após a postagem</div>
+              </div>
+            `;
+          } else {
+            entregaContainer.innerHTML = '<div class="text-center text-slate-400">Previsão não disponível</div>';
+          }
         }
 
         // Mostrar modal
