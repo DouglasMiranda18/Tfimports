@@ -2571,7 +2571,21 @@
           
         } else {
           console.error('❌ Erro ao criar pagamento com cartão:', paymentResult.error);
-          toast(`Erro ao processar cartão: ${paymentResult.error}`);
+          
+          // Verificar se é erro de cartão recusado
+          if (paymentResult.error && paymentResult.error.includes('não autorizada')) {
+            console.log('💳 Cartão recusado - mostrando modal de confirmação');
+            
+            // Mostrar modal de confirmação com mensagem de cartão recusado
+            showConfirmacaoModal({
+              success: false,
+              message: 'Cartão de crédito recusado',
+              details: 'A transação não foi autorizada. Verifique os dados do cartão e tente novamente.',
+              orderData: orderData
+            });
+          } else {
+            toast(`Erro ao processar cartão: ${paymentResult.error}`);
+          }
         }
         
       } catch (error) {
@@ -4501,6 +4515,12 @@
     function showConfirmacaoModal(orderData, paymentResult) {
       console.log('🔄 showConfirmacaoModal chamada com:', orderData, paymentResult);
       try {
+        // Verificar se é um erro de pagamento
+        const isPaymentError = orderData && orderData.success === false;
+        const isCardDeclined = orderData && orderData.message && orderData.message.includes('Cartão de crédito recusado');
+        
+        console.log('💳 É erro de pagamento:', isPaymentError);
+        console.log('💳 Cartão recusado:', isCardDeclined);
         // Preencher produtos
         const produtosContainer = qs('#confirmacaoProdutos');
         if (produtosContainer) {
@@ -4565,6 +4585,41 @@
         const modal = qs('#confirmacaoModal');
         console.log('🔍 Modal encontrada:', modal);
         if (modal) {
+          // Atualizar conteúdo do modal baseado no tipo (sucesso ou erro)
+          const iconContainer = modal.querySelector('.w-16.h-16');
+          const titleElement = modal.querySelector('h3');
+          const subtitleElement = modal.querySelector('p');
+          
+          if (isPaymentError) {
+            // Modal de erro
+            if (iconContainer) {
+              iconContainer.className = 'w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-4';
+              iconContainer.innerHTML = '<span class="text-2xl">❌</span>';
+            }
+            if (titleElement) {
+              titleElement.className = 'text-2xl font-bold text-red-400 mb-2';
+              titleElement.textContent = orderData.message || 'Erro no Pagamento';
+            }
+            if (subtitleElement) {
+              subtitleElement.className = 'text-slate-300 mb-6';
+              subtitleElement.textContent = orderData.details || 'Ocorreu um problema ao processar seu pagamento';
+            }
+          } else {
+            // Modal de sucesso (padrão)
+            if (iconContainer) {
+              iconContainer.className = 'w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4';
+              iconContainer.innerHTML = '<span class="text-2xl">✅</span>';
+            }
+            if (titleElement) {
+              titleElement.className = 'text-2xl font-bold text-green-400 mb-2';
+              titleElement.textContent = 'Compra Realizada!';
+            }
+            if (subtitleElement) {
+              subtitleElement.className = 'text-slate-300 mb-6';
+              subtitleElement.textContent = 'Seu pedido foi processado com sucesso';
+            }
+          }
+          
           console.log('🔄 Removendo classe hidden e adicionando flex');
           modal.classList.remove('hidden');
           modal.classList.add('flex');
