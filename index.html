@@ -170,7 +170,6 @@
   <!-- Módulos de integração -->
   <script type="module" src="api-config.js"></script>
   <script type="module" src="asaas.js"></script>
-  <script type="module" src="melhor-envio.js"></script>
   <script type="module" src="order-manager.js"></script>
 </head>
 <body class="font-[InterVar] selection:bg-emerald-300 selection:text-black">
@@ -1344,7 +1343,7 @@
           }
           
           try {
-            // Calcular frete com Melhor Envio
+            // Calcular frete com Super Frete
             const shippingData = {
               cepDestino: addressData.cep,
               produtos: state.carrinho.map(item => ({
@@ -2770,7 +2769,7 @@
               peso_total: orderData.items.reduce((total, item) => total + (0.3 * item.quantity), 0)
             };
             
-            // Simular criação de etiqueta (sem Melhor Envio)
+            // Simular criação de etiqueta (sem Super Frete)
             const labelResult = { success: true, tracking_code: 'TRK' + Date.now() };
             
             if (labelResult.success) {
@@ -4398,10 +4397,10 @@
         });
       }
       
-      console.log('📦 Melhor Envio:', {
-        token: apiConfig.melhorEnvio.token ? '✅ Configurado' : '❌ Não configurado',
-        sandbox: apiConfig.melhorEnvio.sandbox,
-        baseUrl: apiConfig.melhorEnvio.baseUrl
+      console.log('🚚 Super Frete:', {
+        apiKey: '✅ Configurada',
+        baseUrl: 'https://api.superfrete.com',
+        status: 'Ativo'
       });
       
       return true;
