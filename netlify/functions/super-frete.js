@@ -1,4 +1,4 @@
-// Função Netlify para Super Frete - corrigindo caminho da API
+// Função Netlify para Super Frete - testando conectividade
 exports.handler = async (event, context) => {
   console.log('🚀 Função Super Frete chamada:', event.httpMethod);
   
@@ -57,7 +57,7 @@ exports.handler = async (event, context) => {
       };
     }
 
-    console.log('✅ API Key encontrada, testando diferentes URLs...');
+    console.log('✅ API Key encontrada, testando conectividade...');
 
     // Dimensões padrão
     const defaultDimensoes = {
@@ -94,6 +94,25 @@ exports.handler = async (event, context) => {
     
     console.log('📦 Dados para API:', JSON.stringify(shippingData, null, 2));
 
+    // Testar conectividade básica primeiro
+    try {
+      console.log('🌐 Testando conectividade básica...');
+      
+      // Teste simples de conectividade
+      const testResponse = await fetch('https://api.superfrete.com/', {
+        method: 'GET',
+        headers: {
+          'User-Agent': 'TFI Imports (contato@tfimports.com.br)'
+        }
+      });
+      
+      console.log('📡 Status do teste de conectividade:', testResponse.status);
+      console.log('📡 Headers do teste:', Object.fromEntries(testResponse.headers.entries()));
+      
+    } catch (connectError) {
+      console.error('❌ Erro de conectividade:', connectError.message);
+    }
+
     // Testar diferentes URLs da API
     const urlsToTest = [
       'https://api.superfrete.com/api/v0/calculator',
@@ -118,11 +137,12 @@ exports.handler = async (event, context) => {
         });
 
         console.log(`📡 Status da API (${url}):`, apiResponse.status);
+        console.log(`📡 Headers da resposta (${url}):`, Object.fromEntries(apiResponse.headers.entries()));
+        
+        const responseText = await apiResponse.text();
+        console.log(`📡 Resposta bruta (${url}):`, responseText);
         
         if (apiResponse.ok) {
-          const responseText = await apiResponse.text();
-          console.log(`📡 Resposta da API (${url}):`, responseText);
-          
           let apiData;
           try {
             apiData = JSON.parse(responseText);
@@ -167,16 +187,16 @@ exports.handler = async (event, context) => {
             };
           }
         } else {
-          const errorText = await apiResponse.text();
-          console.log(`❌ Erro na URL ${url}:`, apiResponse.status, errorText);
+          console.log(`❌ Erro na URL ${url}:`, apiResponse.status, responseText);
         }
       } catch (urlError) {
         console.error(`❌ Erro na URL ${url}:`, urlError.message);
+        console.error(`❌ Stack trace (${url}):`, urlError.stack);
         continue;
       }
     }
 
-    // Se nenhuma URL funcionou
+    // Se nenhuma URL funcionou, retornar erro detalhado
     console.error('❌ Nenhuma URL da API funcionou');
     return {
       statusCode: 500,
@@ -185,7 +205,12 @@ exports.handler = async (event, context) => {
         success: false,
         error: 'Nenhuma URL da API SuperFrete funcionou',
         tested_urls: urlsToTest,
-        api_used: 'all_urls_failed'
+        api_used: 'all_urls_failed',
+        debug_info: {
+          api_key_exists: !!apiKey,
+          api_key_length: apiKey?.length || 0,
+          timestamp: new Date().toISOString()
+        }
       })
     };
 
