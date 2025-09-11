@@ -1360,6 +1360,16 @@
               pesoTotal: state.carrinho.reduce((total, item) => total + (0.3 * item.qtd), 0)
             };
             
+            // Verificar se carrinho tem itens
+            if (!state.carrinho || state.carrinho.length === 0) {
+              console.log('❌ Carrinho vazio, recarregando...');
+              loadCart(); // Recarregar carrinho
+              if (!state.carrinho || state.carrinho.length === 0) {
+                op.innerHTML = `<div class="hint text-center py-4">Erro: Carrinho vazio. Adicione produtos antes de calcular frete.</div>`;
+                return;
+              }
+            }
+            
             // Calcular frete com Super Frete
             const pesoTotal = state.carrinho.reduce((total, item) => total + (0.3 * item.qtd), 0);
             const valorTotal = state.carrinho.reduce((total, item) => total + (item.preco * item.qtd), 0);
@@ -1378,7 +1388,7 @@
               return;
             }
             
-            console.log('🚚 Calculando frete:', { cep, pesoTotal, valorTotal, dimensoes });
+            console.log('🚚 Calculando frete:', { cep, pesoTotal, valorTotal, dimensoes, carrinho: state.carrinho.length });
             
             const result = await superFreteService.calculateShipping(
               cep,
@@ -2045,6 +2055,7 @@
     // Carrinho
     function loadCart() {
       try { state.carrinho = JSON.parse(localStorage.getItem('tfi_cart')||'[]'); } catch { state.carrinho = []; }
+      console.log('🛒 Carrinho carregado:', state.carrinho.length, 'itens');
       updateCartCount();
     }
     function saveCart() {
