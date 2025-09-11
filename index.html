@@ -1371,8 +1371,17 @@
               length: 16 // cm
             };
             
+            // Validar CEP antes de enviar
+            const cep = addressData.cep.replace(/\D/g, '');
+            if (cep.length !== 8) {
+              op.innerHTML = `<div class="hint text-center py-4">Erro: CEP inválido (${addressData.cep})</div>`;
+              return;
+            }
+            
+            console.log('🚚 Calculando frete:', { cep, pesoTotal, valorTotal, dimensoes });
+            
             const result = await superFreteService.calculateShipping(
-              addressData.cep,
+              cep,
               pesoTotal,
               valorTotal,
               dimensoes

@@ -42,13 +42,26 @@ exports.handler = async (event, context) => {
 
     // Validar parâmetros
     if (!cepDestino || !peso || !valor) {
-      console.log('❌ Parâmetros inválidos');
+      console.log('❌ Parâmetros inválidos:', { cepDestino, peso, valor });
       return {
         statusCode: 400,
         headers,
         body: JSON.stringify({ 
           success: false, 
-          error: 'Parâmetros obrigatórios: cepDestino, peso, valor' 
+          error: `Parâmetros obrigatórios: cepDestino=${cepDestino}, peso=${peso}, valor=${valor}` 
+        })
+      };
+    }
+    
+    // Validar CEP
+    if (cepDestino.length !== 8) {
+      console.log('❌ CEP inválido:', cepDestino);
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ 
+          success: false, 
+          error: `CEP deve ter 8 dígitos: ${cepDestino}` 
         })
       };
     }
