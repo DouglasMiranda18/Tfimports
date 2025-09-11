@@ -287,21 +287,62 @@ export class OrderManager {
         peso_total: order.items.reduce((total, item) => total + (item.peso || 0.3), 0)
       };
 
-      // Simular criação de etiqueta (Super Frete não tem criação de etiqueta via API)
-      const result = { 
-        success: true, 
-        tracking_code: 'TRK' + Date.now(),
-        message: 'Etiqueta simulada - Super Frete não suporta criação via API'
+      // Preparar dados para criação da etiqueta no Super Frete
+      const labelData = {
+        orderData: order,
+        selectedShipping: order.shipping,
+        packageDimensions: order.package_dimensions || {
+          height: 2,
+          width: 11,
+          length: 16,
+          weight: order.items.reduce((total, item) => total + (item.peso || 0.3), 0)
+        },
+        fromData: {
+          name: "TFI IMPORTS",
+          address: "Rua Augusta, 123",
+          complement: "",
+          number: "",
+          district: "Consolação",
+          city: "São Paulo",
+          state_abbr: "SP",
+          postal_code: "01310-100",
+          document: "12345678901"
+        },
+        toData: {
+          name: order.user_name,
+          address: order.shipping_address.logradouro,
+          complement: order.shipping_address.complemento || "",
+          number: order.shipping_address.numero || "",
+          district: order.shipping_address.bairro,
+          city: order.shipping_address.cidade,
+          state_abbr: order.shipping_address.uf,
+          postal_code: order.shipping_address.cep,
+          email: order.user_email,
+          document: order.shipping_address.documento || "00000000000"
+        }
       };
+
+      // Chamar função Netlify para criar etiqueta
+      const response = await fetch('/.netlify/functions/super-frete-label', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(labelData)
+      });
+
+      const result = await response.json();
       
       if (result.success) {
         // Atualizar pedido com dados da etiqueta
         await this.db.collection('pedidos').doc(orderId).update({
           shipping_label: {
-            order_id: result.order_id,
-            protocol: result.protocol,
-            tracking_code: result.tracking_code,
-            created_at: new Date()
+            label_id: result.label_id,
+            status: result.status,
+            tracking_code: result.tracking,
+            price: result.price,
+            service: result.service,
+            created_at: result.created_at
           },
           status: 'shipping_created',
           updated_at: new Date()
@@ -309,8 +350,9 @@ export class OrderManager {
 
         return {
           success: true,
-          tracking_code: result.tracking_code,
-          protocol: result.protocol
+          label_id: result.label_id,
+          tracking_code: result.tracking,
+          status: result.status
         };
       } else {
         throw new Error(result.error);
