@@ -98,16 +98,76 @@ exports.handler = async (event, context) => {
       }]
     };
 
-    // Por enquanto, usar apenas fallback para testar a função
-    console.log('🔄 Usando cálculo local (fallback)');
-    const fallbackResult = calculateShippingFallback(cepDestino, peso, valor);
-    console.log('✅ Resultado fallback:', fallbackResult);
+    // Chamar API real do Super Frete
+    console.log('🔄 Chamando API do Super Frete...');
     
-    return {
-      statusCode: 200,
-      headers,
-      body: JSON.stringify(fallbackResult)
-    };
+    try {
+      const apiResponse = await fetch('https://api.superfrete.com/shipment/calculate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+          'User-Agent': 'SuperFrete-Integration/1.0'
+        },
+        body: JSON.stringify(shippingData)
+      });
+
+      console.log('📡 Status da API:', apiResponse.status);
+      
+      if (!apiResponse.ok) {
+        throw new Error(`API retornou status ${apiResponse.status}`);
+      }
+
+      const apiData = await apiResponse.json();
+      console.log('📦 Resposta da API:', apiData);
+
+      // Processar resposta da API
+      if (apiData && apiData.data && Array.isArray(apiData.data)) {
+        const opcoes = apiData.data.map(item => ({
+          id: item.id || item.service,
+          name: item.name || item.service,
+          company: item.company?.name || 'Correios',
+          company_id: item.company?.id || '1',
+          price: parseFloat(item.price) || 0,
+          delivery_time: item.delivery_time || '5-8 dias úteis',
+          description: item.description || '',
+          service: item.service || item.id,
+          error: item.error || null
+        }));
+
+        const result = {
+          success: true,
+          options: opcoes,
+          origin: cepOrigem,
+          destination: cepDestino,
+          weight: peso,
+          value: valor,
+          api_used: 'super_frete_api'
+        };
+
+        console.log('✅ Resultado da API:', result);
+        return {
+          statusCode: 200,
+          headers,
+          body: JSON.stringify(result)
+        };
+      } else {
+        throw new Error('Resposta da API inválida');
+      }
+
+    } catch (apiError) {
+      console.error('❌ Erro na API do Super Frete:', apiError);
+      console.log('🔄 Usando fallback...');
+      
+      const fallbackResult = calculateShippingFallback(cepDestino, peso, valor);
+      console.log('✅ Resultado fallback:', fallbackResult);
+      
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify(fallbackResult)
+      };
+    }
 
   } catch (error) {
     console.error('Erro na função Super Frete:', error);
@@ -133,6 +193,21 @@ function calculateShippingFallback(cepDestino, peso, valor) {
     const distancia = calculateDistance('01310-100', cepDestino);
     
     const opcoes = [];
+
+    // Mini Envios (para peso até 300g)
+    if (peso <= 0.3) {
+      opcoes.push({
+        id: 'mini-envios',
+        name: 'Mini Envios',
+        company: 'Correios',
+        company_id: '1',
+        price: 8.49,
+        delivery_time: 'Até 6 dias úteis',
+        description: 'Melhor preço - Exclusivo no app',
+        service: 'mini-envios',
+        error: null
+      });
+    }
 
     // PAC
     const pacPrice = calculatePacPrice(peso, distancia);
@@ -223,18 +298,20 @@ function getRegionCode(cep) {
 function calculatePacPrice(peso, distancia) {
   let preco = 0;
   
-  if (peso <= 0.3) preco = 8.50;
-  else if (peso <= 0.5) preco = 10.50;
-  else if (peso <= 1) preco = 12.50;
-  else if (peso <= 2) preco = 15.50;
-  else if (peso <= 3) preco = 18.50;
-  else if (peso <= 5) preco = 22.50;
-  else if (peso <= 10) preco = 30.50;
-  else preco = 30.50 + ((peso - 10) * 2.5);
+  // Valores baseados no Super Frete real
+  if (peso <= 0.3) preco = 8.49; // Mini Envios
+  else if (peso <= 0.5) preco = 10.49;
+  else if (peso <= 1) preco = 12.49;
+  else if (peso <= 2) preco = 15.15; // PAC padrão
+  else if (peso <= 3) preco = 18.15;
+  else if (peso <= 5) preco = 22.15;
+  else if (peso <= 10) preco = 30.15;
+  else preco = 30.15 + ((peso - 10) * 2.5);
 
-  if (distancia > 1000) preco += 5;
-  if (distancia > 2000) preco += 10;
-  if (distancia > 3000) preco += 15;
+  // Ajuste por distância (mais conservador)
+  if (distancia > 1000) preco += 3;
+  if (distancia > 2000) preco += 6;
+  if (distancia > 3000) preco += 9;
 
   return Math.round(preco * 100) / 100;
 }
@@ -242,18 +319,20 @@ function calculatePacPrice(peso, distancia) {
 function calculateSedexPrice(peso, distancia) {
   let preco = 0;
   
-  if (peso <= 0.3) preco = 15.50;
-  else if (peso <= 0.5) preco = 18.50;
-  else if (peso <= 1) preco = 22.50;
-  else if (peso <= 2) preco = 28.50;
-  else if (peso <= 3) preco = 34.50;
-  else if (peso <= 5) preco = 42.50;
-  else if (peso <= 10) preco = 55.50;
-  else preco = 55.50 + ((peso - 10) * 4.5);
+  // Valores baseados no Super Frete real
+  if (peso <= 0.3) preco = 24.27; // SEDEX padrão
+  else if (peso <= 0.5) preco = 26.27;
+  else if (peso <= 1) preco = 28.27;
+  else if (peso <= 2) preco = 32.27;
+  else if (peso <= 3) preco = 36.27;
+  else if (peso <= 5) preco = 42.27;
+  else if (peso <= 10) preco = 55.27;
+  else preco = 55.27 + ((peso - 10) * 4.5);
 
-  if (distancia > 1000) preco += 8;
-  if (distancia > 2000) preco += 15;
-  if (distancia > 3000) preco += 25;
+  // Ajuste por distância (mais conservador)
+  if (distancia > 1000) preco += 5;
+  if (distancia > 2000) preco += 10;
+  if (distancia > 3000) preco += 15;
 
   return Math.round(preco * 100) / 100;
 }

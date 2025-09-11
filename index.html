@@ -1404,11 +1404,17 @@
               
               result.options.forEach(option => {
                 const d = document.createElement('label');
-                d.className = 'glass rounded-xl p-3 flex items-center justify-between cursor-pointer hover:ring-2 hover:ring-emerald-400/40';
+                const isMiniEnvios = option.id === 'mini-envios';
+                const isBestPrice = option.name === 'Mini Envios' || option.description?.includes('Melhor preço');
+                d.className = `glass rounded-xl p-3 flex items-center justify-between cursor-pointer hover:ring-2 hover:ring-emerald-400/40 ${isBestPrice ? 'ring-2 ring-emerald-400/60 bg-emerald-400/5' : ''}`;
                 d.innerHTML = `
                   <div>
-                    <div class="font-bold">${option.name}</div>
-                    <div class="hint text-sm">${option.company} • ${option.delivery_time} dias úteis</div>
+                    <div class="font-bold flex items-center gap-2">
+                      ${option.name}
+                      ${isBestPrice ? '<span class="bg-emerald-500 text-white text-xs px-2 py-1 rounded-full">Melhor preço</span>' : ''}
+                    </div>
+                    <div class="hint text-sm">${option.company} • ${option.delivery_time}</div>
+                    ${option.description ? `<div class="text-xs text-emerald-400 mt-1">${option.description}</div>` : ''}
                   </div>
                   <div class="flex items-center gap-3">
                     <div class="font-extrabold">${fmt(option.price)}</div>
