@@ -1084,6 +1084,14 @@
     </div>
   </footer>
 
+  <!-- Definir funções utilitárias globalmente -->
+  <script>
+    // Definir funções no escopo global para evitar erros
+    window.qs = s => document.querySelector(s);
+    window.qsa = s => Array.from(document.querySelectorAll(s));
+    window.fmt = v => v.toLocaleString('pt-BR',{style:'currency', currency:'BRL'});
+  </script>
+
   <script type="module" data-timestamp="20241220-001">
     // Importar funções de segurança
     import { checkRateLimit, sanitizeText, validateProduct } from './security.js';
@@ -1095,11 +1103,7 @@
     import { validateConfig } from './api-config.js';
     
     // Utilidades - definidas primeiro para evitar erros
-    const fmt = v => v.toLocaleString('pt-BR',{style:'currency', currency:'BRL'});
-    
-    // Definir funções no escopo global para evitar erros
-    window.qs = s => document.querySelector(s);
-    window.qsa = s => Array.from(document.querySelectorAll(s));
+    const fmt = window.fmt;
     const qs = window.qs;
     const qsa = window.qsa;
     
