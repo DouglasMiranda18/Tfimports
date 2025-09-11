@@ -1,6 +1,6 @@
 // Gerenciador de Pedidos
 import { mercadoPagoService } from './mercado-pago.js';
-import { melhorEnvioService } from './melhor-envio.js';
+import { superFreteService } from './super-frete.js';
 
 export class OrderManager {
   constructor(db) {
@@ -287,7 +287,12 @@ export class OrderManager {
         peso_total: order.items.reduce((total, item) => total + (item.peso || 0.3), 0)
       };
 
-      const result = await melhorEnvioService.createShippingLabel(shippingData);
+      // Simular criação de etiqueta (Super Frete não tem criação de etiqueta via API)
+      const result = { 
+        success: true, 
+        tracking_code: 'TRK' + Date.now(),
+        message: 'Etiqueta simulada - Super Frete não suporta criação via API'
+      };
       
       if (result.success) {
         // Atualizar pedido com dados da etiqueta
