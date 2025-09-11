@@ -4509,32 +4509,32 @@
 
         // Preencher frete
         const freteContainer = qs('#confirmacaoFrete');
-        if (freteContainer && state.freteSelecionado) {
+        if (freteContainer && orderData.shipping) {
           freteContainer.innerHTML = `
-            <div><strong>Serviço:</strong> ${state.freteSelecionado.nome}</div>
-            <div><strong>Preço:</strong> R$ ${state.freteSelecionado.preco.toFixed(2)}</div>
-            <div><strong>Prazo:</strong> ${state.freteSelecionado.prazo} dias úteis</div>
+            <div><strong>Serviço:</strong> ${orderData.shipping.name}</div>
+            <div><strong>Preço:</strong> R$ ${orderData.shipping.price.toFixed(2)}</div>
+            <div><strong>Prazo:</strong> ${orderData.shipping.delivery_time} dias úteis</div>
           `;
         }
 
         // Preencher total
         const totalContainer = qs('#confirmacaoTotal');
         if (totalContainer) {
-          const total = orderData.items.reduce((sum, item) => sum + (item.preco * item.quantidade), 0) + (state.freteSelecionado?.preco || 0);
+          const total = orderData.total || (orderData.items.reduce((sum, item) => sum + (item.preco * item.quantidade), 0) + (orderData.shipping?.price || 0));
           totalContainer.textContent = `R$ ${total.toFixed(2)}`;
         }
 
         // Preencher previsão de entrega
         const entregaContainer = qs('#confirmacaoEntrega');
-        if (entregaContainer && state.freteSelecionado) {
+        if (entregaContainer && orderData.shipping) {
           const hoje = new Date();
-          const prazoEntrega = new Date(hoje.getTime() + (state.freteSelecionado.prazo + 1) * 24 * 60 * 60 * 1000);
+          const prazoEntrega = new Date(hoje.getTime() + (parseInt(orderData.shipping.delivery_time) + 1) * 24 * 60 * 60 * 1000);
           const dataFormatada = prazoEntrega.toLocaleDateString('pt-BR');
           
           entregaContainer.innerHTML = `
             <div class="text-center">
               <div class="text-lg font-bold text-blue-400">${dataFormatada}</div>
-              <div class="text-sm">${state.freteSelecionado.prazo} dias úteis após a postagem</div>
+              <div class="text-sm">${orderData.shipping.delivery_time} dias úteis após a postagem</div>
             </div>
           `;
         }
