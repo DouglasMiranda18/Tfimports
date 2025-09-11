@@ -1,7 +1,9 @@
 // Função Netlify para Super Frete - contorna CORS
-const fetch = require('node-fetch');
+// Usando fetch nativo do Node.js 18+
 
 exports.handler = async (event, context) => {
+  console.log('🚀 Função Super Frete chamada:', event.httpMethod);
+  
   // Configurar CORS
   const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -12,6 +14,7 @@ exports.handler = async (event, context) => {
 
   // Responder a requisições OPTIONS (preflight)
   if (event.httpMethod === 'OPTIONS') {
+    console.log('✅ Respondendo OPTIONS');
     return {
       statusCode: 200,
       headers,
@@ -21,6 +24,7 @@ exports.handler = async (event, context) => {
 
   // Apenas permitir POST
   if (event.httpMethod !== 'POST') {
+    console.log('❌ Método não permitido:', event.httpMethod);
     return {
       statusCode: 405,
       headers,
@@ -29,12 +33,16 @@ exports.handler = async (event, context) => {
   }
 
   try {
+    console.log('📦 Processando requisição POST');
     // Parse do body
+    console.log('📝 Body recebido:', event.body);
     const body = JSON.parse(event.body);
     const { cepDestino, peso, valor, dimensoes } = body;
+    console.log('📋 Parâmetros:', { cepDestino, peso, valor, dimensoes });
 
     // Validar parâmetros
     if (!cepDestino || !peso || !valor) {
+      console.log('❌ Parâmetros inválidos');
       return {
         statusCode: 400,
         headers,
@@ -77,68 +85,15 @@ exports.handler = async (event, context) => {
       }]
     };
 
-    // Fazer requisição para a API do Super Frete
-    const response = await fetch('https://api.superfrete.com/shipment/calculate', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-        'User-Agent': 'TFImports/1.0'
-      },
-      body: JSON.stringify(shippingData)
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error('Erro na API Super Frete:', errorData);
-      
-      // Fallback para cálculo local
-      const fallbackResult = calculateShippingFallback(cepDestino, peso, valor);
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify(fallbackResult)
-      };
-    }
-
-    const data = await response.json();
+    // Por enquanto, usar apenas fallback para testar a função
+    console.log('🔄 Usando cálculo local (fallback)');
+    const fallbackResult = calculateShippingFallback(cepDestino, peso, valor);
+    console.log('✅ Resultado fallback:', fallbackResult);
     
-    if (!data || !Array.isArray(data)) {
-      const fallbackResult = calculateShippingFallback(cepDestino, peso, valor);
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify(fallbackResult)
-      };
-    }
-
-    // Processar opções de frete
-    const opcoes = data.map(option => ({
-      id: option.id || option.name?.toLowerCase().replace(/\s+/g, ''),
-      name: option.name || 'Frete',
-      company: option.company?.name || 'Transportadora',
-      company_id: option.company?.id || '1',
-      price: parseFloat(option.price) || 0,
-      delivery_time: formatDeliveryTime(option.delivery_time),
-      description: option.description || '',
-      service: option.service || 'standard',
-      error: option.error || null
-    })).filter(option => option.price > 0 && !option.error);
-
-    const result = {
-      success: true,
-      options: opcoes,
-      origin: cepOrigem,
-      destination: cepDestino,
-      weight: peso,
-      value: valor,
-      api_used: 'super_frete'
-    };
-
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify(result)
+      body: JSON.stringify(fallbackResult)
     };
 
   } catch (error) {
