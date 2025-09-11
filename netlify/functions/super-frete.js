@@ -1,4 +1,4 @@
-// Função Netlify para Super Frete - API oficial
+// Função Netlify para Super Frete - versão debug simples
 exports.handler = async (event, context) => {
   console.log('🚀 Função Super Frete chamada:', event.httpMethod);
   
@@ -42,6 +42,9 @@ exports.handler = async (event, context) => {
 
     // Verificar API Key
     const apiKey = process.env.SUPER_FRETE_API_KEY;
+    console.log('🔑 API Key existe:', !!apiKey);
+    console.log('🔑 Tamanho da API Key:', apiKey?.length || 0);
+    
     if (!apiKey) {
       console.error('❌ API Key não encontrada');
       return {
@@ -54,7 +57,7 @@ exports.handler = async (event, context) => {
       };
     }
 
-    console.log('✅ API Key encontrada, chamando API oficial do Super Frete...');
+    console.log('✅ API Key encontrada, testando API...');
 
     // Dimensões padrão
     const defaultDimensoes = {
@@ -89,11 +92,12 @@ exports.handler = async (event, context) => {
       }]
     };
     
-    console.log('📦 Dados para API oficial:', JSON.stringify(shippingData, null, 2));
+    console.log('📦 Dados para API:', JSON.stringify(shippingData, null, 2));
 
-    // Chamar API oficial do Super Frete
+    // Testar API oficial do Super Frete
     try {
-      console.log('🌐 Fazendo requisição para API oficial do Super Frete...');
+      console.log('🌐 Testando API oficial do Super Frete...');
+      console.log('🔗 URL:', 'https://api.superfrete.com/api/v0/calculator');
       
       const apiResponse = await fetch('https://api.superfrete.com/api/v0/calculator', {
         method: 'POST',
@@ -107,15 +111,24 @@ exports.handler = async (event, context) => {
       });
 
       console.log('📡 Status da API:', apiResponse.status);
+      console.log('📡 Headers da resposta:', Object.fromEntries(apiResponse.headers.entries()));
+      
+      const responseText = await apiResponse.text();
+      console.log('📡 Resposta bruta da API:', responseText);
       
       if (!apiResponse.ok) {
-        const errorText = await apiResponse.text();
-        console.error('❌ API retornou erro:', apiResponse.status, errorText);
-        throw new Error(`API retornou status ${apiResponse.status}: ${errorText}`);
+        console.error('❌ API retornou erro:', apiResponse.status, responseText);
+        throw new Error(`API retornou status ${apiResponse.status}: ${responseText}`);
       }
 
-      const apiData = await apiResponse.json();
-      console.log('📦 Resposta da API oficial:', JSON.stringify(apiData, null, 2));
+      let apiData;
+      try {
+        apiData = JSON.parse(responseText);
+        console.log('📦 Resposta parseada da API:', JSON.stringify(apiData, null, 2));
+      } catch (parseError) {
+        console.error('❌ Erro ao fazer parse da resposta:', parseError);
+        throw new Error(`Erro ao fazer parse da resposta: ${parseError.message}`);
+      }
 
       // Processar resposta da API oficial
       if (apiData && Array.isArray(apiData) && apiData.length > 0) {
@@ -129,7 +142,6 @@ exports.handler = async (event, context) => {
           description: item.description || '',
           service: item.service || item.id,
           error: item.error || null,
-          // Dados da caixa ideal retornada pela API
           package: item.package || null
         }));
 
@@ -144,7 +156,7 @@ exports.handler = async (event, context) => {
           package_dimensions: apiData[0]?.package || null
         };
 
-        console.log('✅ Resultado processado com sucesso da API oficial');
+        console.log('✅ Resultado processado com sucesso');
         return {
           statusCode: 200,
           headers,
@@ -156,9 +168,9 @@ exports.handler = async (event, context) => {
       }
 
     } catch (apiError) {
-      console.error('❌ Erro na API oficial do Super Frete:', apiError);
+      console.error('❌ Erro na API do Super Frete:', apiError);
+      console.error('❌ Stack trace:', apiError.stack);
       
-      // Retornar erro específico da API
       return {
         statusCode: 500,
         headers,
@@ -166,6 +178,7 @@ exports.handler = async (event, context) => {
           success: false,
           error: 'Erro ao calcular frete com Super Frete',
           details: apiError.message,
+          stack: apiError.stack,
           api_used: 'super_frete_official_api_failed'
         })
       };
@@ -173,12 +186,14 @@ exports.handler = async (event, context) => {
 
   } catch (error) {
     console.error('❌ Erro na função:', error);
+    console.error('❌ Stack trace:', error.stack);
     return {
       statusCode: 500,
       headers,
       body: JSON.stringify({
         success: false,
-        error: error.message
+        error: error.message,
+        stack: error.stack
       })
     };
   }
