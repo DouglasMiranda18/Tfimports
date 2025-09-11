@@ -5,7 +5,7 @@ class SuperFreteService {
   constructor() {
     this.apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NTc1ODg5NzQsInN1YiI6InBtOGY3bFREMlpOSFQwRjRsNVBNTFpxbEltZjEifQ.NLe4SysNaudhBIy3xlid18e2cM2wlMDgNCLPMkCkQc';
     this.baseUrl = 'https://api.superfrete.com';
-    this.cepOrigem = '01310-100'; // CEP de origem (São Paulo)
+    this.cepOrigem = '01153-000'; // CEP de origem (São Paulo)
   }
 
   // Validar CEP usando ViaCEP (gratuito)
@@ -58,7 +58,7 @@ class SuperFreteService {
     return cep;
   }
 
-  // Calcular frete usando função Netlify (contorna CORS)
+  // Calcular frete usando API direta do Super Frete
   async calculateShipping(cepDestino, peso, valor, dimensoes = null) {
     try {
       // Dimensões padrão se não fornecidas
@@ -70,36 +70,77 @@ class SuperFreteService {
 
       const dimensoesFinais = dimensoes || defaultDimensoes;
 
-      // Fazer requisição para a função Netlify
-      const response = await fetch('/.netlify/functions/super-frete', {
+      // Preparar dados para a API do Super Frete
+      const cepOrigem = this.cepOrigem.replace(/\D/g, '');
+      const cepDestinoLimpo = cepDestino.replace(/\D/g, '');
+
+      const options = {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          accept: 'application/json',
+          'User-Agent': 'TFI Imports - E-commerce (contato@tfiimports.com)',
+          'content-type': 'application/json',
+          Authorization: `Bearer ${this.apiKey}`
         },
         body: JSON.stringify({
-          cepDestino,
-          peso,
-          valor,
-          dimensoes: dimensoesFinais
+          from: { postal_code: cepOrigem },
+          to: { postal_code: cepDestinoLimpo },
+          services: '1,2,17', // PAC, SEDEX, e outros serviços
+          options: {
+            own_hand: false,
+            receipt: false,
+            insurance_value: valor,
+            use_insurance_value: valor > 0
+          },
+          package: {
+            height: dimensoesFinais.height,
+            width: dimensoesFinais.width,
+            length: dimensoesFinais.length,
+            weight: peso
+          }
         })
-      });
+      };
+
+      // Fazer requisição direta para a API do Super Frete
+      const response = await fetch('https://api.superfrete.com/api/v0/calculator', options);
 
       if (!response.ok) {
-        console.error('Erro na função Netlify:', response.status);
+        console.error('Erro na API Super Frete:', response.status);
         return this.calculateShippingFallback(cepDestino, peso, valor);
       }
 
       const data = await response.json();
       
-      if (!data.success) {
-        console.error('Erro na resposta da função:', data.error);
+      // Processar resposta da API
+      if (data && data.length > 0) {
+        const opcoes = data.map(item => ({
+          id: item.id || item.service,
+          name: item.name || item.service,
+          company: item.company || 'Super Frete',
+          company_id: item.company_id || item.id,
+          price: parseFloat(item.price) || 0,
+          delivery_time: item.delivery_time || item.delivery_range || '5-8 dias úteis',
+          description: item.description || item.name || item.service,
+          service: item.service || item.id,
+          error: item.error || null
+        }));
+
+        return {
+          success: true,
+          options: opcoes,
+          origin: this.cepOrigem,
+          destination: cepDestino,
+          weight: peso,
+          value: valor,
+          api_used: 'super_frete_direct'
+        };
+      } else {
+        console.error('Resposta vazia da API Super Frete');
         return this.calculateShippingFallback(cepDestino, peso, valor);
       }
 
-      return data;
-
     } catch (error) {
-      console.error('Erro ao calcular frete:', error);
+      console.error('Erro ao calcular frete com API direta:', error);
       
       // Fallback para cálculo local
       return this.calculateShippingFallback(cepDestino, peso, valor);
