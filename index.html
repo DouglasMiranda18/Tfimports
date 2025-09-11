@@ -4561,10 +4561,12 @@
         }
 
         // Limpar carrinho após confirmação
-        state.carrinho = [];
-        state.freteSelecionado = null;
-        saveCart();
-        updateCartCount();
+        if (typeof state !== 'undefined') {
+          state.carrinho = [];
+          state.freteSelecionado = null;
+          saveCart();
+          updateCartCount();
+        }
 
         console.log('✅ Modal de confirmação exibida com sucesso');
 
@@ -4591,7 +4593,7 @@
     if (btnContinuarComprando) {
       btnContinuarComprando.addEventListener('click', () => {
         closeConfirmacaoModal();
-        navigateToPage('home');
+        showPage('home');
       });
     }
 
@@ -4599,7 +4601,7 @@
     if (btnVerPedidos) {
       btnVerPedidos.addEventListener('click', () => {
         closeConfirmacaoModal();
-        navigateToPage('perfil');
+        showPage('perfil');
         // Recarregar pedidos quando navegar para o perfil
         setTimeout(() => {
           if (typeof loadUserOrders === 'function') {
