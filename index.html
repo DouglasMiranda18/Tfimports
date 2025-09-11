@@ -1387,7 +1387,9 @@
               dimensoes
             );
             
-            if (result.success && result.options.length > 0) {
+            console.log('📦 Resultado do frete:', result);
+            
+            if (result.success && result.options && result.options.length > 0) {
               op.innerHTML = '';
               
               result.options.forEach(option => {
@@ -2523,10 +2525,12 @@
           showConfirmacaoModal(orderToSave, paymentResult);
           console.log('✅ showConfirmacaoModal chamada');
           
-          // Limpar carrinho
+        // Limpar carrinho
+        if (typeof state !== 'undefined') {
           state.carrinho = [];
           saveCart();
           updateCartCount();
+        }
           
           // Iniciar verificação automática do status em background
           console.log('🔄 Iniciando verificação em background...');
@@ -2791,8 +2795,8 @@
               // Atualizar pedido com dados da etiqueta
               await db.collection('orders').doc(orderId).update({
                 'shipping_label': {
-                  order_id: labelResult.order_id,
-                  protocol: labelResult.protocol,
+                  order_id: orderId, // Usar o ID do pedido
+                  protocol: labelResult.protocol || 'N/A',
                   tracking_code: labelResult.tracking_code,
                   status: 'created',
                   created_at: new Date(),
@@ -2971,7 +2975,7 @@
             name: state.freteSelecionado.nome,
             delivery_time: state.freteSelecionado.prazo
           },
-          total: state.carrinho.reduce((s,i)=>s+i.preco*i.qtd,0) + state.freteSelecionado.preco,
+          total: state.carrinho.reduce((s,i)=>s+i.preco*i.qtd,0) + (state.freteSelecionado?.preco || 0),
           shipping_address: state.enderecoCompleto || {
             cep: qs('#cep').value.replace(/\D/g, ''),
             logradouro: qs('#logradouro').value,
