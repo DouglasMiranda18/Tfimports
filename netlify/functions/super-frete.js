@@ -1,4 +1,4 @@
-// Função Netlify para Super Frete - API real
+// Função Netlify para Super Frete - API oficial
 exports.handler = async (event, context) => {
   console.log('🚀 Função Super Frete chamada:', event.httpMethod);
   
@@ -54,7 +54,7 @@ exports.handler = async (event, context) => {
       };
     }
 
-    console.log('✅ API Key encontrada, chamando API do Super Frete...');
+    console.log('✅ API Key encontrada, chamando API oficial do Super Frete...');
 
     // Dimensões padrão
     const defaultDimensoes = {
@@ -65,7 +65,7 @@ exports.handler = async (event, context) => {
 
     const dimensoesFinais = dimensoes || defaultDimensoes;
 
-    // Preparar dados para API do Super Frete
+    // Preparar dados para API oficial do Super Frete
     const shippingData = {
       from: {
         postal_code: '01310-100'
@@ -89,18 +89,19 @@ exports.handler = async (event, context) => {
       }]
     };
     
-    console.log('📦 Dados para API:', JSON.stringify(shippingData, null, 2));
+    console.log('📦 Dados para API oficial:', JSON.stringify(shippingData, null, 2));
 
-    // Chamar API real do Super Frete
+    // Chamar API oficial do Super Frete
     try {
-      console.log('🌐 Fazendo requisição para API do Super Frete...');
+      console.log('🌐 Fazendo requisição para API oficial do Super Frete...');
       
-      const apiResponse = await fetch('https://api.superfrete.com/shipment/calculate', {
+      const apiResponse = await fetch('https://api.superfrete.com/api/v0/calculator', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${apiKey}`,
-          'User-Agent': 'SuperFrete-Integration/1.0'
+          'User-Agent': 'TFI Imports (contato@tfimports.com.br)',
+          'accept': 'application/json',
+          'content-type': 'application/json'
         },
         body: JSON.stringify(shippingData)
       });
@@ -114,9 +115,9 @@ exports.handler = async (event, context) => {
       }
 
       const apiData = await apiResponse.json();
-      console.log('📦 Resposta da API:', JSON.stringify(apiData, null, 2));
+      console.log('📦 Resposta da API oficial:', JSON.stringify(apiData, null, 2));
 
-      // Processar resposta da API
+      // Processar resposta da API oficial
       if (apiData && Array.isArray(apiData) && apiData.length > 0) {
         const opcoes = apiData.map(item => ({
           id: item.id || item.service,
@@ -139,11 +140,11 @@ exports.handler = async (event, context) => {
           destination: cepDestino,
           weight: peso,
           value: valor,
-          api_used: 'super_frete_api',
+          api_used: 'super_frete_official_api',
           package_dimensions: apiData[0]?.package || null
         };
 
-        console.log('✅ Resultado processado com sucesso');
+        console.log('✅ Resultado processado com sucesso da API oficial');
         return {
           statusCode: 200,
           headers,
@@ -155,58 +156,18 @@ exports.handler = async (event, context) => {
       }
 
     } catch (apiError) {
-      console.error('❌ Erro na API do Super Frete:', apiError);
+      console.error('❌ Erro na API oficial do Super Frete:', apiError);
       
-      // Retornar dados de fallback em caso de erro
-      const fallbackResult = {
-        success: true,
-        options: [
-          {
-            id: 'mini-envios',
-            name: 'Mini Envios',
-            company: 'Correios',
-            company_id: '17',
-            price: 8.49,
-            delivery_time: 'Até 6 dias úteis',
-            description: 'Melhor preço - Fallback',
-            service: '17',
-            error: null
-          },
-          {
-            id: 'pac',
-            name: 'PAC',
-            company: 'Correios',
-            company_id: '1',
-            price: 15.15,
-            delivery_time: '5-8 dias úteis',
-            description: 'Envio econômico - Fallback',
-            service: '1',
-            error: null
-          },
-          {
-            id: 'sedex',
-            name: 'SEDEX',
-            company: 'Correios',
-            company_id: '2',
-            price: 24.27,
-            delivery_time: '3-5 dias úteis',
-            description: 'Envio expresso - Fallback',
-            service: '2',
-            error: null
-          }
-        ],
-        origin: '01310-100',
-        destination: cepDestino,
-        weight: peso,
-        value: valor,
-        api_used: 'fallback_mode',
-        error: apiError.message
-      };
-
+      // Retornar erro específico da API
       return {
-        statusCode: 200,
+        statusCode: 500,
         headers,
-        body: JSON.stringify(fallbackResult)
+        body: JSON.stringify({
+          success: false,
+          error: 'Erro ao calcular frete com Super Frete',
+          details: apiError.message,
+          api_used: 'super_frete_official_api_failed'
+        })
       };
     }
 
