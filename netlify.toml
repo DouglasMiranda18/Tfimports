@@ -18,6 +18,9 @@
   VITE_ASAAS_ENVIRONMENT = "sandbox"
   VITE_ASAAS_WEBHOOK_TOKEN = "tfimports_webhook_secret_2024"
   
+  # Super Frete Configuration
+  VITE_SUPER_FRETE_API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NTc1ODg5NzQsInN1YiI6InBtOGY3bFREMlpOSFQwRjRsNVBNTFpxbEltZjEifQ.NLe4SysNaudhBIy3xlid18e2cM2wlMDgNCLPMkCkQc"
+  
   # Melhor Envio Configuration - REMOVIDO
   # VITE_MELHOR_ENVIO_TOKEN = "oj7uVXJfJczTN1kZfDcB9uEoPWfBHXLElI4gTPdT"
   # MELHOR_ENVIO_WEBHOOK_SECRET = "tfimports_melhor_envio_webhook_2024"
