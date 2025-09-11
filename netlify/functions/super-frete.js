@@ -1,4 +1,4 @@
-// Função Netlify para Super Frete - versão ultra simples para debug
+// Função Netlify para Super Frete - versão debug mínima
 exports.handler = async (event, context) => {
   console.log('🚀 Função Super Frete chamada:', event.httpMethod);
   
@@ -42,8 +42,10 @@ exports.handler = async (event, context) => {
     }
     
     const { cepDestino, peso, valor, dimensoes } = body;
+    console.log('📋 Parâmetros extraídos:', { cepDestino, peso, valor, dimensoes });
     
     if (!cepDestino || !peso || !valor) {
+      console.log('❌ Parâmetros obrigatórios ausentes');
       return {
         statusCode: 400,
         headers,
@@ -71,7 +73,7 @@ exports.handler = async (event, context) => {
       };
     }
 
-    console.log('✅ API Key encontrada, testando API...');
+    console.log('✅ API Key encontrada, preparando dados...');
 
     // Dados simples para teste
     const shippingData = {
@@ -98,94 +100,58 @@ exports.handler = async (event, context) => {
     
     console.log('📦 Dados para API:', JSON.stringify(shippingData, null, 2));
 
-    // Testar API
-    const url = 'https://api.superfrete.com/api/v0/calculator';
-    console.log('🌐 Testando URL:', url);
-    
-    try {
-      const apiResponse = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'User-Agent': 'TFI Imports (contato@tfimports.com.br)',
-          'accept': 'application/json',
-          'content-type': 'application/json'
+    // Retornar dados de teste primeiro (sem chamar API)
+    const result = {
+      success: true,
+      options: [
+        {
+          id: 'mini-envios',
+          name: 'Mini Envios',
+          company: 'Correios',
+          company_id: '17',
+          price: 8.49,
+          delivery_time: 'Até 6 dias úteis',
+          description: 'Melhor preço - Teste',
+          service: '17',
+          error: null
         },
-        body: JSON.stringify(shippingData)
-      });
-
-      console.log('📡 Status da API:', apiResponse.status);
-      
-      const responseText = await apiResponse.text();
-      console.log('📡 Resposta da API:', responseText);
-      
-      if (apiResponse.ok) {
-        let apiData;
-        try {
-          apiData = JSON.parse(responseText);
-          console.log('📦 Resposta parseada:', JSON.stringify(apiData, null, 2));
-        } catch (parseError) {
-          console.error('❌ Erro ao fazer parse:', parseError);
-          throw parseError;
+        {
+          id: 'pac',
+          name: 'PAC',
+          company: 'Correios',
+          company_id: '1',
+          price: 15.15,
+          delivery_time: '5-8 dias úteis',
+          description: 'Envio econômico - Teste',
+          service: '1',
+          error: null
+        },
+        {
+          id: 'sedex',
+          name: 'SEDEX',
+          company: 'Correios',
+          company_id: '2',
+          price: 24.27,
+          delivery_time: '3-5 dias úteis',
+          description: 'Envio expresso - Teste',
+          service: '2',
+          error: null
         }
+      ],
+      origin: '01310-100',
+      destination: cepDestino,
+      weight: peso,
+      value: valor,
+      api_used: 'test_mode',
+      message: 'Modo de teste - API não chamada'
+    };
 
-        // Processar resposta
-        if (apiData && Array.isArray(apiData) && apiData.length > 0) {
-          const opcoes = apiData.map(item => ({
-            id: item.id || item.service,
-            name: item.name || item.service,
-            company: item.company?.name || 'Correios',
-            company_id: item.company?.id || item.service,
-            price: parseFloat(item.price) || 0,
-            delivery_time: item.delivery_time || '5-8 dias úteis',
-            description: item.description || '',
-            service: item.service || item.id,
-            error: item.error || null,
-            package: item.package || null
-          }));
-
-          const result = {
-            success: true,
-            options: opcoes,
-            origin: '01310-100',
-            destination: cepDestino,
-            weight: peso,
-            value: valor,
-            api_used: 'super_frete_api',
-            working_url: url
-          };
-
-          console.log('✅ Resultado processado com sucesso');
-          return {
-            statusCode: 200,
-            headers,
-            body: JSON.stringify(result)
-          };
-        } else {
-          console.error('❌ Resposta da API inválida ou vazia:', apiData);
-          throw new Error('Resposta da API inválida ou vazia');
-        }
-      } else {
-        console.error('❌ API retornou erro:', apiResponse.status, responseText);
-        throw new Error(`API retornou status ${apiResponse.status}: ${responseText}`);
-      }
-
-    } catch (apiError) {
-      console.error('❌ Erro na API do Super Frete:', apiError);
-      console.error('❌ Stack trace:', apiError.stack);
-      
-      return {
-        statusCode: 500,
-        headers,
-        body: JSON.stringify({
-          success: false,
-          error: 'Erro ao calcular frete com Super Frete',
-          details: apiError.message,
-          stack: apiError.stack,
-          api_used: 'super_frete_api_failed'
-        })
-      };
-    }
+    console.log('✅ Retornando dados de teste');
+    return {
+      statusCode: 200,
+      headers,
+      body: JSON.stringify(result)
+    };
 
   } catch (error) {
     console.error('❌ Erro na função:', error);
