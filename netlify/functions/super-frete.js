@@ -36,7 +36,22 @@ exports.handler = async (event, context) => {
     console.log('📦 Processando requisição POST');
     // Parse do body
     console.log('📝 Body recebido:', event.body);
-    const body = JSON.parse(event.body);
+    
+    let body;
+    try {
+      body = JSON.parse(event.body);
+    } catch (parseError) {
+      console.error('❌ Erro ao fazer parse do JSON:', parseError);
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({
+          success: false,
+          error: 'Body inválido - não é um JSON válido'
+        })
+      };
+    }
+    
     const { cepDestino, peso, valor, dimensoes } = body;
     console.log('📋 Parâmetros:', { cepDestino, peso, valor, dimensoes });
 
@@ -69,6 +84,9 @@ exports.handler = async (event, context) => {
     // API Key do Super Frete
     const apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NTc1ODg5NzQsInN1YiI6InBtOGY3bFREMlpOSFQwRjRsNVBNTFpxbEltZjEifQ.NLe4SysNaudhBIy3xlid18e2cM2wlMDgNCLPMkCkQc';
     const cepOrigem = '01310-100';
+    
+    console.log('🔑 API Key configurada:', apiKey ? 'Sim' : 'Não');
+    console.log('📍 CEP Origem:', cepOrigem);
 
     // Dimensões padrão se não fornecidas
     const defaultDimensoes = {
@@ -97,6 +115,8 @@ exports.handler = async (event, context) => {
         quantity: 1
       }]
     };
+    
+    console.log('📦 Dados para API:', JSON.stringify(shippingData, null, 2));
 
     // Chamar API real do Super Frete com retry
     console.log('🔄 Chamando API do Super Frete...');
@@ -107,6 +127,13 @@ exports.handler = async (event, context) => {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         console.log(`🔄 Tentativa ${attempt}/${maxRetries}...`);
+        
+        console.log('🌐 Fazendo requisição para:', 'https://api.superfrete.com/shipment/calculate');
+        console.log('📤 Headers:', {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey.substring(0, 20)}...`,
+          'User-Agent': 'SuperFrete-Integration/1.0'
+        });
         
         const apiResponse = await fetch('https://api.superfrete.com/shipment/calculate', {
           method: 'POST',
@@ -119,13 +146,14 @@ exports.handler = async (event, context) => {
         });
 
         console.log('📡 Status da API:', apiResponse.status);
+        console.log('📡 Headers da resposta:', Object.fromEntries(apiResponse.headers.entries()));
         
         if (!apiResponse.ok) {
           throw new Error(`API retornou status ${apiResponse.status}`);
         }
 
         const apiData = await apiResponse.json();
-        console.log('📦 Resposta da API:', apiData);
+        console.log('📦 Resposta da API:', JSON.stringify(apiData, null, 2));
 
         // Processar resposta da API
         if (apiData && apiData.data && Array.isArray(apiData.data) && apiData.data.length > 0) {
@@ -164,6 +192,7 @@ exports.handler = async (event, context) => {
       } catch (apiError) {
         lastError = apiError;
         console.error(`❌ Erro na tentativa ${attempt}:`, apiError);
+        console.error(`❌ Stack trace:`, apiError.stack);
         
         if (attempt < maxRetries) {
           console.log(`⏳ Aguardando 2 segundos antes da próxima tentativa...`);
