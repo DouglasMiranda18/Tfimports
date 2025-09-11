@@ -113,12 +113,9 @@ exports.handler = async (event, context) => {
       console.error('❌ Erro de conectividade:', connectError.message);
     }
 
-    // Testar diferentes URLs da API
+    //  URL da API
     const urlsToTest = [
-      'https://api.superfrete.com/api/v0/calculator',
-      'https://api.superfrete.com/calculator',
-      'https://api.superfrete.com/shipment/calculate',
-      'https://sandbox.superfrete.com/api/v0/calculator'
+      'https://api.superfrete.com/api/v0/calculator'
     ];
 
     for (const url of urlsToTest) {
