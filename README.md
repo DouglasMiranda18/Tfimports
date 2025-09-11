@@ -305,6 +305,6 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 ---
 
 <div align="center">
-  <p>Desenvolvido com ❤️ por <strong>TFI IMPORTS</strong></p>
-  <p>© 2024 TFI IMPORTS. Todos os direitos reservados.</p>
+  <p>Desenvolvido com ❤️ por <strong>ELEVARE</strong></p>
+  <p>© 2025 TFI IMPORTS. Todos os direitos reservados.</p>
 </div>
