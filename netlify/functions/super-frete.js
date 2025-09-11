@@ -1,4 +1,4 @@
-// Função Netlify para Super Frete - versão debug ultra simples
+// Função Netlify para Super Frete - baseada no código que funcionou
 exports.handler = async (event, context) => {
   console.log('🚀 Função Super Frete chamada:', event.httpMethod);
   
@@ -59,33 +59,41 @@ exports.handler = async (event, context) => {
 
     console.log('✅ API Key encontrada, testando API...');
 
-    // Dados simples para teste
+    // Dimensões padrão
+    const defaultDimensoes = {
+      height: 2,
+      width: 11,
+      length: 16
+    };
+
+    const dimensoesFinais = dimensoes || defaultDimensoes;
+
+    // Preparar dados EXATAMENTE como no código que funcionou
     const shippingData = {
       from: {
-        postal_code: '01310-100'
+        postal_code: '01310-100'  // CEP de origem
       },
       to: {
-        postal_code: cepDestino
+        postal_code: cepDestino   // CEP de destino
       },
-      services: "1,2,17",
+      services: "1,2,17",  // PAC, SEDEX, Mini Envios
       options: {
         own_hand: false,
         receipt: false,
-        insurance_value: parseFloat(valor),
-        use_insurance_value: true
+        insurance_value: 0,  // Usar 0 como no exemplo
+        use_insurance_value: false  // Usar false como no exemplo
       },
-      products: [{
-        quantity: 1,
-        height: 2,
-        width: 11,
-        length: 16,
+      package: {  // USAR PACKAGE em vez de products
+        height: dimensoesFinais.height,
+        width: dimensoesFinais.width,
+        length: dimensoesFinais.length,
         weight: peso
-      }]
+      }
     };
     
-    console.log('📦 Dados para API:', JSON.stringify(shippingData, null, 2));
+    console.log('📦 Dados para API (formato correto):', JSON.stringify(shippingData, null, 2));
 
-    // Testar apenas uma URL primeiro
+    // URL exata que funcionou
     const url = 'https://api.superfrete.com/api/v0/calculator';
     console.log('🌐 Testando URL:', url);
     
@@ -139,7 +147,7 @@ exports.handler = async (event, context) => {
             destination: cepDestino,
             weight: peso,
             value: valor,
-            api_used: 'super_frete_api',
+            api_used: 'super_frete_api_correct_format',
             working_url: url
           };
 
