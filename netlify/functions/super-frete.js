@@ -81,11 +81,11 @@ exports.handler = async (event, context) => {
 
     // Verificar variáveis de ambiente
     console.log('🔍 Verificando variáveis de ambiente...');
-    console.log('🔑 VITE_SUPER_FRETE_API_KEY existe:', !!process.env.VITE_SUPER_FRETE_API_KEY);
-    console.log('🔑 Tamanho da API Key:', process.env.VITE_SUPER_FRETE_API_KEY?.length || 0);
+    console.log('🔑 SUPER_FRETE_API_KEY existe:', !!process.env.SUPER_FRETE_API_KEY);
+    console.log('🔑 Tamanho da API Key:', process.env.SUPER_FRETE_API_KEY?.length || 0);
     
     // API Key do Super Frete (variável de ambiente)
-    const apiKey = process.env.VITE_SUPER_FRETE_API_KEY;
+    const apiKey = process.env.SUPER_FRETE_API_KEY;
     const cepOrigem = '01310-100';
     
     if (!apiKey) {
