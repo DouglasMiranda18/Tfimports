@@ -237,7 +237,9 @@ export class OrderManager {
 
       // Se pagamento aprovado, criar etiqueta de envio
       if (status === 'payment_approved') {
-        await this.createShippingLabel(orderId);
+        console.log('🏷️ Pagamento aprovado, criando etiqueta de envio...');
+        const labelResult = await this.createShippingLabel(orderId);
+        console.log('🏷️ Resultado da criação da etiqueta:', labelResult);
       }
 
       return {
@@ -258,6 +260,8 @@ export class OrderManager {
   // Criar etiqueta de envio
   async createShippingLabel(orderId) {
     try {
+      console.log('🏷️ Iniciando criação de etiqueta para pedido:', orderId);
+      
       const orderDoc = await this.db.collection('pedidos').doc(orderId).get();
       
       if (!orderDoc.exists) {
@@ -265,6 +269,12 @@ export class OrderManager {
       }
 
       const order = orderDoc.data();
+      console.log('📦 Dados do pedido:', {
+        id: order.id,
+        status: order.status,
+        shipping: order.shipping,
+        items: order.items?.length || 0
+      });
       
       const shippingData = {
         service_id: order.shipping.service_id,
@@ -323,6 +333,9 @@ export class OrderManager {
       };
 
       // Chamar função Netlify para criar etiqueta
+      console.log('🌐 Chamando função Netlify para criar etiqueta...');
+      console.log('📦 Dados enviados:', labelData);
+      
       const response = await fetch('/.netlify/functions/super-frete-label', {
         method: 'POST',
         headers: {
@@ -331,7 +344,9 @@ export class OrderManager {
         body: JSON.stringify(labelData)
       });
 
+      console.log('📡 Status da resposta:', response.status);
       const result = await response.json();
+      console.log('📦 Resultado da função:', result);
       
       if (result.success) {
         // Atualizar pedido com dados da etiqueta
