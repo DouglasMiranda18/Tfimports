@@ -98,272 +98,103 @@ exports.handler = async (event, context) => {
       }]
     };
 
-    // Chamar API real do Super Frete
+    // Chamar API real do Super Frete com retry
     console.log('🔄 Chamando API do Super Frete...');
     
-    try {
-      const apiResponse = await fetch('https://api.superfrete.com/shipment/calculate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`,
-          'User-Agent': 'SuperFrete-Integration/1.0'
-        },
-        body: JSON.stringify(shippingData)
-      });
+    let lastError = null;
+    const maxRetries = 3;
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`🔄 Tentativa ${attempt}/${maxRetries}...`);
+        
+        const apiResponse = await fetch('https://api.superfrete.com/shipment/calculate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`,
+            'User-Agent': 'SuperFrete-Integration/1.0'
+          },
+          body: JSON.stringify(shippingData)
+        });
 
-      console.log('📡 Status da API:', apiResponse.status);
-      
-      if (!apiResponse.ok) {
-        throw new Error(`API retornou status ${apiResponse.status}`);
+        console.log('📡 Status da API:', apiResponse.status);
+        
+        if (!apiResponse.ok) {
+          throw new Error(`API retornou status ${apiResponse.status}`);
+        }
+
+        const apiData = await apiResponse.json();
+        console.log('📦 Resposta da API:', apiData);
+
+        // Processar resposta da API
+        if (apiData && apiData.data && Array.isArray(apiData.data) && apiData.data.length > 0) {
+          const opcoes = apiData.data.map(item => ({
+            id: item.id || item.service,
+            name: item.name || item.service,
+            company: item.company?.name || 'Correios',
+            company_id: item.company?.id || '1',
+            price: parseFloat(item.price) || 0,
+            delivery_time: item.delivery_time || '5-8 dias úteis',
+            description: item.description || '',
+            service: item.service || item.id,
+            error: item.error || null
+          }));
+
+          const result = {
+            success: true,
+            options: opcoes,
+            origin: cepOrigem,
+            destination: cepDestino,
+            weight: peso,
+            value: valor,
+            api_used: 'super_frete_api'
+          };
+
+          console.log('✅ Resultado da API:', result);
+          return {
+            statusCode: 200,
+            headers,
+            body: JSON.stringify(result)
+          };
+        } else {
+          throw new Error('Resposta da API inválida ou vazia');
+        }
+
+      } catch (apiError) {
+        lastError = apiError;
+        console.error(`❌ Erro na tentativa ${attempt}:`, apiError);
+        
+        if (attempt < maxRetries) {
+          console.log(`⏳ Aguardando 2 segundos antes da próxima tentativa...`);
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
       }
-
-      const apiData = await apiResponse.json();
-      console.log('📦 Resposta da API:', apiData);
-
-      // Processar resposta da API
-      if (apiData && apiData.data && Array.isArray(apiData.data)) {
-        const opcoes = apiData.data.map(item => ({
-          id: item.id || item.service,
-          name: item.name || item.service,
-          company: item.company?.name || 'Correios',
-          company_id: item.company?.id || '1',
-          price: parseFloat(item.price) || 0,
-          delivery_time: item.delivery_time || '5-8 dias úteis',
-          description: item.description || '',
-          service: item.service || item.id,
-          error: item.error || null
-        }));
-
-        const result = {
-          success: true,
-          options: opcoes,
-          origin: cepOrigem,
-          destination: cepDestino,
-          weight: peso,
-          value: valor,
-          api_used: 'super_frete_api'
-        };
-
-        console.log('✅ Resultado da API:', result);
-        return {
-          statusCode: 200,
-          headers,
-          body: JSON.stringify(result)
-        };
-      } else {
-        throw new Error('Resposta da API inválida');
-      }
-
-    } catch (apiError) {
-      console.error('❌ Erro na API do Super Frete:', apiError);
-      console.log('🔄 Usando fallback...');
-      
-      const fallbackResult = calculateShippingFallback(cepDestino, peso, valor);
-      console.log('✅ Resultado fallback:', fallbackResult);
-      
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify(fallbackResult)
-      };
     }
+    
+    // Se todas as tentativas falharam, retornar erro
+    console.error('❌ Todas as tentativas falharam. Último erro:', lastError);
+    return {
+      statusCode: 500,
+      headers,
+      body: JSON.stringify({
+        success: false,
+        error: 'Não foi possível calcular o frete. Tente novamente em alguns minutos.',
+        details: lastError?.message || 'Erro desconhecido'
+      })
+    };
 
   } catch (error) {
     console.error('Erro na função Super Frete:', error);
     
-    // Fallback para cálculo local
-    const fallbackResult = calculateShippingFallback(
-      JSON.parse(event.body).cepDestino || '01310-100',
-      JSON.parse(event.body).peso || 0.3,
-      JSON.parse(event.body).valor || 50
-    );
-    
     return {
-      statusCode: 200,
+      statusCode: 500,
       headers,
-      body: JSON.stringify(fallbackResult)
+      body: JSON.stringify({
+        success: false,
+        error: 'Erro interno do servidor. Tente novamente.',
+        details: error.message
+      })
     };
   }
 };
-
-// Função de fallback (cálculo local)
-function calculateShippingFallback(cepDestino, peso, valor) {
-  try {
-    const distancia = calculateDistance('01310-100', cepDestino);
-    
-    const opcoes = [];
-
-    // Mini Envios (para peso até 300g)
-    if (peso <= 0.3) {
-      opcoes.push({
-        id: 'mini-envios',
-        name: 'Mini Envios',
-        company: 'Correios',
-        company_id: '1',
-        price: 8.49,
-        delivery_time: 'Até 6 dias úteis',
-        description: 'Melhor preço - Exclusivo no app',
-        service: 'mini-envios',
-        error: null
-      });
-    }
-
-    // PAC
-    const pacPrice = calculatePacPrice(peso, distancia);
-    if (pacPrice > 0) {
-      opcoes.push({
-        id: 'pac',
-        name: 'PAC',
-        company: 'Correios',
-        company_id: '1',
-        price: pacPrice,
-        delivery_time: getDeliveryTime('pac', distancia),
-        description: 'Envio econômico',
-        service: 'pac',
-        error: null
-      });
-    }
-
-    // SEDEX
-    const sedexPrice = calculateSedexPrice(peso, distancia);
-    if (sedexPrice > 0) {
-      opcoes.push({
-        id: 'sedex',
-        name: 'SEDEX',
-        company: 'Correios',
-        company_id: '2',
-        price: sedexPrice,
-        delivery_time: getDeliveryTime('sedex', distancia),
-        description: 'Envio expresso',
-        service: 'sedex',
-        error: null
-      });
-    }
-
-    return {
-      success: true,
-      options: opcoes,
-      origin: '01310-100',
-      destination: cepDestino,
-      weight: peso,
-      value: valor,
-      api_used: 'fallback'
-    };
-
-  } catch (error) {
-    return {
-      success: false,
-      error: 'Erro ao calcular frete'
-    };
-  }
-}
-
-// Funções auxiliares (mesmas do super-frete.js)
-function calculateDistance(cepOrigem, cepDestino) {
-  const origem = getRegionCode(cepOrigem);
-  const destino = getRegionCode(cepDestino);
-  
-  const distances = {
-    'SP': { 'SP': 0, 'RJ': 400, 'MG': 500, 'PR': 300, 'SC': 600, 'RS': 800, 'DF': 900, 'GO': 800, 'BA': 1000, 'PE': 2000, 'CE': 2500, 'PA': 3000, 'AM': 4000 },
-    'RJ': { 'SP': 400, 'RJ': 0, 'MG': 300, 'PR': 700, 'SC': 1000, 'RS': 1200, 'DF': 1000, 'GO': 1100, 'BA': 800, 'PE': 1800, 'CE': 2200, 'PA': 2800, 'AM': 3800 },
-    'MG': { 'SP': 500, 'RJ': 300, 'MG': 0, 'PR': 800, 'SC': 1100, 'RS': 1300, 'DF': 600, 'GO': 700, 'BA': 500, 'PE': 1500, 'CE': 1900, 'PA': 2500, 'AM': 3500 },
-    'PR': { 'SP': 300, 'RJ': 700, 'MG': 800, 'PR': 0, 'SC': 300, 'RS': 500, 'DF': 1200, 'GO': 1300, 'BA': 1500, 'PE': 2300, 'CE': 2700, 'PA': 3300, 'AM': 4300 },
-    'SC': { 'SP': 600, 'RJ': 1000, 'MG': 1100, 'PR': 300, 'SC': 0, 'RS': 200, 'DF': 1500, 'GO': 1600, 'BA': 1800, 'PE': 2600, 'CE': 3000, 'PA': 3600, 'AM': 4600 },
-    'RS': { 'SP': 800, 'RJ': 1200, 'MG': 1300, 'PR': 500, 'SC': 200, 'RS': 0, 'DF': 1700, 'GO': 1800, 'BA': 2000, 'PE': 2800, 'CE': 3200, 'PA': 3800, 'AM': 4800 },
-    'DF': { 'SP': 900, 'RJ': 1000, 'MG': 600, 'PR': 1200, 'SC': 1500, 'RS': 1700, 'DF': 0, 'GO': 100, 'BA': 800, 'PE': 1600, 'CE': 2000, 'PA': 2600, 'AM': 3600 },
-    'GO': { 'SP': 800, 'RJ': 1100, 'MG': 700, 'PR': 1300, 'SC': 1600, 'RS': 1800, 'DF': 100, 'GO': 0, 'BA': 900, 'PE': 1700, 'CE': 2100, 'PA': 2700, 'AM': 3700 },
-    'BA': { 'SP': 1000, 'RJ': 800, 'MG': 500, 'PR': 1500, 'SC': 1800, 'RS': 2000, 'DF': 800, 'GO': 900, 'BA': 0, 'PE': 800, 'CE': 1200, 'PA': 1800, 'AM': 2800 },
-    'PE': { 'SP': 2000, 'RJ': 1800, 'MG': 1500, 'PR': 2300, 'SC': 2600, 'RS': 2800, 'DF': 1600, 'GO': 1700, 'BA': 800, 'PE': 0, 'CE': 400, 'PA': 1000, 'AM': 2000 },
-    'CE': { 'SP': 2500, 'RJ': 2200, 'MG': 1900, 'PR': 2700, 'SC': 3000, 'RS': 3200, 'DF': 2000, 'GO': 2100, 'BA': 1200, 'PE': 400, 'CE': 0, 'PA': 600, 'AM': 1600 },
-    'PA': { 'SP': 3000, 'RJ': 2800, 'MG': 2500, 'PR': 3300, 'SC': 3600, 'RS': 3800, 'DF': 2600, 'GO': 2700, 'BA': 1800, 'PE': 1000, 'CE': 600, 'PA': 0, 'AM': 1000 },
-    'AM': { 'SP': 4000, 'RJ': 3800, 'MG': 3500, 'PR': 4300, 'SC': 4600, 'RS': 4800, 'DF': 3600, 'GO': 3700, 'BA': 2800, 'PE': 2000, 'CE': 1600, 'PA': 1000, 'AM': 0 }
-  };
-
-  return distances[origem]?.[destino] || 1000;
-}
-
-function getRegionCode(cep) {
-  const cleanCEP = cep.replace(/\D/g, '');
-  const firstDigit = cleanCEP[0];
-  
-  const regionMap = {
-    '0': 'SP', '1': 'SP', '2': 'RJ', '3': 'MG', '4': 'RS', '5': 'PE',
-    '6': 'CE', '7': 'BA', '8': 'PR', '9': 'DF'
-  };
-  
-  return regionMap[firstDigit] || 'SP';
-}
-
-function calculatePacPrice(peso, distancia) {
-  let preco = 0;
-  
-  // Valores baseados no Super Frete real
-  if (peso <= 0.3) preco = 8.49; // Mini Envios
-  else if (peso <= 0.5) preco = 10.49;
-  else if (peso <= 1) preco = 12.49;
-  else if (peso <= 2) preco = 15.15; // PAC padrão
-  else if (peso <= 3) preco = 18.15;
-  else if (peso <= 5) preco = 22.15;
-  else if (peso <= 10) preco = 30.15;
-  else preco = 30.15 + ((peso - 10) * 2.5);
-
-  // Ajuste por distância (mais conservador)
-  if (distancia > 1000) preco += 3;
-  if (distancia > 2000) preco += 6;
-  if (distancia > 3000) preco += 9;
-
-  return Math.round(preco * 100) / 100;
-}
-
-function calculateSedexPrice(peso, distancia) {
-  let preco = 0;
-  
-  // Valores baseados no Super Frete real
-  if (peso <= 0.3) preco = 24.27; // SEDEX padrão
-  else if (peso <= 0.5) preco = 26.27;
-  else if (peso <= 1) preco = 28.27;
-  else if (peso <= 2) preco = 32.27;
-  else if (peso <= 3) preco = 36.27;
-  else if (peso <= 5) preco = 42.27;
-  else if (peso <= 10) preco = 55.27;
-  else preco = 55.27 + ((peso - 10) * 4.5);
-
-  // Ajuste por distância (mais conservador)
-  if (distancia > 1000) preco += 5;
-  if (distancia > 2000) preco += 10;
-  if (distancia > 3000) preco += 15;
-
-  return Math.round(preco * 100) / 100;
-}
-
-function getDeliveryTime(tipo, distancia) {
-  const prazos = {
-    'pac': {
-      'local': '2-3',
-      'regional': '3-5',
-      'nacional': '5-8'
-    },
-    'sedex': {
-      'local': '1-2',
-      'regional': '2-3',
-      'nacional': '3-5'
-    }
-  };
-
-  let categoria = 'nacional';
-  if (distancia < 200) categoria = 'local';
-  else if (distancia < 1000) categoria = 'regional';
-
-  return prazos[tipo][categoria];
-}
-
-function formatDeliveryTime(deliveryTime) {
-  if (typeof deliveryTime === 'string') {
-    return deliveryTime;
-  }
-  if (typeof deliveryTime === 'number') {
-    return `${deliveryTime} dias úteis`;
-  }
-  return '5-8 dias úteis';
-}

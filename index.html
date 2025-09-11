@@ -1447,12 +1447,26 @@
               };
               
             } else {
-              op.innerHTML = '<div class="hint text-center py-4">Não foi possível calcular o frete para este endereço.</div>';
+              console.error('❌ Erro no cálculo de frete:', result);
+              const errorMsg = result.error || 'Não foi possível calcular o frete para este endereço.';
+              op.innerHTML = `
+                <div class="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-center">
+                  <div class="text-red-400 font-medium mb-2">❌ Erro no cálculo de frete</div>
+                  <div class="text-sm text-red-300">${errorMsg}</div>
+                  <div class="text-xs text-red-400 mt-2">Tente novamente em alguns minutos</div>
+                </div>
+              `;
             }
             
           } catch (error) {
-            console.error('Erro ao calcular frete:', error);
-            op.innerHTML = '<div class="hint text-center py-4">Erro ao calcular frete. Tente novamente.</div>';
+            console.error('❌ Erro ao calcular frete:', error);
+            op.innerHTML = `
+              <div class="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-center">
+                <div class="text-red-400 font-medium mb-2">❌ Erro de conexão</div>
+                <div class="text-sm text-red-300">Não foi possível conectar com o serviço de frete</div>
+                <div class="text-xs text-red-400 mt-2">Verifique sua conexão e tente novamente</div>
+              </div>
+            `;
           }
         });
       }
