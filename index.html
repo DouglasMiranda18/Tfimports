@@ -14,7 +14,7 @@
     script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://www.gstatic.com https://apis.google.com;
     style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com;
     img-src 'self' data: https:;
-    connect-src 'self' https://*.firebaseapp.com https://*.googleapis.com https://firestore.googleapis.com https://viacep.com.br https://api.asaas.com https://www.asaas.com;
+    connect-src 'self' https://*.firebaseapp.com https://*.googleapis.com https://firestore.googleapis.com https://viacep.com.br https://api.asaas.com https://www.asaas.com https://api.superfrete.com;
     font-src 'self' data:;
     object-src 'none';
     base-uri 'self';
@@ -1091,7 +1091,7 @@
     
     // Importar serviços de integração
     import { asaasService } from './asaas.js';
-    import { correiosService } from './correios.js';
+    import { superFreteService } from './super-frete.js';
     import { OrderManager } from './order-manager.js';
     import { validateConfig } from './api-config.js';
     
@@ -1267,7 +1267,7 @@
           qs('#btnBuscarCep').disabled = true;
           
           try {
-            const result = await correiosService.validateCEP(cep);
+            const result = await superFreteService.validateCEP(cep);
             
             if (result.success) {
               // Preencher campos automaticamente
@@ -1337,7 +1337,7 @@
           };
           
           // Validar endereço
-          const validation = correiosService.validateAddress(addressData);
+          const validation = superFreteService.validateAddress(addressData);
           if (!validation.isValid) {
             op.innerHTML = `<div class="hint text-center py-4">Erro: ${validation.errors.join(', ')}</div>`;
             return;
@@ -1357,14 +1357,22 @@
               pesoTotal: state.carrinho.reduce((total, item) => total + (0.3 * item.qtd), 0)
             };
             
-            // Calcular frete com Correios
+            // Calcular frete com Super Frete
             const pesoTotal = state.carrinho.reduce((total, item) => total + (0.3 * item.qtd), 0);
             const valorTotal = state.carrinho.reduce((total, item) => total + (item.preco * item.qtd), 0);
             
-            const result = await correiosService.calculateShipping(
+            // Dimensões padrão para o produto
+            const dimensoes = {
+              height: 2, // cm
+              width: 11, // cm
+              length: 16 // cm
+            };
+            
+            const result = await superFreteService.calculateShipping(
               addressData.cep,
               pesoTotal,
-              valorTotal
+              valorTotal,
+              dimensoes
             );
             
             if (result.success && result.options.length > 0) {
@@ -2112,7 +2120,7 @@
       cepInput.addEventListener('input', (e) => {
       const cep = e.target.value.replace(/\D/g, '');
       if (cep.length <= 8) {
-        e.target.value = correiosService.formatCEP(cep);
+        e.target.value = superFreteService.formatCEP(cep);
       }
       
       // Limpar status quando usuário digita
@@ -4374,7 +4382,7 @@
       
       // Verificar se os serviços estão disponíveis
       console.log('💳 AsaasService:', typeof asaasService !== 'undefined' ? '✅ Disponível' : '❌ Não disponível');
-      console.log('📮 CorreiosService:', typeof correiosService !== 'undefined' ? '✅ Disponível' : '❌ Não disponível');
+      console.log('🚚 SuperFreteService:', typeof superFreteService !== 'undefined' ? '✅ Disponível' : '❌ Não disponível');
       
       // Verificar configurações específicas
       console.log('💳 Asaas:', {
@@ -4382,6 +4390,13 @@
         environment: apiConfig.asaas.environment,
         baseUrl: apiConfig.asaas.baseUrl
       });
+      
+      // Testar conectividade com Super Frete
+      if (typeof superFreteService !== 'undefined') {
+        superFreteService.testConnection().then(testResult => {
+          console.log('🚚 Super Frete API:', testResult);
+        });
+      }
       
       console.log('📦 Melhor Envio:', {
         token: apiConfig.melhorEnvio.token ? '✅ Configurado' : '❌ Não configurado',
