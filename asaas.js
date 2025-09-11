@@ -157,7 +157,7 @@ export class AsaasService {
       }
 
       // Calcular valor total
-      const totalValue = paymentData.items.reduce((total, item) => {
+      const totalValue = paymentData.total || paymentData.items.reduce((total, item) => {
         return total + (parseFloat(item.preco) * parseInt(item.quantidade));
       }, 0);
 
@@ -294,7 +294,7 @@ export class AsaasService {
       const payment = {
         customer: customer.id,
         billingType: 'CREDIT_CARD',
-        value: paymentData.items.reduce((total, item) => total + (item.preco * item.quantidade), 0),
+        value: paymentData.total || paymentData.items.reduce((total, item) => total + (item.preco * item.quantidade), 0),
         dueDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 1 dia
         description: `Pedido TFI - ${paymentData.items.map(item => item.nome).join(', ')}`,
         externalReference: paymentData.external_reference,

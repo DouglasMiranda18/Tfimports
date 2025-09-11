@@ -2403,7 +2403,8 @@
             estado: qs('#uf')?.value || 'SP'
           },
           external_reference: `TFI-${Date.now()}`,
-          user_id: orderData.user_id
+          user_id: orderData.user_id,
+          total: orderData.total || (orderData.subtotal + (orderData.shipping?.price || 0))
         };
 
         console.log('📦 Dados para pagamento PIX:', paymentData);
@@ -2487,7 +2488,8 @@
           },
           card: cardData,
           external_reference: `TFI-${Date.now()}`,
-          user_id: orderData.user_id
+          user_id: orderData.user_id,
+          total: orderData.total || (orderData.subtotal + (orderData.shipping?.price || 0))
         };
 
         console.log('📦 Dados para pagamento com cartão:', paymentData);
