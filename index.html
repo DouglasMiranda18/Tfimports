@@ -840,7 +840,7 @@
           </div>
         </div>
       </div>
-      
+
       <!-- Seção Pedidos dos Clientes -->
       <div class="mt-6 glass rounded-2xl p-5">
         <div class="flex items-center justify-between mb-4">
@@ -4251,50 +4251,8 @@
         });
         
         console.log('Firebase inicializado com sucesso');
-        
-        // Criar usuário admin se não existir
-        await createAdminUserIfNotExists();
-        
       } catch (e) {
         console.error('Erro ao inicializar Firebase:', e);
-      }
-    }
-    
-    // Função para criar usuário admin se não existir
-    async function createAdminUserIfNotExists() {
-      try {
-        const adminEmail = 'souza.henrique007@gmail.com';
-        const adminPassword = 'Thiago28';
-        
-        // Tentar fazer login com as credenciais do admin
-        try {
-          const adminUser = await auth.signInWithEmailAndPassword(adminEmail, adminPassword);
-          console.log('✅ Usuário admin já existe e está logado');
-          return;
-        } catch (loginError) {
-          // Se o erro for de credenciais inválidas, tentar criar o usuário
-          if (loginError.code === 'auth/invalid-credential' || loginError.code === 'auth/user-not-found') {
-            console.log('🔧 Criando usuário admin...');
-            
-            // Criar usuário admin
-            const adminUser = await auth.createUserWithEmailAndPassword(adminEmail, adminPassword);
-            
-            // Atualizar perfil do usuário admin
-            await adminUser.user.updateProfile({
-              displayName: 'Admin TFI'
-            });
-            
-            console.log('✅ Usuário admin criado com sucesso');
-            
-            // Fazer logout do admin para não interferir no fluxo normal
-            await auth.signOut();
-            
-          } else {
-            console.error('❌ Erro inesperado ao verificar usuário admin:', loginError);
-          }
-        }
-      } catch (error) {
-        console.error('❌ Erro ao criar usuário admin:', error);
       }
     }
     function updateAuthUI() {
@@ -5142,4 +5100,4 @@
     }
   </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9721b30b149bf202',t:'MTc1NTY5MDkwMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
-</html> 
+</html>
