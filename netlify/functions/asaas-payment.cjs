@@ -54,9 +54,9 @@ exports.handler = async (event, context) => {
     }
 
     // Obter API key do ambiente
-    const apiKey = process.env.ASAAS_API_KEY;
+    const apiKey = process.env.VITE_ASAAS_API_KEY;
     if (!apiKey) {
-      console.error('❌ ASAAS_API_KEY não configurada');
+      console.error('❌ VITE_ASAAS_API_KEY não configurada');
       return {
         statusCode: 500,
         headers,
@@ -68,7 +68,10 @@ exports.handler = async (event, context) => {
     }
 
     // URL base da API Asaas
-    const baseUrl = process.env.ASAAS_BASE_URL || 'https://api.asaas.com/v3';
+    const environment = process.env.VITE_ASAAS_ENVIRONMENT || 'sandbox';
+    const baseUrl = environment === 'production' 
+      ? 'https://www.asaas.com/api/v3' 
+      : 'https://sandbox.asaas.com/api/v3';
     const url = `${baseUrl}${endpoint}`;
 
     console.log('💳 Fazendo requisição para Asaas:', {
