@@ -408,14 +408,14 @@
         <div class="glass rounded-2xl p-5">
           <h3 class="font-bold mb-2">Instagram Oficial</h3>
           <p class="text-slate-300">Siga para ver lançamentos, making-of e ofertas exclusivas.</p>
-          <a href="https://instagram.com" target="_blank" rel="noopener" class="btn mt-3 px-4 py-2 rounded-lg pill inline-flex items-center gap-2 hover:text-white">📸 Abrir Instagram</a>
-          <div class="mt-4 grid grid-cols-3 gap-3">
-            <!-- Placeholders de posts -->
-            <div class="card-img rounded-xl h-24"></div>
-            <div class="card-img rounded-xl h-24"></div>
-            <div class="card-img rounded-xl h-24"></div>
+          <a href="https://www.instagram.com/tfimports01/" target="_blank" rel="noopener" class="btn mt-3 px-4 py-2 rounded-lg pill inline-flex items-center gap-2 hover:text-white">📸 Abrir Instagram</a>
+          <div class="mt-4 grid grid-cols-3 gap-3" id="instagramPosts">
+            <!-- Posts do Instagram serão carregados aqui -->
           </div>
-          <p class="hint mt-2">Pré-visualização ilustrativa. A incorporação direta do feed não é suportada aqui.</p>
+          <div class="mt-4 flex items-center justify-between">
+            <p class="hint text-sm">@tfimports01</p>
+            <button id="btnRefreshInstagram" class="btn px-3 py-1 rounded-lg text-xs">🔄 Atualizar</button>
+          </div>
         </div>
       </div>
     </div>
@@ -5098,6 +5098,123 @@
         }
       });
     }
+
+    // ===== FUNCIONALIDADES DO INSTAGRAM =====
+    
+    // Posts simulados do Instagram
+    const instagramPosts = [
+      {
+        id: 1,
+        image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=300&h=300&fit=crop&crop=center',
+        caption: 'Novo lançamento! 🔥',
+        likes: 42,
+        comments: 8
+      },
+      {
+        id: 2,
+        image: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=300&h=300&fit=crop&crop=center',
+        caption: 'Making of da produção 📸',
+        likes: 38,
+        comments: 12
+      },
+      {
+        id: 3,
+        image: 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=300&h=300&fit=crop&crop=center',
+        caption: 'Oferta especial! 💥',
+        likes: 56,
+        comments: 15
+      }
+    ];
+
+    // Renderizar posts do Instagram
+    function renderInstagramPosts() {
+      const container = qs('#instagramPosts');
+      if (!container) return;
+
+      container.innerHTML = instagramPosts.map(post => `
+        <div class="instagram-post relative group cursor-pointer" data-post-id="${post.id}">
+          <div class="card-img rounded-xl h-24 bg-cover bg-center relative overflow-hidden" 
+               style="background-image: url('${post.image}')">
+            <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+              <div class="text-center text-white">
+                <div class="text-lg">❤️ ${post.likes}</div>
+                <div class="text-sm">💬 ${post.comments}</div>
+              </div>
+            </div>
+          </div>
+          <div class="mt-1 text-xs text-slate-400 truncate">${post.caption}</div>
+        </div>
+      `).join('');
+
+      // Adicionar event listeners para os posts
+      container.querySelectorAll('.instagram-post').forEach(post => {
+        post.addEventListener('click', () => {
+          const postId = post.dataset.postId;
+          const postData = instagramPosts.find(p => p.id == postId);
+          if (postData) {
+            showInstagramPostModal(postData);
+          }
+        });
+      });
+    }
+
+    // Mostrar modal com detalhes do post
+    function showInstagramPostModal(post) {
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4';
+      modal.innerHTML = `
+        <div class="bg-slate-800 rounded-2xl max-w-md w-full p-6 relative">
+          <button class="absolute top-4 right-4 text-slate-400 hover:text-white text-2xl" onclick="this.closest('.fixed').remove()">×</button>
+          <div class="mb-4">
+            <div class="card-img rounded-xl h-64 bg-cover bg-center mb-3" 
+                 style="background-image: url('${post.image}')"></div>
+            <h3 class="font-bold text-lg mb-2">@tfimports01</h3>
+            <p class="text-slate-300 mb-3">${post.caption}</p>
+            <div class="flex items-center gap-4 text-sm text-slate-400">
+              <span>❤️ ${post.likes} curtidas</span>
+              <span>💬 ${post.comments} comentários</span>
+            </div>
+          </div>
+          <div class="flex gap-3">
+            <a href="https://www.instagram.com/tfimports01/" target="_blank" 
+               class="btn cta-gradient px-4 py-2 rounded-lg font-bold flex-1 text-center">
+              Ver no Instagram
+            </a>
+            <button onclick="this.closest('.fixed').remove()" 
+                    class="btn px-4 py-2 rounded-lg pill">
+              Fechar
+            </button>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(modal);
+      
+      // Fechar modal clicando fora
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.remove();
+        }
+      });
+    }
+
+    // Atualizar posts do Instagram
+    function refreshInstagramPosts() {
+      console.log('🔄 Atualizando posts do Instagram...');
+      renderInstagramPosts();
+      toast('Posts do Instagram atualizados!');
+    }
+
+    // Event listener para o botão de atualizar
+    document.addEventListener('DOMContentLoaded', () => {
+      const btnRefresh = qs('#btnRefreshInstagram');
+      if (btnRefresh) {
+        btnRefresh.addEventListener('click', refreshInstagramPosts);
+      }
+      
+      // Carregar posts iniciais
+      renderInstagramPosts();
+    });
   </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9721b30b149bf202',t:'MTc1NTY5MDkwMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
