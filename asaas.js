@@ -291,12 +291,15 @@ export class AsaasService {
         customer = { id: 'cliente-padrao' };
       }
 
+      const totalValue = paymentData.total || paymentData.items.reduce((total, item) => total + (item.preco * item.quantidade), 0);
+      const parcelas = paymentData.card.parcelas || 1;
+      
       const payment = {
         customer: customer.id,
         billingType: 'CREDIT_CARD',
-        value: paymentData.total || paymentData.items.reduce((total, item) => total + (item.preco * item.quantidade), 0),
+        value: totalValue,
         dueDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 1 dia
-        description: `Pedido TFI - ${paymentData.items.map(item => item.nome).join(', ')}`,
+        description: `Pedido TFI - ${paymentData.items.map(item => item.nome).join(', ')}${parcelas > 1 ? ` (${parcelas}x)` : ''}`,
         externalReference: paymentData.external_reference,
         creditCard: {
           holderName: paymentData.card.nome,
@@ -314,6 +317,12 @@ export class AsaasService {
           phone: paymentData.customer.telefone
         }
       };
+
+      // Adicionar parcelas se for maior que 1
+      if (parcelas > 1) {
+        payment.installmentCount = parcelas;
+        payment.installmentValue = totalValue / parcelas;
+      }
 
       const response = await fetch('/.netlify/functions/asaas-payment', {
         method: 'POST',

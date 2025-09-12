@@ -582,6 +582,25 @@
                   <input id="cvvCartao" type="text" class="w-full bg-transparent pill px-3 py-3 rounded-lg text-sm" placeholder="123" maxlength="4" />
                 </div>
               </div>
+              
+              <div class="mb-4">
+                <label class="block text-sm text-slate-300 mb-2">Parcelamento</label>
+                <select id="parcelasCartao" class="w-full bg-transparent pill px-3 py-3 rounded-lg text-sm border border-slate-600">
+                  <option value="1">À vista (1x)</option>
+                  <option value="2">2x sem juros</option>
+                  <option value="3">3x sem juros</option>
+                  <option value="4">4x sem juros</option>
+                  <option value="5">5x sem juros</option>
+                  <option value="6">6x sem juros</option>
+                  <option value="7">7x com juros</option>
+                  <option value="8">8x com juros</option>
+                  <option value="9">9x com juros</option>
+                  <option value="10">10x com juros</option>
+                  <option value="11">11x com juros</option>
+                  <option value="12">12x com juros</option>
+                </select>
+                <div id="parcelaInfo" class="text-xs text-slate-400 mt-1"></div>
+              </div>
             </div>
             
             <button id="btnFinalizar" class="btn cta-gradient w-full px-4 py-3 rounded-lg font-bold">
@@ -821,7 +840,49 @@
           </div>
         </div>
       </div>
-
+      
+      <!-- Seção Pedidos dos Clientes -->
+      <div class="mt-6 glass rounded-2xl p-5">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="font-bold">Pedidos dos Clientes</h3>
+          <div class="flex items-center gap-2">
+            <button id="btnRefreshOrders" class="btn pill px-3 py-2 rounded-lg text-sm">
+              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+              </svg>
+              Atualizar
+            </button>
+            <div class="text-sm text-slate-400">
+              Total: <span id="totalOrders">0</span> pedidos
+            </div>
+          </div>
+        </div>
+        
+        <!-- Filtros -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
+          <select id="filterStatus" class="bg-slate-800 text-white px-3 py-2 rounded-lg border border-slate-600 focus:border-emerald-400 focus:outline-none">
+            <option value="">Todos os status</option>
+            <option value="pending">Pendente</option>
+            <option value="confirmed">Confirmado</option>
+            <option value="processing">Processando</option>
+            <option value="shipped">Enviado</option>
+            <option value="delivered">Entregue</option>
+            <option value="cancelled">Cancelado</option>
+          </select>
+          <select id="filterPayment" class="bg-slate-800 text-white px-3 py-2 rounded-lg border border-slate-600 focus:border-emerald-400 focus:outline-none">
+            <option value="">Todos os pagamentos</option>
+            <option value="pix">PIX</option>
+            <option value="card">Cartão</option>
+          </select>
+          <input id="filterDate" type="date" class="bg-slate-800 text-white px-3 py-2 rounded-lg border border-slate-600 focus:border-emerald-400 focus:outline-none" />
+          <input id="filterSearch" type="text" placeholder="Buscar por nome, email ou ID..." class="bg-slate-800 text-white px-3 py-2 rounded-lg border border-slate-600 focus:border-emerald-400 focus:outline-none" />
+        </div>
+        
+        <!-- Lista de Pedidos -->
+        <div id="ordersList" class="space-y-3 max-h-96 overflow-y-auto hidden-scroll">
+          <!-- Os pedidos serão carregados aqui dinamicamente -->
+        </div>
+      </div>
 
         </div>
   </section>
@@ -2280,6 +2341,12 @@
       });
     }
     
+    // Event listener para parcelamento
+    const parcelasCartao = qs('#parcelasCartao');
+    if (parcelasCartao) {
+      parcelasCartao.addEventListener('change', updateParcelaInfo);
+    }
+    
     // Formatação de telefone
     const telefone = qs('#telefone');
     if (telefone) {
@@ -2483,15 +2550,39 @@
       }
     }
 
+    // Função para atualizar informações de parcelamento
+    function updateParcelaInfo() {
+      const parcelas = parseInt(qs('#parcelasCartao').value);
+      const parcelaInfo = qs('#parcelaInfo');
+      const total = state.carrinho.reduce((sum, item) => sum + (item.preco * item.quantidade), 0);
+      const frete = state.shipping?.price || 0;
+      const totalComFrete = total + frete;
+      
+      if (parcelas === 1) {
+        parcelaInfo.textContent = `Total: R$ ${totalComFrete.toFixed(2).replace('.', ',')}`;
+      } else if (parcelas <= 6) {
+        const valorParcela = totalComFrete / parcelas;
+        parcelaInfo.textContent = `${parcelas}x de R$ ${valorParcela.toFixed(2).replace('.', ',')} sem juros`;
+      } else {
+        // Aplicar juros de 2.99% ao mês para parcelas acima de 6x
+        const taxaJuros = 0.0299;
+        const valorComJuros = totalComFrete * Math.pow(1 + taxaJuros, parcelas - 6);
+        const valorParcela = valorComJuros / parcelas;
+        parcelaInfo.textContent = `${parcelas}x de R$ ${valorParcela.toFixed(2).replace('.', ',')} com juros`;
+      }
+    }
+
     async function processCardPayment(orderData) {
       try {
         console.log('🔄 Processando pagamento com cartão...');
         
+        const parcelas = parseInt(qs('#parcelasCartao').value);
         const cardData = {
           numero: qs('#numeroCartao').value.replace(/\D/g, ''),
           validade: qs('#validadeCartao').value,
           nome: qs('#nomeCartao').value,
-          cvv: qs('#cvvCartao').value
+          cvv: qs('#cvvCartao').value,
+          parcelas: parcelas
         };
 
         const paymentData = {
@@ -3740,6 +3831,245 @@
       } catch {}
     }
 
+    // Admin: Carregar e exibir pedidos dos clientes
+    let allOrders = [];
+    
+    async function loadOrdersFromFirestore() {
+      try {
+        if (!db || !isAdmin()) return;
+        
+        console.log('📦 Carregando pedidos do Firestore...');
+        const ordersSnapshot = await db.collection('orders').orderBy('createdAt', 'desc').get();
+        
+        allOrders = [];
+        ordersSnapshot.forEach(doc => {
+          const orderData = doc.data();
+          allOrders.push({
+            id: doc.id,
+            ...orderData
+          });
+        });
+        
+        console.log(`✅ ${allOrders.length} pedidos carregados`);
+        renderOrdersList();
+        
+      } catch (error) {
+        console.error('❌ Erro ao carregar pedidos:', error);
+        toast('Erro ao carregar pedidos');
+      }
+    }
+    
+    function renderOrdersList() {
+      const container = qs('#ordersList');
+      const totalOrders = qs('#totalOrders');
+      
+      if (!container) return;
+      
+      // Aplicar filtros
+      let filteredOrders = [...allOrders];
+      
+      const statusFilter = qs('#filterStatus')?.value;
+      const paymentFilter = qs('#filterPayment')?.value;
+      const dateFilter = qs('#filterDate')?.value;
+      const searchFilter = qs('#filterSearch')?.value;
+      
+      if (statusFilter) {
+        filteredOrders = filteredOrders.filter(order => order.status === statusFilter);
+      }
+      
+      if (paymentFilter) {
+        filteredOrders = filteredOrders.filter(order => order.paymentMethod === paymentFilter);
+      }
+      
+      if (dateFilter) {
+        const filterDate = new Date(dateFilter);
+        filteredOrders = filteredOrders.filter(order => {
+          const orderDate = new Date(order.createdAt);
+          return orderDate.toDateString() === filterDate.toDateString();
+        });
+      }
+      
+      if (searchFilter) {
+        const search = searchFilter.toLowerCase();
+        filteredOrders = filteredOrders.filter(order => 
+          order.customer?.nome?.toLowerCase().includes(search) ||
+          order.customer?.email?.toLowerCase().includes(search) ||
+          order.external_reference?.toLowerCase().includes(search) ||
+          order.id?.toLowerCase().includes(search)
+        );
+      }
+      
+      // Atualizar contador
+      if (totalOrders) {
+        totalOrders.textContent = filteredOrders.length;
+      }
+      
+      // Renderizar lista
+      container.innerHTML = '';
+      
+      if (filteredOrders.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-8 text-slate-400">
+            <svg class="w-12 h-12 mx-auto mb-3 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+            </svg>
+            <p>Nenhum pedido encontrado</p>
+          </div>
+        `;
+        return;
+      }
+      
+      filteredOrders.forEach(order => {
+        const orderElement = createOrderElement(order);
+        container.appendChild(orderElement);
+      });
+    }
+    
+    function createOrderElement(order) {
+      const div = document.createElement('div');
+      div.className = 'glass rounded-xl p-4 hover:ring-2 hover:ring-emerald-400/20 transition-all';
+      
+      const statusColors = {
+        pending: 'text-yellow-400 bg-yellow-400/20',
+        confirmed: 'text-green-400 bg-green-400/20',
+        processing: 'text-blue-400 bg-blue-400/20',
+        shipped: 'text-purple-400 bg-purple-400/20',
+        delivered: 'text-emerald-400 bg-emerald-400/20',
+        cancelled: 'text-red-400 bg-red-400/20'
+      };
+      
+      const statusText = {
+        pending: 'Pendente',
+        confirmed: 'Confirmado',
+        processing: 'Processando',
+        shipped: 'Enviado',
+        delivered: 'Entregue',
+        cancelled: 'Cancelado'
+      };
+      
+      const total = order.items?.reduce((sum, item) => sum + (item.preco * item.quantidade), 0) || 0;
+      const frete = order.shipping?.price || 0;
+      const totalComFrete = total + frete;
+      
+      div.innerHTML = `
+        <div class="flex items-start justify-between mb-3">
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="font-bold text-lg">#${order.external_reference || order.id}</span>
+              <span class="badge px-2 py-1 rounded-full text-xs ${statusColors[order.status] || 'text-gray-400 bg-gray-400/20'}">
+                ${statusText[order.status] || order.status}
+              </span>
+              <span class="text-sm text-slate-400">
+                💳 ${order.paymentMethod?.toUpperCase() || 'N/A'}
+              </span>
+            </div>
+            <div class="text-sm text-slate-300 mb-1">
+              <strong>Cliente:</strong> ${order.customer?.nome || 'N/A'}
+            </div>
+            <div class="text-sm text-slate-300 mb-1">
+              <strong>Email:</strong> ${order.customer?.email || 'N/A'}
+            </div>
+            <div class="text-sm text-slate-300 mb-1">
+              <strong>Data:</strong> ${new Date(order.createdAt).toLocaleDateString('pt-BR')}
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="text-lg font-bold text-emerald-400">
+              R$ ${totalComFrete.toFixed(2).replace('.', ',')}
+            </div>
+            <div class="text-xs text-slate-400">
+              ${order.items?.length || 0} item(s)
+            </div>
+          </div>
+        </div>
+        
+        <div class="border-t border-slate-700 pt-3">
+          <div class="text-sm text-slate-300 mb-2">
+            <strong>Endereço:</strong> ${order.shipping?.address || 'N/A'}
+          </div>
+          <div class="flex items-center justify-between">
+            <div class="text-xs text-slate-400">
+              ID: ${order.id}
+            </div>
+            <div class="flex gap-2">
+              <button class="btn pill px-3 py-1 rounded-lg text-xs hover:bg-emerald-500/20" onclick="viewOrderDetails('${order.id}')">
+                Ver Detalhes
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      return div;
+    }
+    
+    // Função para visualizar detalhes do pedido
+    function viewOrderDetails(orderId) {
+      const order = allOrders.find(o => o.id === orderId);
+      if (!order) return;
+      
+      const itemsHtml = order.items?.map(item => `
+        <div class="flex items-center gap-3 p-2 bg-slate-800/50 rounded-lg">
+          <div class="w-12 h-12 bg-slate-700 rounded-lg flex items-center justify-center">
+            ${item.imagem ? `<img src="${item.imagem}" alt="${item.nome}" class="w-full h-full object-cover rounded-lg">` : '📦'}
+          </div>
+          <div class="flex-1">
+            <div class="font-medium">${item.nome}</div>
+            <div class="text-sm text-slate-400">Qtd: ${item.quantidade} | R$ ${item.preco.toFixed(2).replace('.', ',')}</div>
+          </div>
+          <div class="font-bold">R$ ${(item.preco * item.quantidade).toFixed(2).replace('.', ',')}</div>
+        </div>
+      `).join('') || '<p class="text-slate-400">Nenhum item encontrado</p>';
+      
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4';
+      modal.innerHTML = `
+        <div class="glass rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xl font-bold">Detalhes do Pedido #${order.external_reference || order.id}</h3>
+            <button onclick="this.closest('.fixed').remove()" class="btn pill px-3 py-1 rounded-lg text-sm">✕</button>
+          </div>
+          
+          <div class="space-y-4">
+            <div>
+              <h4 class="font-bold mb-2">Informações do Cliente</h4>
+              <div class="bg-slate-800/50 rounded-lg p-3 text-sm">
+                <div><strong>Nome:</strong> ${order.customer?.nome || 'N/A'}</div>
+                <div><strong>Email:</strong> ${order.customer?.email || 'N/A'}</div>
+                <div><strong>Telefone:</strong> ${order.customer?.telefone || 'N/A'}</div>
+                <div><strong>CPF:</strong> ${order.customer?.cpf || 'N/A'}</div>
+              </div>
+            </div>
+            
+            <div>
+              <h4 class="font-bold mb-2">Endereço de Entrega</h4>
+              <div class="bg-slate-800/50 rounded-lg p-3 text-sm">
+                <div>${order.shipping?.address || 'N/A'}</div>
+                <div>${order.shipping?.city || ''} - ${order.shipping?.state || ''}</div>
+                <div>CEP: ${order.shipping?.postalCode || 'N/A'}</div>
+              </div>
+            </div>
+            
+            <div>
+              <h4 class="font-bold mb-2">Itens do Pedido</h4>
+              <div class="space-y-2">
+                ${itemsHtml}
+              </div>
+            </div>
+            
+            <div class="border-t border-slate-700 pt-4">
+              <div class="flex justify-between items-center">
+                <span class="font-bold">Total:</span>
+                <span class="text-xl font-bold text-emerald-400">R$ ${(order.items?.reduce((sum, item) => sum + (item.preco * item.quantidade), 0) + (order.shipping?.price || 0)).toFixed(2).replace('.', ',')}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(modal);
+    }
+
     // Admin: Gerenciar Coleção Destaque
     function renderFeaturedProductsList() {
       const container = qs('#featuredProductsList');
@@ -4203,6 +4533,32 @@
       btnLogoutUser.addEventListener('click', signOut);
     }
     
+    // Event listeners para filtros de pedidos
+    const btnRefreshOrders = qs('#btnRefreshOrders');
+    if (btnRefreshOrders) {
+      btnRefreshOrders.addEventListener('click', loadOrdersFromFirestore);
+    }
+    
+    const filterStatus = qs('#filterStatus');
+    if (filterStatus) {
+      filterStatus.addEventListener('change', renderOrdersList);
+    }
+    
+    const filterPayment = qs('#filterPayment');
+    if (filterPayment) {
+      filterPayment.addEventListener('change', renderOrdersList);
+    }
+    
+    const filterDate = qs('#filterDate');
+    if (filterDate) {
+      filterDate.addEventListener('change', renderOrdersList);
+    }
+    
+    const filterSearch = qs('#filterSearch');
+    if (filterSearch) {
+      filterSearch.addEventListener('input', renderOrdersList);
+    }
+    
     // Fechar modal ao clicar fora
     const loginModal = qs('#loginModal');
     if (loginModal) {
@@ -4286,6 +4642,7 @@
       renderAdminList();
       loadFeaturedCollection();
       renderFeaturedProductsList();
+      loadOrdersFromFirestore(); // Carregar pedidos para admin
       applyRoute();
     }
     
@@ -4743,4 +5100,4 @@
     }
   </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9721b30b149bf202',t:'MTc1NTY5MDkwMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
-</html>
+</html> 
