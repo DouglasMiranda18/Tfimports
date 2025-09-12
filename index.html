@@ -5134,39 +5134,25 @@
     ];
 
     // Carregar posts do Instagram (usando dados reais configurados)
-    async function loadRealInstagramPosts() {
-      if (isLoadingPosts) return;
-      
-      isLoadingPosts = true;
+    function loadRealInstagramPosts() {
       console.log('📸 Carregando posts do Instagram...');
       
-      // Simular carregamento para melhor UX
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Usar posts reais configurados
+      // Usar posts reais configurados diretamente
       instagramPosts = [...fallbackPosts];
       console.log('✅ Posts do Instagram carregados:', instagramPosts.length);
       renderInstagramPosts();
-      isLoadingPosts = false;
     }
 
 
     // Renderizar posts do Instagram
     function renderInstagramPosts() {
       const container = qs('#instagramPosts');
-      if (!container) return;
-
-      if (isLoadingPosts) {
-        container.innerHTML = `
-          <div class="col-span-3 flex items-center justify-center py-8">
-            <div class="text-center">
-              <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-400 mx-auto mb-2"></div>
-              <div class="text-slate-400 text-sm">Carregando posts...</div>
-            </div>
-          </div>
-        `;
+      if (!container) {
+        console.error('❌ Container #instagramPosts não encontrado');
         return;
       }
+
+      console.log('🎨 Renderizando posts:', instagramPosts.length);
 
       if (instagramPosts.length === 0) {
         container.innerHTML = `
@@ -5205,6 +5191,8 @@
           }
         });
       });
+
+      console.log('✅ Posts renderizados com sucesso');
     }
 
     // Mostrar modal com detalhes do post
@@ -5248,10 +5236,9 @@
     }
 
     // Atualizar posts do Instagram
-    async function refreshInstagramPosts() {
+    function refreshInstagramPosts() {
       console.log('🔄 Atualizando posts do Instagram...');
-      isLoadingPosts = false; // Reset loading state
-      await loadRealInstagramPosts();
+      loadRealInstagramPosts();
       
       // Mostrar notificação de sucesso
       if (typeof toast === 'function') {
@@ -5263,12 +5250,18 @@
 
     // Event listener para o botão de atualizar
     document.addEventListener('DOMContentLoaded', () => {
+      console.log('🚀 DOM carregado, configurando Instagram...');
+      
       const btnRefresh = qs('#btnRefreshInstagram');
       if (btnRefresh) {
+        console.log('✅ Botão de atualizar encontrado');
         btnRefresh.addEventListener('click', refreshInstagramPosts);
+      } else {
+        console.error('❌ Botão de atualizar não encontrado');
       }
       
       // Carregar posts reais na inicialização
+      console.log('📸 Iniciando carregamento dos posts...');
       loadRealInstagramPosts();
     });
   </script>
