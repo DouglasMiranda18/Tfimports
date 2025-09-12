@@ -5101,35 +5101,155 @@
 
     // ===== FUNCIONALIDADES DO INSTAGRAM =====
     
-    // Posts simulados do Instagram
-    const instagramPosts = [
+    // Posts do Instagram (serão carregados dinamicamente)
+    let instagramPosts = [];
+    let isLoadingPosts = false;
+    
+    // Posts de fallback caso a API não funcione
+    const fallbackPosts = [
       {
         id: 1,
         image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=300&h=300&fit=crop&crop=center',
         caption: 'Novo lançamento! 🔥',
         likes: 42,
-        comments: 8
+        comments: 8,
+        permalink: 'https://www.instagram.com/tfimports01/'
       },
       {
         id: 2,
         image: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=300&h=300&fit=crop&crop=center',
         caption: 'Making of da produção 📸',
         likes: 38,
-        comments: 12
+        comments: 12,
+        permalink: 'https://www.instagram.com/tfimports01/'
       },
       {
         id: 3,
         image: 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=300&h=300&fit=crop&crop=center',
         caption: 'Oferta especial! 💥',
         likes: 56,
-        comments: 15
+        comments: 15,
+        permalink: 'https://www.instagram.com/tfimports01/'
       }
     ];
+
+    // Carregar posts reais do Instagram
+    async function loadRealInstagramPosts() {
+      if (isLoadingPosts) return;
+      
+      isLoadingPosts = true;
+      console.log('📸 Carregando posts reais do Instagram...');
+      
+      try {
+        // Usar uma API proxy para contornar CORS
+        const response = await fetch('https://api.allorigins.win/get?url=' + 
+          encodeURIComponent('https://www.instagram.com/tfimports01/?__a=1&__d=dis'));
+        
+        if (!response.ok) {
+          throw new Error('Erro ao carregar posts do Instagram');
+        }
+        
+        const data = await response.json();
+        const instagramData = JSON.parse(data.contents);
+        
+        if (instagramData && instagramData.graphql && instagramData.graphql.user) {
+          const user = instagramData.graphql.user;
+          const posts = user.edge_owner_to_timeline_media.edges.slice(0, 3);
+          
+          instagramPosts = posts.map((post, index) => ({
+            id: post.node.id,
+            image: post.node.thumbnail_src || post.node.display_url,
+            caption: post.node.edge_media_to_caption.edges[0]?.node.text || 'Post do Instagram',
+            likes: post.node.edge_liked_by.count,
+            comments: post.node.edge_media_to_comment.count,
+            permalink: `https://www.instagram.com/p/${post.node.shortcode}/`
+          }));
+          
+          console.log('✅ Posts reais carregados:', instagramPosts.length);
+          renderInstagramPosts();
+          return;
+        }
+      } catch (error) {
+        console.warn('⚠️ Erro ao carregar posts reais, usando fallback:', error);
+      }
+      
+      // Fallback para posts simulados
+      instagramPosts = [...fallbackPosts];
+      renderInstagramPosts();
+      isLoadingPosts = false;
+    }
+
+    // Carregar posts usando Instagram Basic Display API (alternativa)
+    async function loadInstagramPostsAlternative() {
+      if (isLoadingPosts) return;
+      
+      isLoadingPosts = true;
+      console.log('📸 Tentando carregar posts via API alternativa...');
+      
+      try {
+        // Usar uma API pública que não requer autenticação
+        const response = await fetch('https://instagram-scraper-api2.p.rapidapi.com/v1/info?username_or_id_or_url=tfimports01', {
+          headers: {
+            'X-RapidAPI-Key': 'your-api-key-here', // Seria necessário uma chave real
+            'X-RapidAPI-Host': 'instagram-scraper-api2.p.rapidapi.com'
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.data && data.data.recent_posts) {
+            instagramPosts = data.data.recent_posts.slice(0, 3).map((post, index) => ({
+              id: post.id || index,
+              image: post.thumbnail_url || post.image_url,
+              caption: post.caption || 'Post do Instagram',
+              likes: post.like_count || 0,
+              comments: post.comment_count || 0,
+              permalink: post.url || 'https://www.instagram.com/tfimports01/'
+            }));
+            
+            console.log('✅ Posts carregados via API alternativa');
+            renderInstagramPosts();
+            return;
+          }
+        }
+      } catch (error) {
+        console.warn('⚠️ API alternativa falhou:', error);
+      }
+      
+      // Fallback final
+      instagramPosts = [...fallbackPosts];
+      renderInstagramPosts();
+      isLoadingPosts = false;
+    }
 
     // Renderizar posts do Instagram
     function renderInstagramPosts() {
       const container = qs('#instagramPosts');
       if (!container) return;
+
+      if (isLoadingPosts) {
+        container.innerHTML = `
+          <div class="col-span-3 flex items-center justify-center py-8">
+            <div class="text-center">
+              <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-400 mx-auto mb-2"></div>
+              <div class="text-slate-400 text-sm">Carregando posts...</div>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      if (instagramPosts.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-3 flex items-center justify-center py-8">
+            <div class="text-center text-slate-400">
+              <div class="text-2xl mb-2">📸</div>
+              <div class="text-sm">Nenhum post encontrado</div>
+            </div>
+          </div>
+        `;
+        return;
+      }
 
       container.innerHTML = instagramPosts.map(post => `
         <div class="instagram-post relative group cursor-pointer" data-post-id="${post.id}">
@@ -5176,7 +5296,7 @@
             </div>
           </div>
           <div class="flex gap-3">
-            <a href="https://www.instagram.com/tfimports01/" target="_blank" 
+            <a href="${post.permalink || 'https://www.instagram.com/tfimports01/'}" target="_blank" 
                class="btn cta-gradient px-4 py-2 rounded-lg font-bold flex-1 text-center">
               Ver no Instagram
             </a>
@@ -5199,9 +5319,10 @@
     }
 
     // Atualizar posts do Instagram
-    function refreshInstagramPosts() {
+    async function refreshInstagramPosts() {
       console.log('🔄 Atualizando posts do Instagram...');
-      renderInstagramPosts();
+      isLoadingPosts = false; // Reset loading state
+      await loadRealInstagramPosts();
       toast('Posts do Instagram atualizados!');
     }
 
@@ -5212,8 +5333,8 @@
         btnRefresh.addEventListener('click', refreshInstagramPosts);
       }
       
-      // Carregar posts iniciais
-      renderInstagramPosts();
+      // Carregar posts reais na inicialização
+      loadRealInstagramPosts();
     });
   </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9721b30b149bf202',t:'MTc1NTY5MDkwMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
