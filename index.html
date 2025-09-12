@@ -260,7 +260,7 @@
             <a href="#novidades" data-route class="btn px-5 py-3 rounded-xl pill text-slate-200 hover:text-white">Ver lançamentos</a>
           </div>
           <div class="mt-6 flex items-center gap-4 text-sm text-slate-400">
-            <div class="flex items-center gap-2"><span class="star">★ ★ ★ ★ ★</span> <span>+320 avaliações</span></div>
+            <div class="flex items-center gap-2"><span class="star">★ ★ ★ ★ ★</span> <span id="feedbackCount">0 avaliações</span></div>
             <div class="hidden sm:block">•</div>
             <div>Envio rápido e rastreável</div>
           </div>
@@ -881,6 +881,25 @@
         <!-- Lista de Pedidos -->
         <div id="ordersList" class="space-y-3 max-h-96 overflow-y-auto hidden-scroll">
           <!-- Os pedidos serão carregados aqui dinamicamente -->
+        </div>
+      </div>
+
+      <!-- Seção Gerenciar Feedbacks -->
+      <div class="mt-6 glass rounded-2xl p-5">
+        <h3 class="font-bold mb-4">Gerenciar Feedbacks</h3>
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-slate-300 mb-2">Total de feedbacks: <span id="adminFeedbackCount">0</span></p>
+            <p class="text-sm text-slate-400">Gerencie os feedbacks dos clientes</p>
+          </div>
+          <div class="flex gap-2">
+            <button id="btnRefreshFeedbacks" class="btn pill px-3 py-2 rounded-lg text-sm">
+              🔄 Atualizar
+            </button>
+            <button id="btnClearFeedbacks" class="btn bg-red-500 hover:bg-red-600 px-3 py-2 rounded-lg text-sm">
+              🗑️ Zerar Feedbacks
+            </button>
+          </div>
         </div>
       </div>
 
@@ -4538,6 +4557,17 @@
     if (btnRefreshOrders) {
       btnRefreshOrders.addEventListener('click', loadOrdersFromFirestore);
     }
+
+    // Event listeners para gerenciar feedbacks
+    const btnRefreshFeedbacks = qs('#btnRefreshFeedbacks');
+    if (btnRefreshFeedbacks) {
+      btnRefreshFeedbacks.addEventListener('click', refreshFeedbacks);
+    }
+
+    const btnClearFeedbacks = qs('#btnClearFeedbacks');
+    if (btnClearFeedbacks) {
+      btnClearFeedbacks.addEventListener('click', clearAllFeedbacks);
+    }
     
     const filterStatus = qs('#filterStatus');
     if (filterStatus) {
@@ -4711,16 +4741,92 @@
         const snapshot = await db.collection('feedbacks').get();
         const totalFeedbacks = snapshot.size;
         
-        // Atualizar o texto na interface
-        const feedbackCountElement = document.querySelector('.flex.items-center.gap-2 span:last-child');
+        // Atualizar o texto na interface usando o ID correto
+        const feedbackCountElement = qs('#feedbackCount');
         if (feedbackCountElement) {
-          feedbackCountElement.textContent = `+${totalFeedbacks} avaliações`;
+          feedbackCountElement.textContent = `${totalFeedbacks} avaliações`;
+        }
+        
+        // Atualizar contador no painel admin
+        const adminFeedbackCountElement = qs('#adminFeedbackCount');
+        if (adminFeedbackCountElement) {
+          adminFeedbackCountElement.textContent = totalFeedbacks;
         }
         
         console.log(`Contador de feedbacks atualizado: ${totalFeedbacks}`);
         
       } catch (error) {
         console.error('Erro ao atualizar contador de feedbacks:', error);
+      }
+    }
+
+    // Zerar todos os feedbacks
+    async function clearAllFeedbacks() {
+      try {
+        if (!db) {
+          console.error('Firebase não inicializado');
+          return;
+        }
+
+        // Confirmar ação
+        if (!confirm('⚠️ ATENÇÃO: Esta ação irá APAGAR TODOS os feedbacks permanentemente!\n\nTem certeza que deseja continuar?')) {
+          return;
+        }
+
+        console.log('🗑️ Iniciando limpeza de feedbacks...');
+        
+        // Buscar todos os feedbacks
+        const snapshot = await db.collection('feedbacks').get();
+        
+        if (snapshot.empty) {
+          console.log('Nenhum feedback encontrado para deletar');
+          toast('Nenhum feedback encontrado');
+          return;
+        }
+
+        // Deletar em lotes para evitar timeout
+        const batch = db.batch();
+        let deletedCount = 0;
+        
+        snapshot.forEach(doc => {
+          batch.delete(doc.ref);
+          deletedCount++;
+        });
+
+        await batch.commit();
+        
+        // Limpar array local
+        feedbacks.length = 0;
+        
+        // Atualizar interface
+        renderFeedbacks();
+        await updateFeedbackCount();
+        
+        console.log(`✅ ${deletedCount} feedbacks deletados com sucesso`);
+        toast(`✅ ${deletedCount} feedbacks deletados com sucesso`);
+        
+      } catch (error) {
+        console.error('❌ Erro ao deletar feedbacks:', error);
+        toast('❌ Erro ao deletar feedbacks. Tente novamente.');
+      }
+    }
+
+    // Atualizar feedbacks no painel admin
+    async function refreshFeedbacks() {
+      try {
+        console.log('🔄 Atualizando feedbacks...');
+        
+        // Recarregar feedbacks do Firestore
+        await loadFeedbacksFromFirestore();
+        
+        // Atualizar contador
+        await updateFeedbackCount();
+        
+        toast('Feedbacks atualizados!');
+        
+      } catch (error) {
+        console.error('❌ Erro ao atualizar feedbacks:', error);
+        toast('❌ Erro ao atualizar feedbacks');
       }
     }
     init();
