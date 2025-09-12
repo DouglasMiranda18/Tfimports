@@ -5215,7 +5215,7 @@
     const fallbackPosts = [
       {
         id: 'DKVGOsdyquY',
-        image: 'https://scontent.cdninstagram.com/v/t51.2885-15/448123456_1234567890123456_1234567890123456789_n.jpg?stp=dst-jpg_e35&_nc_ht=scontent.cdninstagram.com&_nc_cat=100&_nc_ohc=abc123def456&edm=APs17CUBAAAA&ccb=7-5&ig_cache_key=MTIzNDU2Nzg5MDEyMzQ1Njc4OQ%3D%3D.2-ccb7-5&_nc_zt=23&_nc_ht=scontent.cdninstagram.com&oh=00_Abc123Def456&oe=12345678',
+        image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=400&fit=crop&crop=center&auto=format&q=80',
         caption: 'Novo lançamento TFI! 🔥 Coleção exclusiva disponível agora. #TFI #Moda #Lançamento',
         likes: 10,
         comments: 3,
@@ -5223,7 +5223,7 @@
       },
       {
         id: 'DJ4aGYiNR55',
-        image: 'https://scontent.cdninstagram.com/v/t51.2885-15/448123456_1234567890123456_1234567890123456789_n.jpg?stp=dst-jpg_e35&_nc_ht=scontent.cdninstagram.com&_nc_cat=100&_nc_ohc=abc123def456&edm=APs17CUBAAAA&ccb=7-5&ig_cache_key=MTIzNDU2Nzg5MDEyMzQ1Njc4OQ%3D%3D.2-ccb7-5&_nc_zt=23&_nc_ht=scontent.cdninstagram.com&oh=00_Abc123Def456&oe=12345678',
+        image: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=400&h=400&fit=crop&crop=center&auto=format&q=80',
         caption: 'Making of da produção 📸 Por trás das câmeras da TFI. Qualidade e estilo em cada detalhe! #TFI #MakingOf #Produção',
         likes: 11,
         comments: 5,
@@ -5231,7 +5231,7 @@
       },
       {
         id: 'DJ19O8itDRZ',
-        image: 'https://scontent.cdninstagram.com/v/t51.2885-15/448123456_1234567890123456_1234567890123456789_n.jpg?stp=dst-jpg_e35&_nc_ht=scontent.cdninstagram.com&_nc_cat=100&_nc_ohc=abc123def456&edm=APs17CUBAAAA&ccb=7-5&ig_cache_key=MTIzNDU2Nzg5MDEyMzQ1Njc4OQ%3D%3D.2-ccb7-5&_nc_zt=23&_nc_ht=scontent.cdninstagram.com&oh=00_Abc123Def456&oe=12345678',
+        image: 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=400&h=400&fit=crop&crop=center&auto=format&q=80',
         caption: 'Oferta especial! 💥 Desconto exclusivo para seguidores. Não perca! #TFI #Oferta #Desconto',
         likes: 14,
         comments: 7,
@@ -5274,8 +5274,19 @@
 
       container.innerHTML = instagramPosts.map(post => `
         <div class="instagram-post relative group cursor-pointer" data-post-id="${post.id}">
-          <div class="card-img rounded-xl h-24 bg-cover bg-center relative overflow-hidden" 
+          <div class="card-img rounded-xl h-24 bg-cover bg-center relative overflow-hidden bg-slate-700" 
                style="background-image: url('${post.image}')">
+            <img src="${post.image}" 
+                 alt="Post do Instagram" 
+                 class="w-full h-full object-cover"
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                 style="display: block;">
+            <div class="absolute inset-0 bg-slate-700 flex items-center justify-center" style="display: none;">
+              <div class="text-center text-slate-400">
+                <div class="text-2xl mb-1">📸</div>
+                <div class="text-xs">Imagem não disponível</div>
+              </div>
+            </div>
             <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
               <div class="text-center text-white">
                 <div class="text-lg">❤️ ${post.likes}</div>
@@ -5309,8 +5320,20 @@
         <div class="bg-slate-800 rounded-2xl max-w-md w-full p-6 relative">
           <button class="absolute top-4 right-4 text-slate-400 hover:text-white text-2xl" onclick="this.closest('.fixed').remove()">×</button>
           <div class="mb-4">
-            <div class="card-img rounded-xl h-64 bg-cover bg-center mb-3" 
-                 style="background-image: url('${post.image}')"></div>
+            <div class="card-img rounded-xl h-64 bg-cover bg-center mb-3 bg-slate-700 relative overflow-hidden" 
+                 style="background-image: url('${post.image}')">
+              <img src="${post.image}" 
+                   alt="Post do Instagram" 
+                   class="w-full h-full object-cover"
+                   onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                   style="display: block;">
+              <div class="absolute inset-0 bg-slate-700 flex items-center justify-center" style="display: none;">
+                <div class="text-center text-slate-400">
+                  <div class="text-4xl mb-2">📸</div>
+                  <div class="text-sm">Imagem não disponível</div>
+                </div>
+              </div>
+            </div>
             <h3 class="font-bold text-lg mb-2">@tfimports01</h3>
             <p class="text-slate-300 mb-3">${post.caption}</p>
             <div class="flex items-center gap-4 text-sm text-slate-400">
