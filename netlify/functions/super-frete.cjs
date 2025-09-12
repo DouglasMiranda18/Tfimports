@@ -76,8 +76,8 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // CEP de origem (São Paulo - TFI IMPORTS)
-    const cepOrigem = '01153000';
+    // CEP de origem (Parnamirim/RN - TFI IMPORTS)
+    const cepOrigem = '59140000';
     const cepDestinoLimpo = cepDestino.replace(/\D/g, '');
 
     // Validar CEPs
@@ -225,7 +225,7 @@ exports.handler = async (event, context) => {
 
 // Função de fallback com valores estimados
 function getFallbackOptions(cepDestino, peso, valor) {
-  const distancia = calculateDistance('01153000', cepDestino);
+  const distancia = calculateDistance('59140000', cepDestino);
   
   const options = [];
 

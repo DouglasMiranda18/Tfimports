@@ -5,7 +5,7 @@ class SuperFreteService {
   constructor() {
     this.apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NTc2ODY5MzEsInN1YiI6Imp3Z3lTQldPTWpldWRKdUU2OVlkMDB6Y2JIVzIifQ.GFc4jbEC7hOS4qUH1tHgipigN0RglL3xjovd7f-CjDE';
     this.baseUrl = 'https://api.superfrete.com';
-    this.cepOrigem = '01153-000'; // CEP de origem (São Paulo)
+    this.cepOrigem = '59140-000'; // CEP de origem (Parnamirim/RN)
   }
 
   // Validar CEP usando ViaCEP (gratuito)
