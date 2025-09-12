@@ -1,9 +1,10 @@
 // Função Netlify para integração com SuperFrete API
 // Endpoint: /.netlify/functions/super-frete
 
+// Usar fetch nativo do Node.js 18+ ou polyfill
+const fetch = globalThis.fetch || require('node-fetch');
+
 exports.handler = async (event, context) => {
-  // Importar node-fetch dinamicamente
-  const fetch = (await import('node-fetch')).default;
   // Configurar CORS
   const headers = {
     'Access-Control-Allow-Origin': '*',
