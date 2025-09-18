@@ -146,6 +146,14 @@
     }
     .hidden-scroll::-webkit-scrollbar { display: none; }
     .hidden-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    /* Corrigir scroll horizontal no mobile */
+    body { overflow-x: hidden; }
+    .panel { overflow-x: hidden; }
+    
+    /* Garantir que elementos não ultrapassem a largura da tela */
+    * { max-width: 100%; }
+    img { max-width: 100%; height: auto; }
     .qr {
       background: conic-gradient(from 90deg at 1px 1px, #000 90deg, #fff 0) 0 0/8px 8px;
       image-rendering: pixelated;
@@ -197,7 +205,6 @@
         <a href="#home" data-route class="hover:text-emerald-300">Home</a>
         <a href="#loja" data-route class="hover:text-emerald-300">Loja</a>
         <a href="#novidades" data-route class="hover:text-emerald-300">Novidades</a>
-        <a href="#feedbacks" data-route class="hover:text-emerald-300">Feedbacks</a>
         <a href="#contato" data-route class="hover:text-emerald-300">Contato</a>
         <a href="#minha-conta" data-route id="navMinhaConta" class="ml-2 px-3 py-1 rounded-full pill hidden">Minha Conta</a>
         <a href="#admin" data-route id="navAdmin" class="ml-2 px-3 py-1 rounded-full badge hidden">Painel Admin</a>
@@ -222,7 +229,6 @@
       <div class="px-4 py-3 flex flex-col gap-3">
         <a href="#loja" data-route class="hover:text-emerald-300">Loja</a>
         <a href="#novidades" data-route class="hover:text-emerald-300">Novidades</a>
-        <a href="#feedbacks" data-route class="hover:text-emerald-300">Feedbacks</a>
         <a href="#contato" data-route class="hover:text-emerald-300">Contato</a>
         <a href="#minha-conta" data-route id="navMinhaContaMobile" class="px-3 py-2 rounded-lg pill text-center hidden">Minha Conta</a>
         <a href="#admin" data-route id="navAdminMobile" class="px-3 py-2 rounded-lg badge text-center hidden">Painel Admin</a>
@@ -245,7 +251,7 @@
 
   <!-- Hero -->
   <section id="home" class="panel active">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-12">
+    <div class="max-w-full mx-auto px-4 sm:px-8 lg:px-12 pt-10 pb-12">
       <div class="grid md:grid-cols-2 gap-8 items-center">
         <div>
           <div class="inline-flex items-center gap-2 tag px-3 py-1 rounded-full mb-4">LIFESTYLE PLAYBOY</div>
@@ -284,17 +290,17 @@
       </div>
 
       <!-- Faixa de categorias -->
-      <div class="mt-12 hidden-scroll overflow-x-auto">
-        <div id="categoryChips" class="flex gap-3 min-w-max justify-center">
+      <div class="mt-12">
+        <div id="categoryChips" class="flex flex-wrap gap-3 justify-center">
           <!-- chips dinamicos -->
         </div>
       </div>
 
       <!-- Destaques -->
-      <div class="mt-8 text-center">
-        <h2 class="text-2xl font-bold mb-4">Destaques</h2>
+      <div class="mt-8">
+        <h2 class="text-2xl font-bold mb-6 text-center">Destaques</h2>
         <div class="relative">
-          <div id="featuredGrid" class="grid-auto-fit"></div>
+          <div id="featuredGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6"></div>
         </div>
       </div>
     </div>
@@ -302,7 +308,7 @@
 
   <!-- Loja -->
   <section id="loja" class="panel">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+    <div class="max-w-full mx-auto px-4 sm:px-8 lg:px-12 py-10">
       <div class="flex flex-col md:flex-row gap-6">
         <!-- Filtros -->
         <aside class="md:w-64 glass rounded-2xl p-5 h-max">
@@ -336,7 +342,7 @@
               <option value="novidades">Novidades</option>
             </select>
           </div>
-          <div id="catalogoGrid" class="grid-auto-fit"></div>
+          <div id="catalogoGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6"></div>
         </div>
       </div>
     </div>
@@ -344,18 +350,18 @@
 
   <!-- Novidades -->
   <section id="novidades" class="panel">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+    <div class="max-w-full mx-auto px-4 sm:px-8 lg:px-12 py-10">
       <div class="flex items-center justify-between">
         <h2 class="text-2xl font-bold">Novidades e Promoções</h2>
         <span class="badge px-3 py-1 rounded-full">Atualizado semanalmente</span>
       </div>
-      <div id="novidadesGrid" class="mt-6 grid-auto-fit"></div>
+      <div id="novidadesGrid" class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6"></div>
     </div>
   </section>
 
   <!-- Favoritos -->
   <section id="favoritos" class="panel">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+    <div class="max-w-full mx-auto px-4 sm:px-8 lg:px-12 py-10">
       <div class="text-center mb-10">
         <h2 class="text-4xl font-extrabold mb-4">Meus Favoritos</h2>
         <p class="text-slate-300">Produtos que você adorou e salvou para depois</p>
@@ -714,9 +720,6 @@
             <a href="#carrinho" data-route class="btn w-full px-4 py-2 rounded-lg pill text-center block hover:bg-blue-500/20">
               🛒 Ver Carrinho
             </a>
-            <a href="#feedbacks" data-route class="btn w-full px-4 py-2 rounded-lg pill text-center block hover:bg-yellow-500/20">
-              ⭐ Deixar Feedback
-            </a>
           </div>
         </div>
       </div>
@@ -770,7 +773,7 @@
 
   <!-- Admin -->
   <section id="admin" class="panel">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+    <div class="max-w-full mx-auto px-4 sm:px-8 lg:px-12 py-10">
       <div class="flex items-center justify-between">
         <h2 class="text-2xl font-bold">Painel Admin</h2>
         <div class="flex items-center gap-2">
@@ -1163,7 +1166,6 @@
         <div class="flex flex-col gap-1">
           <a href="#loja" data-route class="hover:text-emerald-300">Loja</a>
           <a href="#novidades" data-route class="hover:text-emerald-300">Novidades</a>
-          <a href="#feedbacks" data-route class="hover:text-emerald-300">Feedbacks</a>
           <a href="#contato" data-route class="hover:text-emerald-300">Contato</a>
         </div>
       </div>
