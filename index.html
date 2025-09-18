@@ -3728,8 +3728,8 @@
             composicao,
             estilo,
             envio,
-            imagem: imagem || null,
-            imagens: imagem ? [imagem] : ['svg'],
+            imagem: imagens.length > 0 ? imagens[0] : null,
+            imagens: imagens.length > 0 ? imagens : [],
             atualizadoEm: firebase.firestore.FieldValue.serverTimestamp()
           };
           
@@ -3767,8 +3767,8 @@
         descricao: desc || 'Sem descrição', 
         composicao: 'A definir', 
         estilo: 'TFI Signature', 
-            imagem: imagem || null,
-            imagens: imagem ? [imagem] : ['svg'],
+            imagem: imagens.length > 0 ? imagens[0] : null,
+            imagens: imagens.length > 0 ? imagens : [],
             criadoPor: state.user.uid,
             criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
             atualizadoEm: firebase.firestore.FieldValue.serverTimestamp()
@@ -3821,8 +3821,8 @@
               composicao,
               estilo,
               envio,
-              imagem: imagem || null,
-              imagens: imagem ? [imagem] : ['svg'],
+              imagem: imagens.length > 0 ? imagens[0] : null,
+              imagens: imagens.length > 0 ? imagens : [],
               criadoPor: state.user.uid,
               criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
               atualizadoEm: firebase.firestore.FieldValue.serverTimestamp()
