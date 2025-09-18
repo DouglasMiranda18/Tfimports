@@ -183,7 +183,7 @@
 <body class="font-[InterVar] selection:bg-emerald-300 selection:text-black">
   <!-- Header -->
   <header class="sticky top-0 z-40 glass">
-    <div class="max-w-5xl mx-auto px-6 sm:px-8 py-2 sm:py-3 flex items-center justify-between">
+    <div class="max-w-4xl mx-auto px-6 sm:px-8 py-2 sm:py-3 flex items-center justify-between">
       <div class="flex items-center gap-2 sm:gap-3">
         <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center ring-accent overflow-hidden">
           <img src="1000048219.webp" alt="TFIMPORTS Logo" class="w-full h-full object-cover rounded-xl" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
@@ -205,6 +205,7 @@
         <a href="#home" data-route class="hover:text-emerald-300">Home</a>
         <a href="#loja" data-route class="hover:text-emerald-300">Loja</a>
         <a href="#novidades" data-route class="hover:text-emerald-300">Novidades</a>
+        <a href="#feedbacks" data-route class="hover:text-emerald-300">Feedbacks</a>
         <a href="#contato" data-route class="hover:text-emerald-300">Contato</a>
         <a href="#minha-conta" data-route id="navMinhaConta" class="ml-2 px-3 py-1 rounded-full pill hidden">Minha Conta</a>
         <a href="#admin" data-route id="navAdmin" class="ml-2 px-3 py-1 rounded-full badge hidden">Painel Admin</a>
@@ -229,6 +230,7 @@
       <div class="px-4 py-3 flex flex-col gap-3">
         <a href="#loja" data-route class="hover:text-emerald-300">Loja</a>
         <a href="#novidades" data-route class="hover:text-emerald-300">Novidades</a>
+        <a href="#feedbacks" data-route class="hover:text-emerald-300">Feedbacks</a>
         <a href="#contato" data-route class="hover:text-emerald-300">Contato</a>
         <a href="#minha-conta" data-route id="navMinhaContaMobile" class="px-3 py-2 rounded-lg pill text-center hidden">Minha Conta</a>
         <a href="#admin" data-route id="navAdminMobile" class="px-3 py-2 rounded-lg badge text-center hidden">Painel Admin</a>
@@ -251,7 +253,7 @@
 
   <!-- Hero -->
   <section id="home" class="panel active">
-    <div class="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12 pt-10 pb-12">
+    <div class="max-w-4xl mx-auto px-6 sm:px-8 lg:px-12 pt-10 pb-12">
       <div class="grid md:grid-cols-2 gap-8 items-center">
         <div>
           <div class="inline-flex items-center gap-2 tag px-3 py-1 rounded-full mb-4">LIFESTYLE PLAYBOY</div>
@@ -720,6 +722,9 @@
             <a href="#carrinho" data-route class="btn w-full px-4 py-2 rounded-lg pill text-center block hover:bg-blue-500/20">
               🛒 Ver Carrinho
             </a>
+            <a href="#feedbacks" data-route class="btn w-full px-4 py-2 rounded-lg pill text-center block hover:bg-yellow-500/20">
+              ⭐ Deixar Feedback
+            </a>
           </div>
         </div>
       </div>
@@ -1152,7 +1157,7 @@
 
   <!-- Footer -->
   <footer class="mt-16 border-t border-white/10">
-    <div class="max-w-5xl mx-auto px-6 sm:px-8 py-8 grid md:grid-cols-3 gap-6">
+    <div class="max-w-4xl mx-auto px-6 sm:px-8 py-8 grid md:grid-cols-3 gap-6">
       <div>
         <div class="text-lg font-extrabold gradient-title">TFIMPORTS</div>
         <p class="text-slate-300 mt-2">Estilo premium com atitude. Atendimento direto no site.</p>
@@ -1166,6 +1171,7 @@
         <div class="flex flex-col gap-1">
           <a href="#loja" data-route class="hover:text-emerald-300">Loja</a>
           <a href="#novidades" data-route class="hover:text-emerald-300">Novidades</a>
+          <a href="#feedbacks" data-route class="hover:text-emerald-300">Feedbacks</a>
           <a href="#contato" data-route class="hover:text-emerald-300">Contato</a>
         </div>
       </div>
@@ -3475,11 +3481,7 @@
     }
 
     // Feedbacks
-    const feedbacks = [
-      { nome:'Rafael', nota:5, texto:'Qualidade absurda. Caimento perfeito.', data:'há 2 dias' },
-      { nome:'Lucas', nota:5, texto:'Entrega rápida e peças com presença.', data:'há 1 semana' },
-      { nome:'Henrique', nota:4, texto:'Camiseta premium real, recomendo.', data:'há 3 semanas' }
-    ];
+    const feedbacks = [];
     function renderFeedbacks() {
       const list = qs('#feedbackList'); list.innerHTML='';
       feedbacks.forEach(f => {
