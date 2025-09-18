@@ -3693,6 +3693,7 @@
       // Event delegation para botões de navegação
       document.addEventListener('click', (e) => {
         if (e.target.closest('.gallery-prev, .gallery-next, .gallery-dot, .thumbnail-item')) {
+          e.stopPropagation(); // Previne que o clique nas setas/miniaturas abra o zoom
           const button = e.target.closest('.gallery-prev, .gallery-next, .gallery-dot, .thumbnail-item');
           const galleryId = button.getAttribute('data-gallery-id');
           const gallery = document.querySelector(`[data-gallery-id="${galleryId}"]`);
