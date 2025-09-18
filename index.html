@@ -3589,7 +3589,10 @@
 
     // Função para obter todas as imagens
     function getImagens() {
-      const inputs = qs('#imagensContainer').querySelectorAll('.imagem-input');
+      const container = qs('#imagensContainer');
+      if (!container) return [];
+      
+      const inputs = container.querySelectorAll('.imagem-input');
       return Array.from(inputs)
         .map(input => input.value.trim())
         .filter(url => url.length > 0);
@@ -3627,6 +3630,11 @@
 
     // Event listeners para gerenciar imagens
     qs('#addImagemBtn').addEventListener('click', addImagemField);
+    
+    // Inicializar com pelo menos um campo de imagem
+    if (qs('#imagensContainer').children.length === 0) {
+      addImagemField();
+    }
 
     // Função para navegar na galeria de imagens
     function initGalleryNavigation() {
@@ -3689,7 +3697,7 @@
       const cat = qs('#admCategoria').value;
       const preco = parseFloat(qs('#admPreco').value.replace(',','.'))||0;
       const promo = qs('#admPromo').value ? parseFloat(qs('#admPromo').value.replace(',','.')) : null;
-      const imagens = getImagens();
+      const imagens = getImagens() || [];
       const cores = qs('#admCores').value.split(',').map(s=>sanitizeText(s.trim())).filter(Boolean);
       const tams = qs('#admTamanhos').value.split(',').map(s=>sanitizeText(s.trim())).filter(Boolean);
       const desc = sanitizeText(qs('#admDesc').value.trim());
