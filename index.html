@@ -3693,6 +3693,7 @@
       // Event delegation para botões de navegação
       document.addEventListener('click', (e) => {
         if (e.target.closest('.gallery-prev, .gallery-next, .gallery-dot, .thumbnail-item')) {
+          e.preventDefault();
           e.stopPropagation(); // Previne que o clique nas setas/miniaturas abra o zoom
           const button = e.target.closest('.gallery-prev, .gallery-next, .gallery-dot, .thumbnail-item');
           const galleryId = button.getAttribute('data-gallery-id');
@@ -3734,8 +3735,9 @@
           });
         }
         
-        // Clique na imagem principal para zoom
-        if (e.target.closest('#mainImageContainer')) {
+        // Clique na imagem principal para zoom (apenas se não for em botões ou controles)
+        if (e.target.closest('#mainImageContainer') && 
+            !e.target.closest('.gallery-prev, .gallery-next, .gallery-dot, .thumbnail-item')) {
           const container = e.target.closest('#mainImageContainer');
           const gallery = container.querySelector('.main-image-gallery');
           if (gallery) {
