@@ -84,6 +84,22 @@ export function validateProduct(produto) {
     errors.push('Pelo menos um tamanho deve ser especificado');
   }
   
+  // Validar imagens se fornecidas
+  if (produto.imagens && produto.imagens.length > 0) {
+    const invalidUrls = produto.imagens.filter(url => {
+      try {
+        new URL(url);
+        return false;
+      } catch {
+        return true;
+      }
+    });
+    
+    if (invalidUrls.length > 0) {
+      errors.push('Todas as URLs de imagem devem ser válidas');
+    }
+  }
+  
   return {
     isValid: errors.length === 0,
     errors
