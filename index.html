@@ -4554,6 +4554,11 @@
         provider.addScope('email');
         provider.addScope('profile');
         
+        // Configurar domínio personalizado para autenticação
+        provider.setCustomParameters({
+          'hd': 'tfimports01.com.br'
+        });
+        
         // Configurar persistência de autenticação
         await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
         
