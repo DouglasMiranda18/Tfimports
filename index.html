@@ -15,7 +15,7 @@
     style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com;
     img-src 'self' data: https:;
     connect-src 'self' https://*.firebaseapp.com https://*.googleapis.com https://firestore.googleapis.com https://viacep.com.br https://api.asaas.com https://www.asaas.com https://api.superfrete.com https://api.allorigins.win https://www.instagram.com;
-    frame-src 'self' https://*.firebaseapp.com https://*.googleapis.com;
+    frame-src 'self' https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com;
     font-src 'self' data:;
     object-src 'none';
     base-uri 'self';
@@ -26,6 +26,7 @@
   <meta http-equiv="X-Content-Type-Options" content="nosniff" />
   <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
+  <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin-allow-popups" />
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @font-face {
@@ -1109,8 +1110,25 @@
           <input id="loginPassword" type="password" class="w-full bg-transparent pill px-3 py-3 rounded-lg text-sm sm:text-base" placeholder="Sua senha" />
     </div>
         <button id="btnEmailLogin" class="btn cta-gradient w-full px-4 py-3 rounded-lg font-bold text-sm sm:text-base">Entrar</button>
-        <button id="btnShowRegister" class="btn pill w-full px-4 py-2 rounded-lg text-sm sm:text-base">Criar conta</button>
+        <div class="flex justify-between items-center">
+          <button id="btnShowRegister" class="btn pill px-4 py-2 rounded-lg text-sm sm:text-base">Criar conta</button>
+          <button id="btnForgotPassword" class="text-sm text-slate-400 hover:text-slate-300 transition-colors">Esqueci a senha</button>
+        </div>
   </div>
+      
+      <!-- Recuperação de Senha -->
+      <div id="forgotPasswordForm" class="space-y-4 hidden">
+        <div class="text-center mb-4">
+          <h3 class="text-lg font-bold text-white mb-2">Recuperar Senha</h3>
+          <p class="text-sm text-slate-400">Digite seu email para receber instruções de recuperação</p>
+        </div>
+        <div>
+          <label class="block text-sm text-slate-300 mb-2">Email</label>
+          <input id="forgotEmail" type="email" class="w-full bg-transparent pill px-3 py-3 rounded-lg text-sm sm:text-base" placeholder="seu@email.com" />
+        </div>
+        <button id="btnSendReset" class="btn cta-gradient w-full px-4 py-3 rounded-lg font-bold text-sm sm:text-base">Enviar Instruções</button>
+        <button id="btnBackToLogin" class="btn pill w-full px-4 py-2 rounded-lg text-sm sm:text-base">Voltar ao Login</button>
+      </div>
       
       <!-- Registro com Email/Senha -->
       <div id="registerForm" class="space-y-4 hidden">
@@ -4619,6 +4637,50 @@
       }
     }
     
+    // Recuperação de senha
+    async function sendPasswordReset() {
+      const email = qs('#forgotEmail').value.trim();
+      
+      if (!email) {
+        toast('Digite seu email.');
+        return;
+      }
+      
+      if (!auth) { 
+        toast('Recuperação indisponível neste ambiente.'); 
+        return; 
+      }
+      
+      try {
+        await auth.sendPasswordResetEmail(email);
+        toast('Email de recuperação enviado! Verifique sua caixa de entrada.');
+        showLoginForm(); // Voltar ao login
+      } catch (error) {
+        console.error('Erro ao enviar email de recuperação:', error);
+        if (error.code === 'auth/user-not-found') {
+          toast('Email não encontrado.');
+        } else if (error.code === 'auth/invalid-email') {
+          toast('Email inválido.');
+        } else {
+          toast('Erro ao enviar email. Tente novamente.');
+        }
+      }
+    }
+    
+    // Mostrar formulário de recuperação
+    function showForgotPasswordForm() {
+      qs('#emailLoginForm').classList.add('hidden');
+      qs('#registerForm').classList.add('hidden');
+      qs('#forgotPasswordForm').classList.remove('hidden');
+    }
+    
+    // Voltar ao login
+    function backToLogin() {
+      qs('#forgotPasswordForm').classList.add('hidden');
+      qs('#registerForm').classList.add('hidden');
+      qs('#emailLoginForm').classList.remove('hidden');
+    }
+    
     // Registro com email/senha
     async function signUpEmail() {
       const name = qs('#registerName').value.trim();
@@ -4807,6 +4869,22 @@
     const btnShowLogin = qs('#btnShowLogin');
     if (btnShowLogin) {
       btnShowLogin.addEventListener('click', showLoginForm);
+    }
+    
+    // Event listeners para recuperação de senha
+    const btnForgotPassword = qs('#btnForgotPassword');
+    if (btnForgotPassword) {
+      btnForgotPassword.addEventListener('click', showForgotPasswordForm);
+    }
+    
+    const btnSendReset = qs('#btnSendReset');
+    if (btnSendReset) {
+      btnSendReset.addEventListener('click', sendPasswordReset);
+    }
+    
+    const btnBackToLogin = qs('#btnBackToLogin');
+    if (btnBackToLogin) {
+      btnBackToLogin.addEventListener('click', backToLogin);
     }
     
     const btnLogout = qs('#btnLogout');
