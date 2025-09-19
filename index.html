@@ -3284,11 +3284,33 @@
     
 
 
-    function toast(msg) {
+    function toast(msg, type = 'info') {
       const t = document.createElement('div');
-      t.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 glass rounded-xl px-4 py-3';
-      t.textContent = msg; document.body.appendChild(t);
-      setTimeout(()=>t.remove(),1600);
+      let bgClass = 'glass';
+      let icon = '';
+      
+      switch(type) {
+        case 'success':
+          bgClass = 'bg-green-600/90 border-green-500';
+          icon = '✅ ';
+          break;
+        case 'error':
+          bgClass = 'bg-red-600/90 border-red-500';
+          icon = '❌ ';
+          break;
+        case 'warning':
+          bgClass = 'bg-yellow-600/90 border-yellow-500';
+          icon = '⚠️ ';
+          break;
+        default:
+          bgClass = 'glass';
+          icon = '';
+      }
+      
+      t.className = `fixed bottom-6 left-1/2 -translate-x-1/2 ${bgClass} border rounded-xl px-4 py-3 text-white font-medium shadow-lg z-50`;
+      t.textContent = icon + msg; 
+      document.body.appendChild(t);
+      setTimeout(()=>t.remove(), type === 'success' ? 4000 : 3000);
     }
 
     // Renderizar área "Minha Conta"
@@ -4652,9 +4674,29 @@
       }
       
       try {
+        // Mostrar loading
+        const btn = qs('#btnSendReset');
+        const originalText = btn.textContent;
+        btn.textContent = 'Enviando...';
+        btn.disabled = true;
+        
         await auth.sendPasswordResetEmail(email);
-        toast('Email de recuperação enviado! Verifique sua caixa de entrada.');
-        showLoginForm(); // Voltar ao login
+        
+        // Mostrar sucesso
+        btn.textContent = '✅ Email Enviado!';
+        btn.classList.add('bg-green-600');
+        
+        // Feedback visual melhorado
+        toast('📧 Email de recuperação enviado! Verifique sua caixa de entrada e a pasta de spam.', 'success');
+        
+        // Aguardar um pouco antes de voltar
+        setTimeout(() => {
+          showLoginForm();
+          btn.textContent = originalText;
+          btn.disabled = false;
+          btn.classList.remove('bg-green-600');
+        }, 3000);
+        
       } catch (error) {
         console.error('Erro ao enviar email de recuperação:', error);
         if (error.code === 'auth/user-not-found') {
