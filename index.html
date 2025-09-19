@@ -15,7 +15,7 @@
     style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com;
     img-src 'self' data: https:;
     connect-src 'self' https://*.firebaseapp.com https://*.googleapis.com https://firestore.googleapis.com https://viacep.com.br https://api.asaas.com https://www.asaas.com https://api.superfrete.com https://api.allorigins.win https://www.instagram.com;
-    frame-src 'self' https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com https://tfimports-27898.firebaseapp.com;
+    frame-src 'self' https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com https://tfimports-27898.firebaseapp.com https://tfimports01.com.br;
     font-src 'self' data:;
     object-src 'none';
     base-uri 'self';
@@ -4553,11 +4553,6 @@
         // Configurações de segurança
         provider.addScope('email');
         provider.addScope('profile');
-        
-        // Configurar domínio personalizado para autenticação
-        provider.setCustomParameters({
-          'hd': 'tfimports01.com.br'
-        });
         
         // Configurar persistência de autenticação
         await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
