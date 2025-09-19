@@ -1,26 +1,33 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Regras para permitir acesso autenticado
+    // Produtos: leitura pública, escrita apenas para usuários autenticados
     match /produtos/{document} {
-      allow read, write: if request.auth != null;
+      allow read: if true; // Qualquer um pode ler produtos
+      allow write: if request.auth != null; // Apenas usuários logados podem escrever
     }
     
+    // Destaque: leitura pública, escrita apenas para usuários autenticados
     match /destaque/{document} {
-      allow read, write: if request.auth != null;
+      allow read: if true; // Qualquer um pode ler destaques
+      allow write: if request.auth != null; // Apenas usuários logados podem escrever
     }
     
+    // Pedidos: apenas usuários autenticados podem ler e escrever
     match /pedidos/{document} {
       allow read, write: if request.auth != null;
     }
     
+    // Feedbacks: leitura pública, escrita apenas para usuários autenticados
     match /feedbacks/{document} {
-      allow read, write: if request.auth != null;
+      allow read: if true; // Qualquer um pode ler feedbacks
+      allow write: if request.auth != null; // Apenas usuários logados podem escrever
     }
     
     // Regra de fallback para outros documentos
     match /{document=**} {
-      allow read, write: if request.auth != null;
+      allow read: if true; // Leitura pública para outros documentos
+      allow write: if request.auth != null; // Escrita apenas para usuários autenticados
     }
   }
 }
