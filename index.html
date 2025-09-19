@@ -4788,28 +4788,24 @@
       }
       
       try {
-        // Usar redirect em vez de popup para evitar problemas de CSP
-        const result = await auth.signInWithRedirect(provider);
+        // Usar popup com configuração específica para evitar erro 403
+        const result = await auth.signInWithPopup(provider);
+        state.user = result.user;
+        updateAuthUI();
+        closeLoginModal();
+        toast('Login realizado com sucesso!');
         
-        // O resultado será processado no onAuthStateChanged
-        toast('Redirecionando para login...');
+        // Salvar dados do usuário no Firestore
+        await saveUserData();
         
       } catch (error) {
         console.error('Erro no login:', error);
         
-        // Se redirect falhar, tentar popup como fallback
-        try {
-          const result = await auth.signInWithPopup(provider);
-          state.user = result.user;
-          updateAuthUI();
-          closeLoginModal();
-          toast('Login realizado com sucesso!');
-          
-          // Salvar dados do usuário no Firestore
-          await saveUserData();
-          
-        } catch (popupError) {
-          console.error('Erro no popup:', popupError);
+        if (error.code === 'auth/popup-closed-by-user') {
+          toast('Login cancelado pelo usuário.');
+        } else if (error.code === 'auth/popup-blocked') {
+          toast('Popup bloqueado. Permita popups para este site.');
+        } else {
           toast('Erro no login. Tente novamente.');
         }
       }
