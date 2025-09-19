@@ -4554,6 +4554,11 @@
         provider.addScope('email');
         provider.addScope('profile');
         
+        // Forçar uso do domínio personalizado
+        provider.setCustomParameters({
+          'redirect_uri': 'https://tfimports01.com.br'
+        });
+        
         // Configurar persistência de autenticação
         await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
         
