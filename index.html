@@ -21,6 +21,7 @@
     base-uri 'self';
     form-action 'self';
   " />
+  <meta http-equiv="Cross-Origin-Opener-Policy" content="unsafe-none" />
   
   <!-- Outros headers de segurança -->
   <meta http-equiv="X-Content-Type-Options" content="nosniff" />
@@ -4828,7 +4829,17 @@
         provider.setCustomParameters({ prompt: 'select_account' });
         provider.addScope('email');
         provider.addScope('profile');
-        const result = await auth.signInWithPopup(provider);
+        let result;
+        try {
+          result = await auth.signInWithPopup(provider);
+        } catch (popupErr) {
+          // Fallback para redirect quando popup for bloqueado/fechado
+          if (popupErr && (popupErr.code === 'auth/popup-blocked' || popupErr.code === 'auth/popup-closed-by-user')) {
+            await auth.signInWithRedirect(provider);
+            return; // fluxo continua no onAuthStateChanged após redirect
+          }
+          throw popupErr;
+        }
         state.user = result.user;
         await saveUserData();
         updateAuthUI();
