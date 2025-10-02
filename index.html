@@ -434,7 +434,7 @@
   <!-- Produto (detalhe) -->
   <section id="produto" class="panel">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-10">
-      <button class="btn pill px-3 py-2 rounded-lg mb-4" onclick="voltarParaLoja()">← Voltar</button>
+        <button class="btn pill px-3 py-2 rounded-lg mb-4" onclick="voltarParaLoja()">&larr; Voltar</button>
       <div id="produtoWrap" class="grid md:grid-cols-2 gap-6">
         <!-- conteudo dinamico -->
       </div>
@@ -2174,6 +2174,14 @@
     }
     
     async function toggleFavorito(id) {
+      // Requer login para gerenciar favoritos
+      if (!state.user) {
+        toast('Faça login para adicionar aos favoritos.');
+        if (typeof openLoginModal === 'function') {
+          openLoginModal();
+        }
+        return;
+      }
       const index = state.favoritos.indexOf(id);
       if (index > -1) {
         state.favoritos.splice(index, 1);
@@ -2515,8 +2523,16 @@
     const btnFinalizar = qs('#btnFinalizar');
     if (btnFinalizar) {
       btnFinalizar.addEventListener('click', async () => {
-      await processPayment();
-    });
+        // Requer login para finalizar pedido
+        if (!state.user) {
+          toast('Faça login para finalizar seu pedido.');
+          if (typeof openLoginModal === 'function') {
+            openLoginModal();
+          }
+          return;
+        }
+        await processPayment();
+      });
     }
     
     const btnPagar = qs('#btnPagar');
@@ -3542,6 +3558,25 @@
         box.appendChild(b);
       }
       qs('#btnEnviarFeedback').onclick = async () => {
+        // Requer login para enviar feedback
+        try {
+          if (!state || !state.user) {
+            toast('Faça login para enviar um feedback.');
+            if (typeof openLoginModal === 'function') {
+              openLoginModal();
+            } else {
+              // Fallback para exibir o modal de login, se o helper não existir
+              const loginModalEl = document.getElementById('loginModal');
+              if (loginModalEl) loginModalEl.classList.remove('hidden');
+            }
+            return;
+          }
+        } catch (e) {
+          // Em caso de qualquer erro inesperado, tentar abrir o modal de login
+          const loginModalEl = document.getElementById('loginModal');
+          if (loginModalEl) loginModalEl.classList.remove('hidden');
+          return;
+        }
         // Verificar rate limiting
         if (!checkRateLimit('feedback', 3, 300000)) { // 3 tentativas por 5 minutos
           toast('Muitas tentativas. Aguarde 5 minutos.');
@@ -3608,6 +3643,14 @@
       box.scrollTop = box.scrollHeight;
     }
     qs('#btnChat').addEventListener('click', async () => {
+      // Requer login para enviar mensagens no chat
+      if (!state.user) {
+        toast('Faça login para enviar mensagens.');
+        if (typeof openLoginModal === 'function') {
+          openLoginModal();
+        }
+        return;
+      }
       const input = qs('#chatInput'); const txt = input.value.trim();
       if (!txt) return;
       
