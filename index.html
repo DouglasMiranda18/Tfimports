@@ -11,11 +11,11 @@
   <!-- Content Security Policy -->
   <meta http-equiv="Content-Security-Policy" content="
     default-src 'self';
-    script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://www.gstatic.com;
+    script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://www.gstatic.com https://apis.google.com https://accounts.google.com https://*.google.com;
     style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com;
     img-src 'self' data: https:;
-    connect-src 'self' https://*.firebaseapp.com https://*.googleapis.com https://firestore.googleapis.com https://viacep.com.br https://api.asaas.com https://www.asaas.com https://api.superfrete.com https://api.allorigins.win https://www.instagram.com;
-    frame-src 'self' https://*.firebaseapp.com https://*.googleapis.com;
+    connect-src 'self' https://*.firebaseapp.com https://*.googleapis.com https://apis.google.com https://firestore.googleapis.com https://viacep.com.br https://api.asaas.com https://www.asaas.com https://api.superfrete.com https://api.allorigins.win https://www.instagram.com;
+    frame-src 'self' https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com https://*.google.com;
     font-src 'self' data:;
     object-src 'none';
     base-uri 'self';
@@ -459,7 +459,6 @@
       </div>
     </div>
   </section>
-
   <!-- Checkout -->
   <section id="checkout" class="panel">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-10">
@@ -952,7 +951,6 @@
     </div>
     </div>
   </div>
-
   <!-- Modal PIX -->
   <div id="pixModal" class="fixed inset-0 hidden items-center justify-center modal-mask z-50 p-4">
     <div class="glass rounded-2xl p-6 max-w-md w-full mx-auto">
@@ -1353,7 +1351,6 @@
         window.initOtherEventListeners();
       }
     }
-    
     // Função para outros event listeners
     window.initOtherEventListeners = function() {
       // Buscar CEP
@@ -1829,7 +1826,6 @@
         preview.appendChild(div);
       }
     }
-
     // Loja: filtros
     function initFilters() {
       const sel = qs('#filterCategoria');
@@ -2706,7 +2702,6 @@
         parcelaInfo.textContent = `${parcelas}x de R$ ${valorParcela.toFixed(2).replace('.', ',')} com juros`;
       }
     }
-
     async function processCardPayment(orderData) {
       try {
         console.log('🔄 Processando pagamento com cartão...');
@@ -3189,7 +3184,6 @@
         pixVerificationInterval = null;
       }
     }
-
     // Processar pagamento
     async function processPayment() {
       if (!state.carrinho.length) {
@@ -3676,7 +3670,6 @@
         sel.appendChild(o);
       });
     }
-
     // Função para adicionar campo de imagem
     function addImagemField() {
       const container = qs('#imagensContainer');
@@ -4811,6 +4804,48 @@
       auth.signOut().then(()=> { state.user=null; updateAuthUI(); toast('Você saiu.'); });
     }
     
+    // Login com Google (novo do zero)
+    async function signInWithGoogle() {
+      if (!auth) { toast('Login indisponível.'); return; }
+      try {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: 'select_account' });
+        provider.addScope('email');
+        provider.addScope('profile');
+        const result = await auth.signInWithPopup(provider);
+        state.user = result.user;
+        await saveUserData();
+        updateAuthUI();
+        closeLoginModal();
+        toast('Login realizado com sucesso!');
+      } catch (err) {
+        console.error('Google Sign-In error:', err);
+        if (err && err.code === 'auth/popup-closed-by-user') {
+          toast('Login cancelado.');
+        } else if (err && err.code === 'auth/popup-blocked') {
+          toast('Popup bloqueado. Permita popups para este site.');
+        } else {
+          toast('Não foi possível entrar com Google.');
+        }
+      }
+    }
+
+    // Salvar dados básicos do usuário no Firestore
+    async function saveUserData() {
+      try {
+        if (!db || !state.user) return;
+        await db.collection('usuarios').doc(state.user.uid).set({
+          uid: state.user.uid,
+          nome: state.user.displayName || state.user.email,
+          email: state.user.email || null,
+          foto: state.user.photoURL || null,
+          ultimoLogin: firebase.firestore.FieldValue.serverTimestamp(),
+        }, { merge: true });
+      } catch (e) {
+        console.error('Erro ao salvar dados do usuário:', e);
+      }
+    }
+
     // Controle do modal de tipo de peça
     let currentProdutoIdForModal = null;
     function openTipoPecaModal(id) {
@@ -4902,6 +4937,10 @@
       btnEmailRegister.addEventListener('click', signUpEmail);
     }
     
+    const btnGoogleLogin = qs('#btnGoogleLogin');
+    if (btnGoogleLogin) {
+      btnGoogleLogin.addEventListener('click', signInWithGoogle);
+    }
     
     
     const btnShowRegister = qs('#btnShowRegister');
@@ -5141,7 +5180,6 @@
         console.error('Erro ao atualizar contador de feedbacks:', error);
       }
     }
-
     // Zerar todos os feedbacks
     async function clearAllFeedbacks() {
       try {
@@ -5628,8 +5666,6 @@
       instagramPosts = [...fallbackPosts];
       renderInstagramPosts();
     }
-
-
     // Renderizar posts do Instagram
     function renderInstagramPosts() {
       const container = qs('#instagramPosts');
